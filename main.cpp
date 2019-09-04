@@ -32,7 +32,7 @@ int main(int argc, char* argv[]) {
    }
 
    /* Create SQL statement */
-   sql = "SELECT * from COMPANY";
+   sql = "SELECT * from history";
 
    /* Execute SQL statement */
    rc = sqlite3_exec(db, sql, callback, (void*)data, &zErrMsg);
