@@ -22,7 +22,7 @@ int main(int argc, char* argv[]) {
    const char* data = "Callback function called";
 
    /* Open database */
-   rc = sqlite3_open("test.db", &db);
+   rc = sqlite3_open("history.db", &db);
    
    if( rc ) {
       fprintf(stderr, "Can't open database: %s\n", sqlite3_errmsg(db));
