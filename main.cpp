@@ -31,10 +31,17 @@ int main(int argc, char* argv[]) {
       fprintf(stderr, "Opened database successfully\n");
    }
 
-   /* Create SQL statement */
-   sql = "SELECT * from history";
-
-   /* Execute SQL statement */
+   sql = "SELECT * from sessions";
+   rc = sqlite3_exec(db, sql, callback, (void*)data, &zErrMsg);
+   
+   if( rc != SQLITE_OK ) {
+      fprintf(stderr, "SQL error: %s\n", zErrMsg);
+      sqlite3_free(zErrMsg);
+   } else {
+      fprintf(stdout, "Operation done successfully\n");
+   }
+   
+   sql = "SELECT * from commands";
    rc = sqlite3_exec(db, sql, callback, (void*)data, &zErrMsg);
    
    if( rc != SQLITE_OK ) {
