@@ -3,11 +3,8 @@
 #include <sqlite3.h>
 #include <string>
 #include <iostream>
-#include <boost/program_options.hpp>
 
 #include "history.hpp"
-
-namespace po = boost::program_options;
 
 enum Type {
 	ADD_SESSION = 0,
@@ -20,75 +17,91 @@ enum ErrorCode {
 	FAILED_TO_ADD
 };
 
-void show_help(po::options_description desc) {
-	std::cout << desc << std::endl; 
+static void show_usage(std::string name)
+{
+    std::cerr << "Usage: " << name << " --db PATH -t NUMBER [--sess_name STRING] [--sess_id NUMBER --pwd PATH --cmd STRING] "
+              << "Options:\n"
+              << "\t-h,--help\ttShow this help message\n"
+              << "\t-db PATH\tPath to the history database\n"
+	      << "\t-t NUMBER\tType of an entry to add:\n\t\t\t    0 - new session, unique identifier is returned\n\t\t\t    1 - new command\n"
+	      << "\tsess_name STRING\tName of a session to be created\n"
+	      << "\tsess_id STRING\tUnique session identifier\n"
+              << "\tpwd PATH\tPath to the directory where command is executed\n" 
+              << "\tcmd STRING\tExecuted command\n"
+              << std::endl;
 }
 
+
 int main(int argc, char* argv[]) {
-   po::options_description opts_desc("Options");
 
-   opts_desc.add_options()
-	   ("help,h", "produce help message")
-	   ("type,t", po::value<int>()->required(), "type of an entry to add:\n    0 - new session, unique identifier is returned\n    1 - new command")
-           ("db", po::value<std::string>()->required(), "path to the database") 
-	   ("sess_name", po::value<std::string>(), "session name assigned to a created session")
-	   ("sess_id", po::value<int64_t>(), "session unique identifier")
-           ("pwd", po::value<std::string>(), "path to the working directory") 
-           ("cmd", po::value<std::string>(), "executed command");
+    if (argc < 7) {
+        show_usage(argv[0]);
+        return ARG_ERROR;
+    }
 
-   po::variables_map vm; 
+    std::string db_path = "/not/defined.db";
+    int type = 0;
 
-   try 
-    { 
-      po::store(po::command_line_parser(argc, argv)
-		      .options(opts_desc) 
-		      .run(), 
-                vm); // throws on error 
- 
-      /** --help option 
-       */ 
-      if ( vm.count("help") ) 
-      { 
-        show_help(opts_desc);
-        return SUCCESS; 
-      } 
- 
-      po::notify(vm); // throws on error, so do after help in case 
-                      // there are any problems 
-      
-      if (vm["type"].as<int>() == ADD_CMD 
-	    && (vm.count("pwd") == 0 || vm.count("cmd") == 0)) {
-	     show_help(opts_desc);
-	     return ARG_ERROR;
-      }
-    } 
-    catch(boost::program_options::required_option& e) 
-    { 
-      std::cerr << "ERROR: " << e.what() << std::endl << std::endl; 
-      return ARG_ERROR; 
-    } 
-    catch(boost::program_options::error& e) 
-    { 
-      std::cerr << "ERROR: " << e.what() << std::endl << std::endl; 
-      return ARG_ERROR; 
-    } 
+    std::string sess_name = "not defined";
+
+    int sess_id = 0;
+    std::string pwd = "not defined";
+    std::string cmd = "not defined";
+
+    for (int i = 1; i < argc; i+=2) {
+        std::string arg = argv[i];
+
+        if ((arg == "-h") || (arg == "--help")) {
+            show_usage(argv[0]);
+            return SUCCESS;
+        } else {
+	    if (i + 1 < argc) {
+		if (arg == "--db") {
+                	db_path = argv[i + 1];
+		}
+		else if (arg == "-t") {
+			type = atoi(argv[i + 1]);
+		}
+		else if (arg == "--sess_name") {
+                	sess_name = argv[i + 1];
+		}
+		else if (arg == "--sess_id") {
+			sess_id = atoi(argv[i + 1]);
+		}
+		else if (arg == "--pwd") {
+                	pwd = argv[i + 1];
+		}
+		else if (arg == "--cmd") {
+                	cmd = argv[i + 1];
+		}
+		else {
+			std::cout << "ERROR! Unrecognized option: " << argv[i] << " " << argv[i + 1] << std::endl;
+			show_usage(argv[0]);
+			return ARG_ERROR;
+		}
+            } else { 
+		std::cout << "ERROR! NO option value!" << std::endl;
+                show_usage(argv[0]); 
+                return ARG_ERROR;
+            }  
+        }
+    }
 
 
    try {
-	History history(vm["db"].as<std::string>());
+	History history(db_path);
 
-	switch (vm["type"].as<int>()) {
+	switch (type) {
 		case ADD_SESSION:
-			std::cout << history.insert_sess(
-					vm["sess_name"].as<std::string>());
+			std::cout << history.insert_sess(sess_name);
 			break;
 		case ADD_CMD:
-			history.insert_cmd(
-					vm["sess_id"].as<int64_t>(),
-					vm["pwd"].as<std::string>(), 
-					vm["cmd"].as<std::string>());
+			history.insert_cmd(sess_id, pwd, cmd);
 			break;
-
+		default:
+			std::cout << "ERROR! Unsupported type value!" << std::endl;
+                	show_usage(argv[0]); 
+                	return ARG_ERROR;
 	}
 
    }

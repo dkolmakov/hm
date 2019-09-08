@@ -9,8 +9,6 @@ with import <nixpkgs> {};
 			cmake
 
 			sqlite
-
-			boost
 		];
 
 		shellHook = ''

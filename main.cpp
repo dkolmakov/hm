@@ -1,6 +1,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <sqlite3.h> 
+#include <assert.h> 
+
+#include <string>
 
 static int callback(void *data, int argc, char **argv, char **azColName){
    int i;
@@ -18,11 +21,15 @@ int main(int argc, char* argv[]) {
    sqlite3 *db;
    char *zErrMsg = 0;
    int rc;
-   char *sql;
+   const char *sql;
    const char* data = "Callback function called";
 
+   assert(argc == 2);
+
+   std::string db_path = argv[1];
+
    /* Open database */
-   rc = sqlite3_open("history.db", &db);
+   rc = sqlite3_open(db_path.c_str(), &db);
    
    if( rc ) {
       fprintf(stderr, "Can't open database: %s\n", sqlite3_errmsg(db));
