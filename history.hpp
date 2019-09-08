@@ -51,6 +51,7 @@ class History {
 		   }
 
 		   sql = "CREATE TABLE IF NOT EXISTS sessions (\
+				id INTEGER PRIMARY KEY, \
 		   		date TEXT, \
 				name TEXT);";
 
