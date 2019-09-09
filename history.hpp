@@ -23,6 +23,16 @@ class History {
 	   return rc;
    }
 
+
+   void replace_all(std::string& str, const std::string& from, const std::string& to) {
+	size_t pos = 0;
+
+	while ((pos = str.find(from, pos)) != std::string::npos) {
+		str.replace(pos, from.length(), to);
+		pos += to.length();
+	}
+   }
+
 	public:
 
 		History(std::string path) {
@@ -73,6 +83,9 @@ class History {
 		}
 
 		void insert_cmd(int64_t session, std::string pwd, std::string cmd) {
+			replace_all(cmd, "\'", "\'\'");
+			replace_all(cmd, "\"", "\"\"");
+
 			if (cmd != get_last_cmd(session, pwd)) {
 			   std::string sql = "INSERT INTO commands (sess_id,date,pwd,cmd) VALUES (";
 			   sql += std::to_string(session) + ",";
