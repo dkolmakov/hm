@@ -8,7 +8,7 @@
 class History {
    sqlite3 *db;
 
-   void exec_sql(std::string sql) {
+   int exec_sql(std::string sql) {
 	   char *zErrMsg = 0;
 	   int rc;
 
@@ -19,12 +19,13 @@ class History {
 	      sqlite3_free(zErrMsg);
 	      throw -3;
 	   }
+
+	   return rc;
    }
 
 	public:
 
 		History(std::string path) {
-		   char *zErrMsg = 0;
 		   int rc;
 		   const char *sql;
 
@@ -40,41 +41,48 @@ class History {
 				sess_id BIGINT, \
 		   		date TEXT, \
 				pwd TEXT, \
-				cmd TEXT);";
-
-		   rc = sqlite3_exec(db, sql, NULL, 0, &zErrMsg);
-		   
-		   if( rc != SQLITE_OK){
-		      fprintf(stderr, "SQL error: %s\n", zErrMsg);
-		      sqlite3_free(zErrMsg);
-		      throw -2;
-		   }
-
-		   sql = "CREATE TABLE IF NOT EXISTS sessions (\
+				cmd TEXT); \
+			 CREATE TABLE IF NOT EXISTS sessions (\
 				id INTEGER PRIMARY KEY, \
 		   		date TEXT, \
-				name TEXT);";
+				name TEXT); \
+			 CREATE TABLE IF NOT EXISTS last_commands (\
+				sess_id INTEGER PRIMARY KEY, \
+		   		pwd TEXT, \
+				cmd TEXT);";
 
-		   rc = sqlite3_exec(db, sql, NULL, 0, &zErrMsg);
-		   
-		   if( rc != SQLITE_OK){
-		      fprintf(stderr, "SQL error: %s\n", zErrMsg);
-		      sqlite3_free(zErrMsg);
-		      throw -2;
-		   }
+		   exec_sql(sql);
 		}
 
 		~History() {
    		   sqlite3_close(db);
 		}
 
+		std::string get_last_cmd(int sess_id, std::string pwd) {
+			return "";
+		}
+
+		void set_last_cmd(int sess_id, std::string pwd, std::string cmd) {
+			std::string sql = "INSERT OR REPLACE INTO last_commands \
+					   (sess_id, pwd, cmd) \
+					   VALUES (";
+			sql += std::to_string(sess_id);
+			sql += ", \"" + pwd + "\"";
+			sql += ", \"" + cmd + "\");";
+			exec_sql(sql);
+		}
+
 		void insert_cmd(int64_t session, std::string pwd, std::string cmd) {
-                   std::string sql = "INSERT INTO commands (sess_id,date,pwd,cmd) VALUES (";
-		   sql += std::to_string(session) + ",";
-		   sql += "DATETIME(),";
-		   sql += "\"" + pwd + "\",";
-		   sql += "\"" + cmd + "\");";
-		   exec_sql(sql);
+			if (cmd != get_last_cmd(session, pwd)) {
+			   std::string sql = "INSERT INTO commands (sess_id,date,pwd,cmd) VALUES (";
+			   sql += std::to_string(session) + ",";
+			   sql += "DATETIME(),";
+			   sql += "\"" + pwd + "\",";
+			   sql += "\"" + cmd + "\");";
+			   exec_sql(sql);
+		   
+		   	   set_last_cmd(session, pwd, cmd);
+			}
 		}
 		
 		int64_t insert_sess(std::string name) {

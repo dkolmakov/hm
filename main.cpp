@@ -4,6 +4,7 @@
 #include <assert.h> 
 
 #include <string>
+#include <iostream>
 
 static int callback(void *data, int argc, char **argv, char **azColName){
    int i;
@@ -38,6 +39,8 @@ int main(int argc, char* argv[]) {
       fprintf(stderr, "Opened database successfully\n");
    }
 
+   std::cout << std::endl << "Sessions" << std::endl;
+   
    sql = "SELECT * from sessions";
    rc = sqlite3_exec(db, sql, callback, (void*)data, &zErrMsg);
    
@@ -48,6 +51,8 @@ int main(int argc, char* argv[]) {
       fprintf(stdout, "Operation done successfully\n");
    }
    
+   std::cout << std::endl << "Commands" << std::endl;
+
    sql = "SELECT * from commands";
    rc = sqlite3_exec(db, sql, callback, (void*)data, &zErrMsg);
    
@@ -57,6 +62,19 @@ int main(int argc, char* argv[]) {
    } else {
       fprintf(stdout, "Operation done successfully\n");
    }
+   
+   std::cout << std::endl << "Last commands" << std::endl;
+
+   sql = "SELECT * from last_commands";
+   rc = sqlite3_exec(db, sql, callback, (void*)data, &zErrMsg);
+   
+   if( rc != SQLITE_OK ) {
+      fprintf(stderr, "SQL error: %s\n", zErrMsg);
+      sqlite3_free(zErrMsg);
+   } else {
+      fprintf(stdout, "Operation done successfully\n");
+   }
+
    sqlite3_close(db);
 
    return 0;
