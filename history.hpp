@@ -6,7 +6,12 @@
 #include <iostream>
 
 class History {
+
    sqlite3 *db;
+
+   sqlite3_stmt *insert_cmd_stmt;
+   sqlite3_stmt *insert_sess_stmt;
+   sqlite3_stmt *insert_last_cmd_stmt;
 
    int exec_sql(std::string sql) {
 	   char *zErrMsg = 0;
@@ -24,13 +29,37 @@ class History {
    }
 
 
-   void replace_all(std::string& str, const std::string& from, const std::string& to) {
-	size_t pos = 0;
+   int prepare_sql(std::string sql, sqlite3_stmt **stmt) {
+	   int rc;
 
-	while ((pos = str.find(from, pos)) != std::string::npos) {
-		str.replace(pos, from.length(), to);
-		pos += to.length();
-	}
+	   rc = sqlite3_prepare_v2(db, sql.c_str(), -1, stmt, NULL);
+
+	   if( rc != SQLITE_OK ){
+	      fprintf(stderr, "SQL preparation error\n");
+	      throw -3;
+	   }
+
+	   return rc;
+   } 
+
+   int bind_value(sqlite3_stmt *stmt, const char* name, std::string value) {
+	   int rc;
+
+	   int index = sqlite3_bind_parameter_index(stmt, name);
+
+	   if( index == 0 ){
+	      fprintf(stderr, "SQL bind parameter index error: no \"%s\" parameter\n", name);
+	      throw -3;
+	   }
+
+	   rc = sqlite3_bind_text(stmt, index, value.c_str(), -1, SQLITE_TRANSIENT);
+	   
+	   if( rc != SQLITE_OK ){
+	      fprintf(stderr, "SQL bind error\n");
+	      throw -3;
+	   }
+	
+	   return rc;
    }
 
 	public:
@@ -62,6 +91,14 @@ class History {
 				cmd TEXT);";
 
 		   exec_sql(sql);
+
+		   sql = "INSERT INTO commands (sess_id,date,pwd,cmd) "
+		         " VALUES ( :sess , DATETIME() , :pwd , :cmd );";
+		   prepare_sql(sql, &insert_cmd_stmt);
+			
+		   sql = "INSERT OR REPLACE INTO last_commands (sess_id, pwd, cmd) "
+			 "VALUES ( :sess, :pwd, :cmd );";
+		   prepare_sql(sql, &insert_last_cmd_stmt);
 		}
 
 		~History() {
@@ -73,27 +110,24 @@ class History {
 		}
 
 		void set_last_cmd(int sess_id, std::string pwd, std::string cmd) {
-			std::string sql = "INSERT OR REPLACE INTO last_commands \
-					   (sess_id, pwd, cmd) \
-					   VALUES (";
-			sql += std::to_string(sess_id);
-			sql += ", \"" + pwd + "\"";
-			sql += ", \"" + cmd + "\");";
-			exec_sql(sql);
+			bind_value(insert_last_cmd_stmt, ":sess", std::to_string(sess_id));
+			bind_value(insert_last_cmd_stmt, ":pwd", pwd);
+			bind_value(insert_last_cmd_stmt, ":cmd", cmd);
+
+			while (sqlite3_step(insert_last_cmd_stmt) != SQLITE_DONE) {};
+
 		}
 
 		void insert_cmd(int64_t session, std::string pwd, std::string cmd) {
-			replace_all(cmd, "\'", "\'\'");
-			replace_all(cmd, "\"", "\"\"");
 
 			if (cmd != get_last_cmd(session, pwd)) {
-			   std::string sql = "INSERT INTO commands (sess_id,date,pwd,cmd) VALUES (";
-			   sql += std::to_string(session) + ",";
-			   sql += "DATETIME(),";
-			   sql += "\"" + pwd + "\",";
-			   sql += "\"" + cmd + "\");";
-			   exec_sql(sql);
-		   
+
+			   bind_value(insert_cmd_stmt, ":sess", std::to_string(session));
+			   bind_value(insert_cmd_stmt, ":pwd", pwd);
+			   bind_value(insert_cmd_stmt, ":cmd", cmd);
+
+			   while (sqlite3_step(insert_cmd_stmt) != SQLITE_DONE) {};
+
 		   	   set_last_cmd(session, pwd, cmd);
 			}
 		}
