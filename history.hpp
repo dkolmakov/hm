@@ -12,6 +12,7 @@ class History {
    sqlite3_stmt *insert_cmd_stmt;
    sqlite3_stmt *insert_sess_stmt;
    sqlite3_stmt *insert_last_cmd_stmt;
+   sqlite3_stmt *select_last_cmd_stmt;
 
    int exec_sql(std::string sql) {
 	   char *zErrMsg = 0;
@@ -99,6 +100,9 @@ class History {
 		   sql = "INSERT OR REPLACE INTO last_commands (sess_id, pwd, cmd) "
 			 "VALUES ( :sess, :pwd, :cmd );";
 		   prepare_sql(sql, &insert_last_cmd_stmt);
+			
+		   sql = "SELECT * FROM last_commands WHERE sess_id = :sess AND pwd = :pwd;";
+		   prepare_sql(sql, &select_last_cmd_stmt);
 		}
 
 		~History() {
@@ -106,7 +110,16 @@ class History {
 		}
 
 		std::string get_last_cmd(int sess_id, std::string pwd) {
-			return "";
+			std::string cmd = "";
+
+			bind_value(select_last_cmd_stmt, ":sess", std::to_string(sess_id));
+			bind_value(select_last_cmd_stmt, ":pwd", pwd);
+
+			while (sqlite3_step(select_last_cmd_stmt) == SQLITE_ROW) {
+				cmd = std::string(reinterpret_cast< char const* >(sqlite3_column_text(select_last_cmd_stmt, 2)));
+			};
+
+			return cmd;
 		}
 
 		void set_last_cmd(int sess_id, std::string pwd, std::string cmd) {
@@ -119,8 +132,9 @@ class History {
 		}
 
 		void insert_cmd(int64_t session, std::string pwd, std::string cmd) {
+			std::string last_cmd = get_last_cmd(session, pwd);
 
-			if (cmd != get_last_cmd(session, pwd)) {
+			if (cmd != last_cmd) {
 
 			   bind_value(insert_cmd_stmt, ":sess", std::to_string(session));
 			   bind_value(insert_cmd_stmt, ":pwd", pwd);
