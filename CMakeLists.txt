@@ -14,6 +14,9 @@ target_link_libraries(hm ${SQLite3_LIBRARIES})
 add_executable(hm-insert insert.cpp)
 target_link_libraries(hm-insert ${SQLite3_LIBRARIES})
 
-install(TARGETS hm-insert DESTINATION bin)
+add_executable(hm-select select.cpp)
+target_link_libraries(hm-select ${SQLite3_LIBRARIES})
+
+install(TARGETS hm-insert hm-select DESTINATION bin)
 
 
