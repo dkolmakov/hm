@@ -18,6 +18,15 @@ static int callback(void *data, int argc, char **argv, char **azColName){
    return 0;
 }
 
+  void replace_all(std::string& str, const std::string& from, const std::string& to) {
+	size_t pos = 0;
+
+	while ((pos = str.find(from, pos)) != std::string::npos) {
+		str.replace(pos, from.length(), to);
+		pos += to.length();
+	}
+   }
+
    int prepare_sql(sqlite3 *db, std::string sql, sqlite3_stmt **stmt) {
 	   int rc;
 
@@ -94,12 +103,14 @@ int main(int argc, char* argv[]) {
    sql = "SELECT * FROM history_fts WHERE pwd MATCH :dir;";
    prepare_sql(db, sql, &select_dir_stmt);
 
+   replace_all(dir, "/", " ");
+
    std::cout << dir << std::endl;
 
    bind_value(db, select_dir_stmt, ":dir", dir);
 
    while (sqlite3_step(select_dir_stmt) == SQLITE_ROW) {
-	   std::cout << sqlite3_column_text(select_dir_stmt, 1) << std::endl;
+	   std::cout << sqlite3_column_text(select_dir_stmt, 3) << std::endl;
    };
 
    sqlite3_close(db);
