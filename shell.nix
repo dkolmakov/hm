@@ -9,10 +9,12 @@ with import <nixpkgs> {};
 			cmake
 
 			sqlite
+			#kdevelop
 		];
 
 		shellHook = ''
 			# export something
+			#nix-store --add-root kdev --indirect -r ${kdevelop}
 		'';
 	};
 }

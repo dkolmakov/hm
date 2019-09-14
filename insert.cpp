@@ -7,14 +7,14 @@
 #include "history.hpp"
 
 enum Type {
-	ADD_SESSION = 0,
-	ADD_CMD
+    ADD_SESSION = 0,
+    ADD_CMD
 };
 
 enum ErrorCode {
-	SUCCESS = 0,
-	ARG_ERROR,
-	FAILED_TO_ADD
+    SUCCESS = 0,
+    ARG_ERROR,
+    FAILED_TO_ADD
 };
 
 static void show_usage(std::string name)
@@ -23,10 +23,10 @@ static void show_usage(std::string name)
               << "Options:\n"
               << "\t-h,--help\ttShow this help message\n"
               << "\t-db PATH\tPath to the history database\n"
-	      << "\t-t NUMBER\tType of an entry to add:\n\t\t\t    0 - new session, unique identifier is returned\n\t\t\t    1 - new command\n"
-	      << "\tsess_name STRING\tName of a session to be created\n"
-	      << "\tsess_id STRING\tUnique session identifier\n"
-              << "\tpwd PATH\tPath to the directory where command is executed\n" 
+              << "\t-t NUMBER\tType of an entry to add:\n\t\t\t    0 - new session, unique identifier is returned\n\t\t\t    1 - new command\n"
+              << "\tsess_name STRING\tName of a session to be created\n"
+              << "\tsess_id STRING\tUnique session identifier\n"
+              << "\tpwd PATH\tPath to the directory where command is executed\n"
               << "\tcmd STRING\tExecuted command\n"
               << std::endl;
 }
@@ -55,60 +55,60 @@ int main(int argc, char* argv[]) {
             show_usage(argv[0]);
             return SUCCESS;
         } else {
-	    if (i + 1 < argc) {
-		if (arg == "--db") {
-                	db_path = argv[i + 1];
-		}
-		else if (arg == "-t") {
-			type = atoi(argv[i + 1]);
-		}
-		else if (arg == "--sess_name") {
-                	sess_name = argv[i + 1];
-		}
-		else if (arg == "--sess_id") {
-			sess_id = atoi(argv[i + 1]);
-		}
-		else if (arg == "--pwd") {
-                	pwd = argv[i + 1];
-		}
-		else if (arg == "--cmd") {
-                	cmd = argv[i + 1];
-		}
-		else {
-			std::cout << "ERROR! Unrecognized option: " << argv[i] << " " << argv[i + 1] << std::endl;
-			show_usage(argv[0]);
-			return ARG_ERROR;
-		}
-            } else { 
-		std::cout << "ERROR! NO option value!" << std::endl;
-                show_usage(argv[0]); 
+            if (i + 1 < argc) {
+                if (arg == "--db") {
+                    db_path = argv[i + 1];
+                }
+                else if (arg == "-t") {
+                    type = atoi(argv[i + 1]);
+                }
+                else if (arg == "--sess_name") {
+                    sess_name = argv[i + 1];
+                }
+                else if (arg == "--sess_id") {
+                    sess_id = atoi(argv[i + 1]);
+                }
+                else if (arg == "--pwd") {
+                    pwd = argv[i + 1];
+                }
+                else if (arg == "--cmd") {
+                    cmd = argv[i + 1];
+                }
+                else {
+                    std::cout << "ERROR! Unrecognized option: " << argv[i] << " " << argv[i + 1] << std::endl;
+                    show_usage(argv[0]);
+                    return ARG_ERROR;
+                }
+            } else {
+                std::cout << "ERROR! NO option value!" << std::endl;
+                show_usage(argv[0]);
                 return ARG_ERROR;
-            }  
+            }
         }
     }
 
 
-   try {
-	History history(db_path);
+    try {
+        History history(db_path);
 
-	switch (type) {
-		case ADD_SESSION:
-			std::cout << history.insert_sess(sess_name);
-			break;
-		case ADD_CMD:
-			history.insert_cmd(sess_id, pwd, cmd);
-			break;
-		default:
-			std::cout << "ERROR! Unsupported type value!" << std::endl;
-                	show_usage(argv[0]); 
-                	return ARG_ERROR;
-	}
+        switch (type) {
+        case ADD_SESSION:
+            std::cout << history.insert_sess(sess_name);
+            break;
+        case ADD_CMD:
+            history.insert_cmd(sess_id, pwd, cmd);
+            break;
+        default:
+            std::cout << "ERROR! Unsupported type value!" << std::endl;
+            show_usage(argv[0]);
+            return ARG_ERROR;
+        }
 
-   }
-   catch (int e) 
-   {
-	   return FAILED_TO_ADD;
-   }
+    }
+    catch (int e)
+    {
+        return FAILED_TO_ADD;
+    }
 
-   return 0;
+    return 0;
 }
