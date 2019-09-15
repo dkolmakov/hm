@@ -7,13 +7,13 @@
 
 struct SqliteException : public std::exception {
     std::string reason;
-    
+
     SqliteException(std::string _reason, int rc) {
         reason = "SQLite error " + std::to_string(rc) + ": " + _reason;
     }
 
     const char * what () const throw () {
-	return reason.c_str();
+        return reason.c_str();
     }
 };
 
@@ -41,7 +41,7 @@ public:
     ~SqliteDB() {
         sqlite3_close(db);
     }
-    
+
     int exec_sql(std::string sql) {
         char *zErrMsg = 0;
         int rc;
@@ -76,11 +76,11 @@ public:
 
         if( index == 0 ) {
             std::string reason = "SQL bind parameter index error: no ";
-                                 reason += name;
+            reason += name;
             reason += " parameter";
-	    std::cout << reason << std::endl;
+            std::cout << reason << std::endl;
             SqliteException e(reason, -1);
-	    std::cout << e.reason << std::endl;
+            std::cout << e.reason << std::endl;
             throw e;
         }
 
@@ -95,6 +95,6 @@ public:
     }
 
     int last_rowid() {
-	    return sqlite3_last_insert_rowid(db);
+        return sqlite3_last_insert_rowid(db);
     }
 };

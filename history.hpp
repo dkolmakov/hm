@@ -49,7 +49,7 @@ public:
         sql = "SELECT * FROM last_commands WHERE sess_id = :sess AND pwd = :pwd;";
         db.prepare_sql(sql, &select_last_cmd_stmt);
 
-	sql = "SELECT * FROM history_fts WHERE pwd MATCH :dir;";
+        sql = "SELECT * FROM history_fts WHERE pwd MATCH :dir;";
         db.prepare_sql(sql, &select_by_dir_stmt);
     }
 
@@ -103,11 +103,11 @@ public:
     }
 
     void select_by_dir(std::string dir) {
-	db.bind_value(select_by_dir_stmt, ":dir", dir);
+        db.bind_value(select_by_dir_stmt, ":dir", dir);
 
-	while (sqlite3_step(select_by_dir_stmt) == SQLITE_ROW) {
-        	std::cout << sqlite3_column_text(select_by_dir_stmt, 3) << std::endl;
-    	};
+        while (sqlite3_step(select_by_dir_stmt) == SQLITE_ROW) {
+            std::cout << sqlite3_column_text(select_by_dir_stmt, 3) << std::endl;
+        };
     }
 
 };
