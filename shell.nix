@@ -9,7 +9,7 @@ with import <nixpkgs> {};
 			cmake
 
 			sqlite
-			#kdevelop
+			kdevelop
 		];
 
 		shellHook = ''
