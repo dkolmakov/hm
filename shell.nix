@@ -10,6 +10,9 @@ with import <nixpkgs> {};
 
 			sqlite
 			kdevelop
+
+			python3
+			python3Packages.pytest
 		];
 
 		shellHook = ''

@@ -96,7 +96,7 @@ int main(int argc, char* argv[]) {
                     return ARG_ERROR;
                 }
             } else {
-                std::cout << "ERROR! NO option value!" << std::endl;
+                std::cout << "ERROR! No option value!" << std::endl;
                 show_usage(argv[0]);
                 return ARG_ERROR;
             }
