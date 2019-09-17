@@ -50,7 +50,10 @@ public:
 		   		pwd TEXT, \
 				cmd TEXT);"
               "CREATE VIRTUAL TABLE IF NOT EXISTS history_fts USING \
-	 		 fts5(content=commands,pwd);";
+	 		   fts5(sess_id,date,pwd,cmd);"
+              "CREATE TRIGGER IF NOT EXISTS history_update AFTER INSERT ON commands BEGIN \
+                    INSERT INTO history_fts(sess_id,date,pwd,cmd) VALUES (new.sess_id,new.date,new.pwd,new.cmd); \
+               END;";
 
         db.exec_sql(sql);
 

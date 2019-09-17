@@ -22,15 +22,16 @@ def test_basic_insert_select(remove_db):
  
     print("Session #{} created".format(sess_id))
 
-    pwd = "some/arbitrary/path"
+    pwd = "/some/arbitrary/path"
     cmd = "some --arbitrary command"
-
+    
     insert(db, sess_id, pwd, cmd)
     
     stdout = select(db, pwd)
 
-    print(stdout)
+    for line in stdout:
+        print(line)
 
-    assert cmd == stdout, "Wrong command in the database!"
+    assert cmd == stdout.strip(), "Wrong command in the database!"
 
  

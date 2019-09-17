@@ -75,6 +75,18 @@ int main(int argc, char* argv[]) {
         fprintf(stdout, "Operation done successfully\n");
     }
 
+    std::cout << std::endl << "fts" << std::endl;
+
+    sql = "SELECT * from history_fts";
+    rc = sqlite3_exec(db, sql, callback, (void*)data, &zErrMsg);
+
+    if( rc != SQLITE_OK ) {
+        fprintf(stderr, "SQL error: %s\n", zErrMsg);
+        sqlite3_free(zErrMsg);
+    } else {
+        fprintf(stdout, "Operation done successfully\n");
+    }
+    
     sqlite3_close(db);
 
     return 0;
