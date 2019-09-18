@@ -10,7 +10,7 @@ matrix:
        apt:
          packages:
            - sqlite3
-           - g++-7.4
+           - g++-4.8
            - python-pytest
 
      
