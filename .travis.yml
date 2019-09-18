@@ -1,0 +1,12 @@
+language: cpp
+os: linux
+compiler: gcc
+script: 
+     - mkdir -p build
+     - cd build
+     - cmake -D-DCMAKE_INSTALL_PREFIX=./../ ..
+     - make
+     - make install
+     - cd ..
+     - export PATH=PATH:$PATH
+     - py.test
