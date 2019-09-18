@@ -9,8 +9,9 @@ matrix:
       addons:
        apt:
          packages:
+           - cmake
            - sqlite3
-           - g++-4.8
+           - g++
            - python-pytest
 
      
