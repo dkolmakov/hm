@@ -1,5 +1,5 @@
 language: cpp
-os: linux
+dist: xenial
 compiler: gcc
 script: 
      - mkdir -p build
