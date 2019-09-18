@@ -3,8 +3,7 @@ language: cpp
 matrix:
   include:
     - os: linux
-      dist: xenial
-      sudo: true
+      dist: trusty
       compiler: gcc
       addons:
        apt:
@@ -16,8 +15,9 @@ matrix:
 
      
 script:
-     - ls -l /usr/local/opt/sqlite
-     - export CMAKE_PREFIX_PATH=$CMAKE_PREFIX_PATH:/usr/local/opt/sqlite
+     - SQLITE_HOME=$(which sqlite3)
+     - ls -l $SQLITE_HOME
+     - export CMAKE_PREFIX_PATH=$CMAKE_PREFIX_PATH:$SQLITE_HOME
      - mkdir -p build
      - cd build
      - cmake -D-DCMAKE_INSTALL_PREFIX=./../ -DSQLite_DIR="/usr/local/opt/sqlite"  ..
