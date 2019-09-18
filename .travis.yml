@@ -18,7 +18,7 @@ matrix:
 script: 
      - mkdir -p build
      - cd build
-     - cmake -D-DCMAKE_INSTALL_PREFIX=./../ ..
+     - cmake -D-DCMAKE_INSTALL_PREFIX=./../ -DSQLite_DIR="/usr/local/opt/sqlite"  ..
      - make
      - make install
      - cd ..
