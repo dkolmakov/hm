@@ -15,12 +15,14 @@ matrix:
            - python-pytest
 
      
-script: 
+script:
+     - ls -l /usr/local/opt/sqlite
+     - export CMAKE_PREFIX_PATH=$CMAKE_PREFIX_PATH:/usr/local/opt/sqlite
      - mkdir -p build
      - cd build
      - cmake -D-DCMAKE_INSTALL_PREFIX=./../ -DSQLite_DIR="/usr/local/opt/sqlite"  ..
      - make
      - make install
      - cd ..
-     - export PATH=PATH:$PATH
+     - export PATH=$PATH:./bin
      - py.test
