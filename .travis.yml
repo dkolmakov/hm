@@ -1,6 +1,19 @@
 language: cpp
-dist: xenial
-compiler: gcc
+
+matrix:
+  include:
+    - os: linux
+      dist: xenial
+      sudo: true
+      compiler: gcc
+      addons:
+       apt:
+         packages:
+           - sqlite3
+           - g++-7.4
+           - python-pytest
+
+     
 script: 
      - mkdir -p build
      - cd build
