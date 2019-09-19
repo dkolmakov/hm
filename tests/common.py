@@ -17,6 +17,8 @@ def run_cmd(cmd_list):
 
 def create_session(db, name):
     db += ".testdb"
+    db = os.path.join(os.path.dirname(os.path.abspath(__file__)), db) 
+    
     create_session_cmd = ['hm-insert', 
                   '--db', db, 
                   '-t', '0', 
