@@ -21,9 +21,8 @@ install:
 script:
      - mkdir -p build
      - cd build
-     - cmake -D-DCMAKE_INSTALL_PREFIX=./../ ..
+     - cmake ..
      - make
-     - make install
+     - sudo make install
      - cd ..
-     - export PATH=$PATH:./bin
      - py.test
