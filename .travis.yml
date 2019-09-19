@@ -13,7 +13,8 @@ matrix:
            - sqlite3
            - libsqlite3-dev
            - g++
-           - python-pytest
+           - python3
+           - python3-pytest
 
 install:
      - mkdir cmake-dist && curl -sfSL https://github.com/Kitware/CMake/releases/download/v3.14.5/cmake-3.14.5-Linux-x86_64.tar.gz | tar --strip-components=1 -C cmake-dist -xz && export PATH=$PWD/cmake-dist/bin:$PATH
@@ -25,4 +26,4 @@ script:
      - make
      - sudo make install
      - cd ..
-     - py.test
+     - pytest-3
