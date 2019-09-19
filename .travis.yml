@@ -10,17 +10,17 @@ matrix:
          packages:
            - cmake
            - sqlite3
+           - libsqlite3-dev
            - g++
            - python-pytest
 
+install:
+     - mkdir cmake-dist && curl -sfSL https://github.com/Kitware/CMake/releases/download/v3.14.5/cmake-3.14.5-Linux-x86_64.tar.gz | tar --strip-components=1 -C cmake-dist -xz && export PATH=$PWD/cmake-dist/bin:$PATH
      
 script:
-     - SQLITE_HOME=$(which sqlite3)
-     - ls -l $SQLITE_HOME
-     - export CMAKE_PREFIX_PATH=$CMAKE_PREFIX_PATH:$SQLITE_HOME
      - mkdir -p build
      - cd build
-     - cmake -D-DCMAKE_INSTALL_PREFIX=./../ -DSQLite_DIR="/usr/local/opt/sqlite"  ..
+     - cmake -D-DCMAKE_INSTALL_PREFIX=./../ ..
      - make
      - make install
      - cd ..
