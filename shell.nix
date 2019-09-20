@@ -1,19 +1,32 @@
 with import <nixpkgs> {};
 
-{
-	shell = stdenv.mkDerivation rec {
+let common = [
+    stdenv
+    cmake
+
+    sqlite
+
+    python3
+    python3Packages.pytest
+]; 
+in {
+	dev = stdenv.mkDerivation rec {
 		name = "hm-env";
 
-		buildInputs = [
-			stdenv
-			cmake
-
-			sqlite
+		buildInputs = common ++ [
 			kdevelop
-
-			python3
-			python3Packages.pytest
 		];
+
+		shellHook = ''
+			# export something
+			#nix-store --add-root kdev --indirect -r ${kdevelop}
+		'';
+	};
+
+	test = stdenv.mkDerivation rec {
+		name = "hm-env";
+
+		buildInputs = common;
 
 		shellHook = ''
 			# export something

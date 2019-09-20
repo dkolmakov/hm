@@ -8,4 +8,4 @@ matrix:
       sudo: required
 
 script:
-     - nix-shell -A shell shell.nix --run "mkdir -p build && cd build && cmake .. && make && sudo make install && cd .. && py.test-3"
+     - nix-shell -A test shell.nix --run "mkdir -p build && cd build && cmake .. && make && sudo make install && cd .. && py.test"
