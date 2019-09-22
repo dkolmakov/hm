@@ -39,8 +39,6 @@ int main(int argc, char* argv[]) {
     std::string db_path = argv[1];
     std::string dir = argv[2];
 
-    replace_all(dir, "/", " ");
-
     History history(db_path);
     history.select_by_dir(dir);
 

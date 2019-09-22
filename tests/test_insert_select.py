@@ -13,25 +13,43 @@ def test_session_numbering(remove_db):
     assert sess_id_1 == 2
 
 
-def test_basic_insert_select(remove_db):
+def basic_insert_select(pwd, cmd):
     db = "test"
     name = "test session"
     
     sess_id = create_session(db, name)
-    assert sess_id == 1
  
     print("Session #{} created".format(sess_id))
 
-    pwd = "/some/arbitrary/path"
-    cmd = "some --arbitrary command"
-    
     insert(db, sess_id, pwd, cmd)
     
-    stdout = select(db, pwd)
+    stdout = select(db, "\"" + pwd + "\"")
 
     for line in stdout:
         print(line)
 
     assert cmd == stdout.strip(), "Wrong command in the database!"
 
- 
+
+def test_basic_insert_select(remove_db):
+    pwd = "/some/arbitrary/path"
+    cmd = "some --arbitrary command"
+
+    basic_insert_select(pwd, cmd)
+
+
+def test_select_with_punctuation(remove_db):
+    pwd = "/some/arbitrary/path_with_underscores"
+    cmd = "some command number one"
+    
+    basic_insert_select(pwd, cmd)
+
+    pwd = "/some/arbitrary/.path"
+    cmd = "some command number two"
+    
+    basic_insert_select(pwd, cmd)
+
+    pwd = "/some/arbitrary/path-with-hyphens"
+    cmd = "some command number three"
+    
+    basic_insert_select(pwd, cmd)
