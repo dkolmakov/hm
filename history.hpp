@@ -121,7 +121,10 @@ public:
         return db.last_rowid();
     }
 
-    void select_by_dir(std::string dir) {
+    void select_by_dir(std::string dir, bool recursively) {
+        if (recursively)
+            dir += "*";
+        
         db.bind_value(select_by_dir_stmt, ":dir", dir);
 
         while (sqlite3_step(select_by_dir_stmt) == SQLITE_ROW) {

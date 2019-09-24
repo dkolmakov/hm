@@ -11,12 +11,9 @@ set(CMAKE_CXX_FLAGS "-std=c++11 -fPIC -fpic -Wall -Wextra -pedantic -O3")
 add_executable(hm main.cpp)
 target_link_libraries(hm ${SQLite3_LIBRARIES})
 
-add_executable(hm-insert insert.cpp)
-target_link_libraries(hm-insert ${SQLite3_LIBRARIES})
+add_executable(read_db read_db.cpp)
+target_link_libraries(read_db ${SQLite3_LIBRARIES})
 
-add_executable(hm-select select.cpp)
-target_link_libraries(hm-select ${SQLite3_LIBRARIES})
-
-install(TARGETS hm-insert hm-select DESTINATION bin)
+install(TARGETS hm DESTINATION bin)
 
 

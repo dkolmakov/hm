@@ -21,7 +21,7 @@ def basic_insert_select(pwd, cmd):
  
     print("Session #{} created".format(sess_id))
 
-    insert(db, sess_id, pwd, cmd)
+    insert(db, sess_id, pwd, cmd, 0)
     
     stdout = select(db, "\"" + pwd + "\"")
 
