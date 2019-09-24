@@ -1,0 +1,12 @@
+# Create History Manager folder where database will be placed
+mkdir -p ~/.hm/
+
+# Create a variable containing database path
+hm_history_db=$HOME/.hm/history.db
+
+# Create a new session entry in the database corresponding to the current terminal session
+hm_session_id=$(hm --db $hm_history_db -s "Not defined")
+
+# Set a script to be executed after each other command in the current terminal session
+export PROMPT_COMMAND='if [ $(id -u) -ne 0 ]; then hm --db $hm_history_db -a $hm_session_id "$(pwd)" "$(history 1 | sed -E "s/^ *[0-9]* *//")" $?; fi'
+
