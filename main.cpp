@@ -70,21 +70,21 @@ int main(int argc, char* argv[]) {
             show_usage(argv[0]);
             return SUCCESS;
         } else {
-            if (arg == "--db") {
+            if (arg == "--db" && (i + 1) <= argc) {
                 db_path = argv[i++];
             }
-            else if (arg == "-a") {
+            else if (arg == "-a" && (i + 4) <= argc) {
                 type = ADD_CMD;
                 sess_id = atoi(argv[i++]);
                 pwd = argv[i++];
                 cmd = argv[i++];
                 ret_code = atoi(argv[i++]);
             }
-            else if (arg == "-s") {
+            else if (arg == "-s" && (i + 1) <= argc) {
                 type = ADD_SESSION;
                 sess_name = argv[i++];
             }
-            else if (arg == "-d") {
+            else if (arg == "-d" && (i + 1) <= argc) {
                 type = SELECT_BY_PATH;
                 pwd = argv[i++];
             }
@@ -92,13 +92,12 @@ int main(int argc, char* argv[]) {
                 recursively = true;
             }
             else {
-                std::cout << "ERROR! Unrecognized option: " << argv[i] << " " << argv[i + 1] << std::endl;
+                std::cout << "ERROR! Wrong usage of option: \"" << arg << "\"" << std::endl;
                 show_usage(argv[0]);
                 return ARG_ERROR;
             }
         }
     }
-
 
     try {
         History history(db_path);
