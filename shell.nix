@@ -25,13 +25,7 @@ in {
 
 	test = stdenv.mkDerivation rec {
 		name = "hm-env";
-
 		buildInputs = common;
-
-		shellHook = ''
-			# export something
-			#nix-store --add-root kdev --indirect -r ${kdevelop}
-		'';
 	};
 }
 
