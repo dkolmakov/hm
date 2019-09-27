@@ -19,7 +19,7 @@ def create_session(db, name):
     db += ".testdb"
     db = os.path.join(os.path.dirname(os.path.abspath(__file__)), db) 
     
-    create_session_cmd = ['hm', 
+    create_session_cmd = ['hm-db', 
                   '--db', db,
                   '-s', name ]
 
@@ -34,7 +34,7 @@ def create_session(db, name):
 
 def insert(db, sess_id, pwd, cmd, ret_code):
     db += ".testdb"
-    insert_cmd = ['hm', 
+    insert_cmd = ['hm-db', 
                   '--db', db, 
                   '-a', '{}'.format(sess_id), pwd, cmd, str(ret_code) ]
 
@@ -45,7 +45,7 @@ def insert(db, sess_id, pwd, cmd, ret_code):
 
 def select(db, pwd):
     db += ".testdb"
-    select_cmd = ['hm', 
+    select_cmd = ['hm-db', 
                   '--db', db, 
                   '-d', pwd]
 

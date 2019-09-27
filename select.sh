@@ -1,5 +1,6 @@
-#/usr/bin/env bash
+#/usr/bin/env bash -i
 
-hm-select ~/.hm/history.db "$(pwd)" > ~/.bash_history 
+HISTFILE=$(mktemp extracted_history.XXXXXXXXXX)
+hm --db ~/.hm/history.db -d \"$(pwd)\" -R > $HISTFILE 
 history -r
-
+rm -rf $HISTFILE
