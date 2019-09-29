@@ -63,11 +63,15 @@ There are several main usage scenarios are kept in mind during the development.
 
 ### By directory history recovery
 
-It is quite common when bash commands to run  rebuilding working command line from scratch may take a lot of time. 
-It is a common issue when you return to some project development after a long break and don't remember how did you run it.  
-To recover command history for the current directory:
+It is a quite common issue when you return to some project development after a long break and don't remember exact commands you have used to build it, run tests or tune an environment for it. If these commands are still in the history file it is possible to find them, but it is not very convenient to check all the neighboring commands you have used because of the following `bash` history drawbacks: 
+- it may require several <kbd>Ctrl</kbd><kbd>r</kbd> consequent searches to get to the right place in the history,
+- commands related to the project may be interleaved by commands from other terminal sessions,
+- some commands may be lost if terminal session was crushed.
+
+History manager provides a way to recover command history related to the current directory:
 
 ```Shell
 hm
 ```
 
+After this all commands executed in the directory are placed torgether at the beginning of bash built-in history, so it is possible to wolk through them using <kbd>&#8593;</kbd> button.
