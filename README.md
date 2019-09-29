@@ -8,7 +8,7 @@ History manager provides an alternative command line history storage with the ab
 
 ### Current status
 
-Currently implemented functionality allows to load commands by the directory they were executed in. By default, it selects commands recursively down by the directory hierarchy. 
+Currently implemented functionality allows to load commands by the directory they were executed in.
 
 ### Planned features
 
@@ -61,7 +61,7 @@ py.test
 
 There are several main usage scenarios are kept in mind during the development.
 
-### By directory history recovery
+### Per directory history recovery
 
 It is a quite common issue when you return to some project development after a long break and don't remember exact commands you have used to build it, run tests or tune an environment for it. If these commands are still in the history file it is possible to find them, but it is not very convenient to check all the neighboring commands you have used because of the following `bash` history drawbacks: 
 - it may require several <kbd>Ctrl</kbd><kbd>r</kbd> consequent searches to get to the right place in the history,
@@ -74,4 +74,23 @@ History manager provides a way to recover command history related to the current
 hm
 ```
 
-After this all commands executed in the directory are placed torgether at the beginning of bash built-in history, so it is possible to wolk through them using <kbd>&#8593;</kbd> button.
+After this all commands executed in the directory are placed together at the beginning of bash built-in history, so it is possible to walk through them using <kbd>&#8593;</kbd> button.
+
+**TODO:** It is possible to filter out commnads containing specified words:
+```Shell
+hm --exclude "cd ls git"
+```
+**TODO:** To include commands executed in nested folders: 
+```Shell
+hm -R"
+```
+
+### Terminal session command history recovery
+
+Sometimes it is convenient to group commands used for a specific purpose, for example, commands related to the administration of a particular subsystem like slurm, docker, jenkins, .etc. History manager allows to name the terminal sessions and to perform commands selection with this name.
+
+**TODO:** To set a terminal session name if it doesn't exist or recover command history otherwise:
+```Shell
+hm -s "Session Name"
+```
+The same name can be used by several terminal sessions opened at the same time to share the common command history.
