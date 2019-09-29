@@ -4,7 +4,7 @@
 Command line history manager for bash. 
 
 ## About
-History manager provides an alternative command line history storage with the ability to select a subset of commands and load it into the current Bash session history so the <ctrl-r> search is performed on the selected subset. It has an [SQLite](https://www.sqlite.org) database under the hood and, besides the executed command line, stores time, working directory, returned code and a unique terminal session identifier. All additional information may be used as a selection criterion.
+History manager provides an alternative command line history storage with the ability to select a subset of commands and load it into the current Bash session history so the <kbd>Ctrl</kbd><kbd>r</kbd> search is performed on the selected subset. It has an [SQLite](https://www.sqlite.org) database under the hood and, besides the executed command line, stores time, working directory, returned code and a unique terminal session identifier. All additional information may be used as a selection criterion.
 
 ### Current status
 
@@ -37,9 +37,9 @@ cmake -DCMAKE_INSTALL_PREFIX=/path/to/installation/directory ..
 make install
 ```
 
-Installation directory should be in your `PATH`.
+Be sure that the installation directory is in your `PATH`.
 
-3. Add `hm` scripts to the `.bashrc`:
+3. Add `hm` wrapper scripts to the `.bashrc`:
 
 ```Shell
 ./install.sh
@@ -51,8 +51,20 @@ Installation directory should be in your `PATH`.
 . ~/.bashrc
 ```
 
+5. Run system tests to verify the installation (tests are built with [pytest](https://docs.pytest.org)):
+
+```Shell
+py.test
+```
+
 ## Usage
 
+There are several main usage scenarios are kept in mind during the development.
+
+### By directory history recovery
+
+It is quite common when bash commands to run  rebuilding working command line from scratch may take a lot of time. 
+It is a common issue when you return to some project development after a long break and don't remember how did you run it.  
 To recover command history for the current directory:
 
 ```Shell
