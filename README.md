@@ -8,7 +8,7 @@ History manager provides an alternative command line history storage with the ab
 
 ### Current status
 
-Currently implemented functionality allows to load commands by the directory they were executed in.
+Currently implemented functionality allows to search for commands by the directory they were executed in and load them to the bash history.
 
 ### Planned features
 
@@ -24,7 +24,7 @@ Installation consists of two steps: building the `hm-db` binary and `.bashrc` mo
 1. Use `git` to clone the repository:
 
 ```Shell
-git clone https://github.com/dkolmakov/hm.gitthe ability
+git clone https://github.com/dkolmakov/hm.git
 cd hm
 ```
 
@@ -82,7 +82,7 @@ hm --exclude "cd ls git"
 ```
 **TODO:** To include commands executed in nested folders: 
 ```Shell
-hm -R"
+hm -R
 ```
 
 ### Terminal session command history recovery
