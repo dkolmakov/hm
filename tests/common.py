@@ -43,15 +43,18 @@ def insert(db, sess_id, pwd, cmd, ret_code):
     assert rc == 0, "Command failed with code {}".format(rc) 
 
 
-def select(db, pwd):
+def select(db, pwd, recursive = False):
     db += ".testdb"
     select_cmd = ['hm-db', 
                   '--db', db, 
                   '-d', pwd]
+    
+    if recursive:
+        select_cmd.append('-R')
 
     rc, stdout, stderr = run_cmd(select_cmd)
 
     assert rc == 0, "Command failed with code {}".format(rc) 
     
-    return stdout
+    return stdout.strip().split('\n')
 

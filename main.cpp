@@ -60,8 +60,8 @@ int main(int argc, char* argv[]) {
     std::string cmd = "not defined";
     int ret_code = 0;
 
-    bool recursively = true;
-    
+    bool recursively = false;
+
     int i = 1;
     while (i < argc) {
         std::string arg = argv[i++];

@@ -30,6 +30,12 @@ class History {
     sqlite3_stmt *insert_last_cmd_stmt;
     sqlite3_stmt *select_last_cmd_stmt;
     sqlite3_stmt *select_by_dir_stmt;
+    sqlite3_stmt *select_by_dir_rec_stmt;
+
+
+    std::string prepare_path_for_search(std::string path) {
+        return "\"" + path + "\"";
+    }
 
 public:
 
@@ -68,8 +74,11 @@ public:
         sql = "SELECT * FROM last_commands WHERE sess_id = :sess AND pwd = :pwd;";
         db.prepare_sql(sql, &select_last_cmd_stmt);
 
-        sql = "SELECT * FROM history_fts WHERE pwd MATCH :dir;";
+        sql = "SELECT * FROM (SELECT * FROM history_fts WHERE pwd MATCH :dir) WHERE pwd = :sdir;";
         db.prepare_sql(sql, &select_by_dir_stmt);
+
+        sql = "SELECT * FROM history_fts WHERE pwd MATCH :dir;";
+        db.prepare_sql(sql, &select_by_dir_rec_stmt);
     }
 
     ~History() {
@@ -122,13 +131,15 @@ public:
     }
 
     void select_by_dir(std::string dir, bool recursively) {
+        dir = prepare_path_for_search(dir);
+
         if (recursively)
             dir += "*";
-        
-        db.bind_value(select_by_dir_stmt, ":dir", dir);
 
-        while (sqlite3_step(select_by_dir_stmt) == SQLITE_ROW) {
-            std::cout << sqlite3_column_text(select_by_dir_stmt, 3) << std::endl;
+        db.bind_value(select_by_dir_rec_stmt, ":dir", dir);
+
+        while (sqlite3_step(select_by_dir_rec_stmt) == SQLITE_ROW) {
+            std::cout << sqlite3_column_text(select_by_dir_rec_stmt, 3) << std::endl;
         };
     }
 
