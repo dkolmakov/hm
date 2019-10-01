@@ -23,7 +23,7 @@
 #include "history.hpp"
 
 enum Type {
-    ADD_SESSION = 0,
+    ADD_SESSION = 1,
     ADD_CMD,
     SELECT_BY_PATH
 };
@@ -127,3 +127,4 @@ int main(int argc, char* argv[]) {
 
     return 0;
 }
+

@@ -16,7 +16,7 @@ SAVE_HISTFILE=$HISTFILE
 
 HISTFILE=$(mktemp extracted_history.XXXXXXXXXX)
 
-hm-db --db ~/.hm/history.db -d \"$(pwd)\" $@ > $HISTFILE && echo hm "$*" >> $HISTFILE && history -r
+hm-db --db ~/.hm/history.db $@ > $HISTFILE && echo hm "$*" >> $HISTFILE && history -r
 if [ $? -eq 0 ]; then echo "History successfully updated!"; fi
 
 rm -rf $HISTFILE
