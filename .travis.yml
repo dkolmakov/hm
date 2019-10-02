@@ -1,17 +1,25 @@
-language: nix
 
 matrix:
   include:
-    - os: linux
+    - language: nix
+      os: linux
       dist: xenial
       compiler: gcc
       sudo: required
+      script: 
+        - nix-shell -A test shell.nix --run 'mkdir -p build && cd build && cmake .. && make && export PATH=$PATH:$(pwd) && cd .. && py.test'
 
-    - os: linux
+    - language: cpp
+      os: linux
       dist: trusty
       compiler: gcc
       sudo: required
-      
-script:
-     - nix-shell -A test shell.nix --run 'mkdir -p build && cd build && cmake .. && make && export PATH=$PATH:$(pwd) && cd .. && py.test'
-     - nix-shell -A test shell.nix --run 'mkdir -p build && cd build && cmake .. && make && export PATH=$PATH:$(pwd) && cd .. && py.test'
+      addons:
+       apt:
+         packages:
+           - cmake
+           - g++
+           - python3
+           - python3-pytest
+      script:
+        - mkdir -p build && cd build && cmake .. && make && sudo make install && cd .. && py.test-3
