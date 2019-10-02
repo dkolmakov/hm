@@ -68,21 +68,26 @@ It is a quite common issue when you return to some project development after a l
 - commands related to the project may be interleaved by commands from other terminal sessions,
 - some commands may be lost if terminal session was crushed.
 
-History manager provides a way to recover command history related to the current directory:
+History manager provides a way to recover command history related to the specified directory:
 
 ```Shell
-hm
+hm -d /path/of/interest
 ```
+or for current working directory:
 
-After this all commands executed in the directory are placed together at the beginning of bash built-in history, so it is possible to walk through them using <kbd>&#8593;</kbd> button.
+```Shell
+hm -d $(pwd)
+```
+After this all commands executed in the specified directory are combined together and placed at the beginning of the bash built-in history, so it is possible to walk through them using <kbd>&#8593;</kbd> button.
+
+To include commands executed in nested folders recursively add `-R` flag: 
+```Shell
+hm -d /path/of/interest -R
+```
 
 **TODO:** It is possible to filter out commnads containing specified words:
 ```Shell
 hm --exclude "cd ls git"
-```
-**TODO:** To include commands executed in nested folders: 
-```Shell
-hm -R
 ```
 
 ### Terminal session command history recovery
