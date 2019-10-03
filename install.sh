@@ -1,2 +1,37 @@
+#!/usr/bin/env bash
 
-cat scripts-to-bashrc >> ~/.bashrc
+# Put database to the home directory by default
+db_path=$HOME/.hm
+
+# Write scripts to .bashrc by default
+target=$HOME/.bashrc
+
+while [[ $# > 0 ]]
+do
+  key=$1
+  
+  case $key in
+    --db)
+    db_path=$2
+    ;;
+    --target)
+    target=$2
+    ;;
+    *)
+    echo "Unknown option $1 $2"
+    ;;
+  esac  
+  
+  shift
+  shift
+done
+
+echo "
+# Create History Manager folder where database will be placed
+mkdir -p $db_path
+
+# Create a variable containing database path
+hm_history_db=$db_path/history.db
+" >> $target
+
+cat scripts-to-bashrc >> $target
