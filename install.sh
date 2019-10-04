@@ -30,7 +30,7 @@ echo "
 # Create History Manager folder where database will be placed
 mkdir -p $db_path
 
-# Create a variable containing database path
+# Create a variable with path to the database
 hm_history_db=$db_path/history.db
 " >> $target
 
