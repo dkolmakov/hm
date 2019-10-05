@@ -28,14 +28,5 @@ script:
     # Run system tests
     - py.test-3
     
-    # Check database file
-    - echo test && ! [ -z $hm_history_db ] && [ -f $hm_history_db ]
-    
-    # Check current session id
-    - ! [ -z $hm_session_id ] && [ $hm_session_id -eq 1 ]
-    
-    # Add test entry to the database
-    - hm-db --db $hm_history_db -a $hm_session_id /test/path "test command" 0
-    
-    # Check if hm function works
-    - hm -d /test/path && [ "$(history 2 | head -n 1 | sed -E "s/^ *[0-9]* *//")" == "test command" ]
+    # Check hm installation
+    - . test_installation.sh
