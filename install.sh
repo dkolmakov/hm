@@ -34,4 +34,4 @@ mkdir -p $db_path
 hm_history_db=$db_path/history.db
 " >> $target
 
-cat scripts-to-bashrc >> $target
+cat ./scripts/scripts-to-bashrc >> $target
