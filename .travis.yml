@@ -6,8 +6,9 @@ matrix:
       dist: xenial
       compiler: gcc
       sudo: required
-      script: 
-        - nix-shell -A test shell.nix --run 'mkdir -p build && cd build && cmake -DCMAKE_INSTALL_PREFIX=/usr/local .. && make && sudo make install && cd .. && py.test'
+      install: 
+        - nix-shell -A test shell.nix 
+        - mkdir -p build && cd build && cmake -DCMAKE_INSTALL_PREFIX=/usr/local .. && make && sudo make install && cd .. && ./install.sh && . ~/.bashrc
 
     - language: cpp
       os: linux
@@ -22,7 +23,7 @@ matrix:
            - python3
            - python3-pytest
       install:
-        mkdir -p build && cd build && cmake .. && make && sudo make install && cd .. && ./install.sh && . ~/.bashrc
+        - mkdir -p build && cd build && cmake .. && make && sudo make install && cd .. && ./install.sh && . ~/.bashrc
 
 script:
     # Run system tests
