@@ -7,7 +7,7 @@ matrix:
       compiler: gcc
       sudo: required
       script: 
-        - nix-shell -A test shell.nix --run 'mkdir -p build && cd build && cmake .. && make && sudo make install && cd .. && py.test'
+        - nix-shell -A test shell.nix --run 'mkdir -p build && cd build && cmake -DCMAKE_INSTALL_PREFIX=/usr/local .. && make && sudo make install && cd .. && py.test'
 
     - language: cpp
       os: linux
