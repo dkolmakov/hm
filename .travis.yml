@@ -29,4 +29,4 @@ script:
     - py.test-3
     
     # Check hm installation
-    - source test_interface.sh
+    - source tests/test_interface.sh
