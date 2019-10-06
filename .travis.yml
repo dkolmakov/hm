@@ -7,7 +7,7 @@ matrix:
       compiler: gcc
       sudo: required
       script: 
-        - nix-shell -A test shell.nix --run 'mkdir -p build && cd build && cmake .. && make && export PATH=$PATH:$(pwd) && cd .. && py.test'
+        - nix-shell -A test shell.nix --run 'mkdir -p build && cd build && cmake -DCMAKE_INSTALL_PREFIX=/usr/local .. && make && sudo make install && cd .. && py.test'
 
     - language: cpp
       os: linux
@@ -22,11 +22,11 @@ matrix:
            - python3
            - python3-pytest
       install:
-        mkdir -p build && cd build && cmake .. && make && sudo make install && cd .. && ./install.sh && . ~/.bashrc
+        - mkdir -p build && cd build && cmake .. && make && sudo make install && cd .. && ./install.sh && . ~/.bashrc
 
 script:
     # Run system tests
     - py.test-3
     
     # Check hm installation
-    - source test_interface.sh
+    - source tests/test_interface.sh
