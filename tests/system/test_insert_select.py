@@ -128,8 +128,8 @@ def test_not_normilized_current_dir(remove_db):
 
     db, sess_id = basic_create_db()
 
-    insert(db, sess_id, pwd, cmd, 0)
-    stdout = select(db, pwd)
+    insert(db, sess_id, pwd_insert, cmd, 0)
+    stdout = select(db, pwd_select)
 
     for line in stdout:
         print(line)
