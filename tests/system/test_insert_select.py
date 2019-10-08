@@ -13,13 +13,19 @@ def test_session_numbering(remove_db):
     assert sess_id_1 == 2
 
 
-def basic_insert_select(pwd, cmd):
+def basic_create_db():
     db = "test"
     name = "test session"
     
     sess_id = create_session(db, name)
  
     print("Session #{} created".format(sess_id))
+
+    return db, sess_id
+
+
+def basic_insert_select(pwd, cmd):
+    db, sess_id = basic_create_db()
 
     insert(db, sess_id, pwd, cmd, 0)
     
@@ -62,12 +68,7 @@ def test_recursive_select(remove_db):
     pwd2 = "/some/arbitrary/path/inside"
     cmd2 = "some --other command"
 
-    db = "test"
-    name = "test session"
-    
-    sess_id = create_session(db, name)
- 
-    print("Session #{} created".format(sess_id))
+    db, sess_id = basic_create_db()
 
     insert(db, sess_id, pwd1, cmd1, 0)
     insert(db, sess_id, pwd2, cmd2, 0)
@@ -88,3 +89,51 @@ def test_recursive_select(remove_db):
     assert len(stdout) == 2, "Wrong number of commands!"
     assert cmd1 == stdout[0], "Wrong command in the database!"
     assert cmd2 == stdout[1], "Wrong command in the database!"
+
+
+def test_trailing_separator_insert(remove_db):
+    pwd = "/some/arbitrary/path"
+    cmd = "some --arbitrary command"
+
+    db, sess_id = basic_create_db()
+
+    insert(db, sess_id, pwd + "/", cmd, 0)
+    stdout = select(db, pwd)
+
+    for line in stdout:
+        print(line)
+        
+    assert cmd == stdout[0], "Wrong command in the database!"
+
+
+def test_trailing_separator_select(remove_db):
+    pwd = "/some/arbitrary/path"
+    cmd = "some --arbitrary command"
+
+    db, sess_id = basic_create_db()
+
+    insert(db, sess_id, pwd, cmd, 0)
+    stdout = select(db, pwd + "/")
+
+    for line in stdout:
+        print(line)
+        
+    assert cmd == stdout[0], "Wrong command in the database!"
+
+
+def test_not_normilized_current_dir(remove_db):
+    pwd_insert = "./"
+    pwd_select = "./tests/../"
+    cmd = "some --arbitrary command"
+
+    db, sess_id = basic_create_db()
+
+    insert(db, sess_id, pwd, cmd, 0)
+    stdout = select(db, pwd)
+
+    for line in stdout:
+        print(line)
+        
+    assert cmd == stdout[0], "Wrong command in the database!"
+
+
