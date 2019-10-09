@@ -20,6 +20,9 @@
 #include <iostream>
 
 #include "database.hpp"
+#include "path.hpp"
+
+using namespace apathy;
 
 class History {
 
@@ -33,10 +36,34 @@ class History {
     sqlite3_stmt *select_by_dir_rec_stmt;
 
 
-    std::string prepare_path_for_search(std::string path) {
-        return "\"" + path + "\"";
+    std::string prepare_path_for_search(std::string input) {
+        Path path(input);
+        
+        return "\"" + path.absolute().sanitize().trim().string() + "\"";
     }
 
+    std::string get_last_cmd(int sess_id, std::string pwd) {
+        std::string cmd = "";
+
+        db.bind_value(select_last_cmd_stmt, ":sess", std::to_string(sess_id));
+        db.bind_value(select_last_cmd_stmt, ":pwd", pwd);
+
+        while (sqlite3_step(select_last_cmd_stmt) == SQLITE_ROW) {
+            cmd = std::string(reinterpret_cast< char const* >(sqlite3_column_text(select_last_cmd_stmt, 2)));
+        };
+
+        return cmd;
+    }
+
+    void set_last_cmd(int sess_id, std::string pwd, std::string cmd) {
+        db.bind_value(insert_last_cmd_stmt, ":sess", std::to_string(sess_id));
+        db.bind_value(insert_last_cmd_stmt, ":pwd", pwd);
+        db.bind_value(insert_last_cmd_stmt, ":cmd", cmd);
+
+        while (sqlite3_step(insert_last_cmd_stmt) != SQLITE_DONE) {};
+
+    }
+    
 public:
 
     History(std::string path) : db(path) {
@@ -84,31 +111,11 @@ public:
     ~History() {
     }
 
-    std::string get_last_cmd(int sess_id, std::string pwd) {
-        std::string cmd = "";
-
-        db.bind_value(select_last_cmd_stmt, ":sess", std::to_string(sess_id));
-        db.bind_value(select_last_cmd_stmt, ":pwd", pwd);
-
-        while (sqlite3_step(select_last_cmd_stmt) == SQLITE_ROW) {
-            cmd = std::string(reinterpret_cast< char const* >(sqlite3_column_text(select_last_cmd_stmt, 2)));
-        };
-
-        return cmd;
-    }
-
-    void set_last_cmd(int sess_id, std::string pwd, std::string cmd) {
-        db.bind_value(insert_last_cmd_stmt, ":sess", std::to_string(sess_id));
-        db.bind_value(insert_last_cmd_stmt, ":pwd", pwd);
-        db.bind_value(insert_last_cmd_stmt, ":cmd", cmd);
-
-        while (sqlite3_step(insert_last_cmd_stmt) != SQLITE_DONE) {};
-
-    }
-
     void insert_cmd(int64_t session, std::string pwd, std::string cmd) {
-        std::string last_cmd = get_last_cmd(session, pwd);
+        pwd = prepare_path_for_search(pwd);
 
+        std::string last_cmd = get_last_cmd(session, pwd);
+        
         if (cmd != last_cmd) {
 
             db.bind_value(insert_cmd_stmt, ":sess", std::to_string(session));

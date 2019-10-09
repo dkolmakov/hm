@@ -123,7 +123,7 @@ def test_trailing_separator_select(remove_db):
 
 def test_not_normilized_current_dir(remove_db):
     pwd_insert = "./"
-    pwd_select = "./tests/../"
+    pwd_select = "./doesnotmatter/../"
     cmd = "some --arbitrary command"
 
     db, sess_id = basic_create_db()
