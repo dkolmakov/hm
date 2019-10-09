@@ -76,13 +76,13 @@ hm -d /path/of/interest
 or for current working directory:
 
 ```Shell
-hm -d $(pwd)
+hm -d .
 ```
 After this all commands executed in the specified directory are combined together and placed at the beginning of the bash built-in history, so it is possible to walk through them using <kbd>&#8593;</kbd> button.
 
 To include commands executed in nested folders recursively add `-R` flag: 
 ```Shell
-hm -d /path/of/interest -R
+hm -d . -R
 ```
 
 **TODO:** It is possible to filter out commnads containing specified words:
