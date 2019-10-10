@@ -32,7 +32,9 @@ def create_session(db, name):
     return sess_id
 
 
-def insert(db, sess_id, pwd, cmd, ret_code):
+def insert(db_obj, pwd, cmd, ret_code):
+    db, sess_id = db_obj
+    
     db += ".testdb"
     insert_cmd = ['hm-db', 
                   '--db', db, 
@@ -43,7 +45,9 @@ def insert(db, sess_id, pwd, cmd, ret_code):
     assert rc == 0, "Command failed with code {}".format(rc) 
 
 
-def select(db, pwd, recursive = False):
+def select(db_obj, pwd, recursive = False):
+    db, sess_id = db_obj
+    
     db += ".testdb"
     select_cmd = ['hm-db', 
                   '--db', db, 
@@ -57,4 +61,28 @@ def select(db, pwd, recursive = False):
     assert rc == 0, "Command failed with code {}".format(rc) 
     
     return stdout.strip().split('\n')
+
+
+def basic_create_db():
+    db = "test"
+    name = "test session"
+    
+    sess_id = create_session(db, name)
+ 
+    print("Session #{} created".format(sess_id))
+
+    return db, sess_id
+
+
+def basic_insert_select(pwd, cmd):
+    db_obj = basic_create_db()
+
+    insert(db_obj, pwd, cmd, 0)
+    
+    stdout = select(db_obj, pwd)
+
+    for line in stdout:
+        print(line)
+
+    assert cmd == stdout[0], "Wrong command in the database!"
 
