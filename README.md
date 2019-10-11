@@ -98,4 +98,14 @@ Sometimes it is convenient to group commands used for a specific purpose, for ex
 ```Shell
 hm -s "Session Name"
 ```
-The same name can be used by several terminal sessions opened at the same time to share the common command history.
+
+### Several terminal sessions with a common command history
+
+**TODO:** The session name can be used to retrieve commands executed in the simulataneously opened terminal sessions by usage of the same name for history recovery:
+```Shell
+hm -s "Other Session Name"
+```
+**TODO:** Subsequent recovery commands may ommit the session name:
+```Shell
+hm -s
+```
