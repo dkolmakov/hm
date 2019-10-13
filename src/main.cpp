@@ -25,7 +25,7 @@
 enum Type {
     ADD_SESSION = 1,
     ADD_CMD,
-    SELECT_BY_PATH
+    SELECT_BY_PATH,
 };
 
 enum ErrorCode {
@@ -51,7 +51,9 @@ static void show_usage(std::string name)
 int main(int argc, char* argv[]) {
 
     std::string db_path = "/not/defined.db";
+    std::string filename = "/not/defined/filename";
     int type = 0;
+    bool parse_file = false;
 
     std::string sess_name = "not defined";
 
@@ -91,6 +93,10 @@ int main(int argc, char* argv[]) {
             else if (arg == "-R") {
                 recursively = true;
             }
+            else if (arg == "-f" && (i + 1) <= argc) {
+                parse_file = true;
+                filename = argv[i++];
+            }
             else {
                 std::cout << "ERROR! Wrong usage of option: \"" << arg << "\"" << std::endl;
                 show_usage(argv[0]);
@@ -101,6 +107,9 @@ int main(int argc, char* argv[]) {
 
     try {
         History history(db_path);
+        
+        if (parse_file)
+            history.parse_input_file(filename);
 
         switch (type) {
         case ADD_SESSION:
