@@ -37,8 +37,6 @@ class History {
     sqlite3_stmt *select_by_dir_stmt;
     sqlite3_stmt *select_by_dir_rec_stmt;
 
-    const std::string splitter = "!!hmsplitter!!";
-
     std::string prepare_path_for_search(std::string& input) {
         Path path(input);
         
@@ -46,17 +44,19 @@ class History {
     }
     
     
-    std::vector<std::string> split(const std::string& s)
+    std::vector<std::string> split(const std::string& s, std::string& separator)
     {
         std::vector<std::string> elements;
         size_t pos = 0;
         size_t prev_pos = 0;
         
-        while ((pos = s.find(splitter, prev_pos)) != std::string::npos)
+        while ((pos = s.find(separator, prev_pos)) != std::string::npos)
         {
-            elements.push_back(s.substr(prev_pos, pos));
-            prev_pos = pos + splitter.size();
+            elements.push_back(s.substr(prev_pos, pos - prev_pos));
+            prev_pos = pos + separator.size();
         }
+        
+        elements.push_back(s.substr(prev_pos, s.size() - prev_pos));
 
         return elements;
     }    
@@ -70,6 +70,8 @@ class History {
         while (sqlite3_step(select_last_cmd_stmt) == SQLITE_ROW) {
             cmd = std::string(reinterpret_cast< char const* >(sqlite3_column_text(select_last_cmd_stmt, 2)));
         };
+        
+        sqlite3_reset(select_last_cmd_stmt);
 
         return cmd;
     }
@@ -81,6 +83,7 @@ class History {
 
         while (sqlite3_step(insert_last_cmd_stmt) != SQLITE_DONE) {};
 
+        sqlite3_reset(insert_last_cmd_stmt);
     }
     
 public:
@@ -143,6 +146,8 @@ public:
 
             while (sqlite3_step(insert_cmd_stmt) != SQLITE_DONE) {};
 
+            sqlite3_reset(insert_cmd_stmt);
+            
             set_last_cmd(session, pwd, cmd);
         }
     }
@@ -167,9 +172,11 @@ public:
         while (sqlite3_step(select_by_dir_rec_stmt) == SQLITE_ROW) {
             std::cout << sqlite3_column_text(select_by_dir_rec_stmt, 3) << std::endl;
         };
+        
+        sqlite3_reset(select_by_dir_rec_stmt);
     }
     
-    int parse_input_file(std::string& filename) {
+    int parse_input_file(std::string& filename, std::string& separator) {
         std::ifstream input(filename.c_str(), std::ios::in);
         std::string line;
         
@@ -177,7 +184,7 @@ public:
             return -11; // TODO: Add meaningful return code
             
         while (getline(input, line)) {
-            std::vector<std::string> elements = split(line);
+            std::vector<std::string> elements = split(line, separator);
             
             for (auto val : elements)
                 std::cout << val << " ";

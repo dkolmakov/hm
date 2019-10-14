@@ -51,7 +51,6 @@ static void show_usage(std::string name)
 int main(int argc, char* argv[]) {
 
     std::string db_path = "/not/defined.db";
-    std::string filename = "/not/defined/filename";
     int type = 0;
     bool parse_file = false;
 
@@ -63,6 +62,9 @@ int main(int argc, char* argv[]) {
     int ret_code = 0;
 
     bool recursively = false;
+
+    std::string filename = "/not/defined/filename";
+    std::string separator = "notdefined";
 
     int i = 1;
     while (i < argc) {
@@ -97,6 +99,9 @@ int main(int argc, char* argv[]) {
                 parse_file = true;
                 filename = argv[i++];
             }
+            else if (arg == "-r" && (i + 1) <= argc) {
+                separator = argv[i++];
+            }
             else {
                 std::cout << "ERROR! Wrong usage of option: \"" << arg << "\"" << std::endl;
                 show_usage(argv[0]);
@@ -109,7 +114,7 @@ int main(int argc, char* argv[]) {
         History history(db_path);
         
         if (parse_file)
-            history.parse_input_file(filename);
+            history.parse_input_file(filename, separator);
 
         switch (type) {
         case ADD_SESSION:
