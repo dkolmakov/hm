@@ -113,7 +113,7 @@ public:
         db.exec_sql(sql);
 
         sql = "INSERT INTO commands (sess_id,date,pwd,cmd) "
-              " VALUES ( :sess , DATETIME() , :pwd , :cmd );";
+              " VALUES ( :sess , :datetime , :pwd , :cmd );";
         db.prepare_sql(sql, &insert_cmd_stmt);
 
         sql = "INSERT OR REPLACE INTO last_commands (sess_id, pwd, cmd) "
@@ -133,7 +133,7 @@ public:
     ~History() {
     }
 
-    void insert_cmd(int64_t session, std::string& pwd, std::string& cmd) {
+    void insert_cmd(int64_t session, std::string& datetime, std::string& pwd, std::string& cmd) {
         pwd = prepare_path_for_search(pwd);
 
         std::string last_cmd = get_last_cmd(session, pwd);
@@ -141,6 +141,7 @@ public:
         if (cmd != last_cmd) {
 
             db.bind_value(insert_cmd_stmt, ":sess", std::to_string(session));
+            db.bind_value(insert_cmd_stmt, ":datetime", datetime);
             db.bind_value(insert_cmd_stmt, ":pwd", pwd);
             db.bind_value(insert_cmd_stmt, ":cmd", cmd);
 
@@ -190,10 +191,10 @@ public:
                 std::cout << val << " ";
             std::cout << std::endl;
             
-            if (elements.size() < 3) 
+            if (elements.size() < 4) 
                 return -12;
             
-            insert_cmd(atoi(elements[0].c_str()), elements[1], elements[2]);
+            insert_cmd(atoi(elements[0].c_str()), elements[1], elements[2], elements[3]);
         }
         
         input.close();

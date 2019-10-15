@@ -9,7 +9,7 @@ if [ -z $hm_history_db ] || ! [ -f $hm_history_db ]; then echo "Error: no databa
 if [ -z $hm_session_id ] || ! [ $hm_session_id -ge 1 ]; then echo "Error: wrong session id!"; rc=1; fi
     
 # Add test entry to the database
-hm-db --db $hm_history_db -a $hm_session_id /test/path "test command" 0
+hm-db --db $hm_history_db -a $hm_session_id "$(date +"%Y-%m-%d %H:%M:%S")" /test/path "test command" 0
 
 # Select commands from the test path
 hm -d /test/path 

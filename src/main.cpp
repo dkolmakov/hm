@@ -57,6 +57,7 @@ int main(int argc, char* argv[]) {
     std::string sess_name = "not defined";
 
     int sess_id = 0;
+    std::string datetime = "1972-01-01 00:00:00";
     std::string pwd = "not defined";
     std::string cmd = "not defined";
     int ret_code = 0;
@@ -77,9 +78,10 @@ int main(int argc, char* argv[]) {
             if (arg == "--db" && (i + 1) <= argc) {
                 db_path = argv[i++];
             }
-            else if (arg == "-a" && (i + 4) <= argc) {
+            else if (arg == "-a" && (i + 5) <= argc) {
                 type = ADD_CMD;
                 sess_id = atoi(argv[i++]);
+                datetime = argv[i++];
                 pwd = argv[i++];
                 cmd = argv[i++];
                 ret_code = atoi(argv[i++]);
@@ -122,7 +124,7 @@ int main(int argc, char* argv[]) {
             break;
         case ADD_CMD:
             (void)ret_code; // Warning suppression. TODO: add return code to the commands table
-            history.insert_cmd(sess_id, pwd, cmd);
+            history.insert_cmd(sess_id, datetime, pwd, cmd);
             break;
         case SELECT_BY_PATH:
             history.select_by_dir(pwd, recursively);
