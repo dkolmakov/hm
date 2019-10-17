@@ -1,32 +1,38 @@
-
 matrix:
   include:
-    - language: nix
-      os: linux
-      dist: xenial
-      compiler: gcc
-      sudo: required
-      script: 
-        - nix-shell -A test shell.nix --run 'mkdir -p build && cd build && cmake -DCMAKE_INSTALL_PREFIX=/usr/local .. && make && sudo make install && cd .. && py.test'
-
-    - language: cpp
-      os: linux
-      dist: trusty
-      compiler: gcc
-      sudo: required
-      addons:
-       apt:
-         packages:
-           - cmake
-           - g++
-           - python3
-           - python3-pytest
-      install:
-        - mkdir -p build && cd build && cmake .. && make && sudo make install && cd .. && ./install.sh && . ~/.bashrc
-
+  - language: nix
+    os: linux
+    dist: xenial
+    compiler: gcc
+    sudo: required
+    script:
+    - nix-shell -A test shell.nix --run 'mkdir -p build && cd build && cmake -DCMAKE_INSTALL_PREFIX=/usr/local
+      .. && make && sudo make install && cd .. && py.test'
+  - language: cpp
+    os: linux
+    dist: trusty
+    compiler: gcc
+    sudo: required
+    addons:
+      apt:
+        packages:
+        - cmake
+        - g++
+        - python3
+        - python3-pytest
+    install:
+    - mkdir -p build && cd build && cmake .. && make && sudo make install && cd ..
+      && ./install.sh && . ~/.bashrc
 script:
-    # Run system tests
-    - py.test-3
-    
-    # Check hm installation
-    - source tests/test_interface.sh
+- py.test-3
+- source tests/test_interface.sh
+before_deploy:
+- cd build
+- make package
+deploy:
+  provider: releases
+  api_key:
+    secure: w93gIk3Zh8r1MWOgHsM8hydJlDiMv83fLiW4jWPn7K2GByv6N63j4H2Aif6tIC5omD0EWNHWlVgWRHMdrwkSy7jzj6NW1hJBr9NtFrqILVs13D1Ngs911M0XjM/MSsC8nQTJue9zWyJSgOe5+WNTvKTgJdxtZsRFKD8MT2EdItot0UalyucqEr5ehPLVSUT+ID4AP2r90UZQgSslQ86kJYHEzQaWTXGgJTwlYxXuUmiy4ZhZOaDflOMrO8KGaidJ5QynfQYyfIMR+VxN7TlW3OuUyUrdfs3GTO4kMzc7OVAANDO9KrCdx3AF8qqWHxBV4lANu00rq5En9V5iEc2/bZDgLOtrw0Peqqg0wVQKKOFos4L1g+h6Vm/s+3TEg/NpAz7/nDrPLXvCteyPyerx24NkrOaCArmJcZJcj3O9+Xg+selbTASzjd+yWf5lmP4pOhfSNX0Kh6wnq5cJnOG/bkJcLMiGNjINZWLED5vr0OeV9FiibusGc7V21FZjDeY75w8A4DBGD/Xyz64ycl2TSUF54NWz/Frrv24+YiHgGwzbL2TSNw3EdlbepZdntIccnr0C9dFeVb7FENsmmnMVR8uD5qYSIeC3BHyfMbn+dyVTe3+srrshdqan34AWWp7m5QdEtqQs3RZjXT3tn6jUTH6HBRama1ZbVgtZmtsosFI=
+  file: build/hm-0.1.0-Linux.deb
+  on:
+    repo: dkolmakov/hm
