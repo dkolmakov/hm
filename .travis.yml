@@ -34,4 +34,7 @@ deploy:
   api_key:
     secure: w93gIk3Zh8r1MWOgHsM8hydJlDiMv83fLiW4jWPn7K2GByv6N63j4H2Aif6tIC5omD0EWNHWlVgWRHMdrwkSy7jzj6NW1hJBr9NtFrqILVs13D1Ngs911M0XjM/MSsC8nQTJue9zWyJSgOe5+WNTvKTgJdxtZsRFKD8MT2EdItot0UalyucqEr5ehPLVSUT+ID4AP2r90UZQgSslQ86kJYHEzQaWTXGgJTwlYxXuUmiy4ZhZOaDflOMrO8KGaidJ5QynfQYyfIMR+VxN7TlW3OuUyUrdfs3GTO4kMzc7OVAANDO9KrCdx3AF8qqWHxBV4lANu00rq5En9V5iEc2/bZDgLOtrw0Peqqg0wVQKKOFos4L1g+h6Vm/s+3TEg/NpAz7/nDrPLXvCteyPyerx24NkrOaCArmJcZJcj3O9+Xg+selbTASzjd+yWf5lmP4pOhfSNX0Kh6wnq5cJnOG/bkJcLMiGNjINZWLED5vr0OeV9FiibusGc7V21FZjDeY75w8A4DBGD/Xyz64ycl2TSUF54NWz/Frrv24+YiHgGwzbL2TSNw3EdlbepZdntIccnr0C9dFeVb7FENsmmnMVR8uD5qYSIeC3BHyfMbn+dyVTe3+srrshdqan34AWWp7m5QdEtqQs3RZjXT3tn6jUTH6HBRama1ZbVgtZmtsosFI=
   file: build/hm-0.1.0-Linux.deb
-  draft: true
+  on:
+    branches:
+      only:
+        - create-deb-package
