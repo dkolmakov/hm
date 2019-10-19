@@ -27,6 +27,7 @@ script:
 - py.test-3
 - source tests/test_interface.sh
 before_deploy:
+- umask 77
 - cd build
 - make package
 deploy:
