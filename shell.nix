@@ -4,8 +4,6 @@ let common = [
     stdenv
     cmake
 
-    sqlite
-
     python3
     python3Packages.pytest
 ]; 
