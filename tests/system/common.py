@@ -38,7 +38,7 @@ def insert(db_obj, pwd, cmd, ret_code):
     db += ".testdb"
     insert_cmd = ['hm-db', 
                   '--db', db, 
-                  '-a', '{}'.format(sess_id), pwd, cmd, str(ret_code) ]
+                  '-a', '{}'.format(sess_id), "\"1972-01-01 00:00:00\"", pwd, cmd, str(ret_code) ]
 
     rc, stdout, stderr = run_cmd(insert_cmd)
 

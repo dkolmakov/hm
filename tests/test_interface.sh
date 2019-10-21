@@ -13,7 +13,7 @@ test_command="test command $(date +"%Y-%m-%d %H:%M:%S")"
 test_path="/test/path/$(date +"%Y-%m-%d_%H:%M:%S")"
     
 # Add test entry to the database
-hm-db --db $hm_history_db -a $hm_session_id $test_path "$test_command" 0
+hm-db --db $hm_history_db -a $hm_session_id "$(date +"%Y-%m-%d %H:%M:%S")" $test_path "$test_command" 0
 if ! [ $? -eq 0 ]; then echo "Error!!! Adding entry to database failed!"; rc=1; fi
 
 # Select commands from the test path

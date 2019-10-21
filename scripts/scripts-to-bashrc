@@ -1,19 +1,20 @@
 # Create a new session entry in the database corresponding to the current terminal session
 hm_session_id=$(hm-db --db $hm_history_db -s "Not defined")
 
-# Set a script to be executed after each other command in the current terminal session
-export PROMPT_COMMAND='if [ $(id -u) -ne 0 ]; then hm-db --db $hm_history_db -a $hm_session_id "$(pwd)" "$(history 1 | sed -E "s/^ *[0-9]* *//")" $?; fi'
+# Service string to split values of stored commands
+separator="!!hmseparator!!"
 
-# Alias for by-folder selection of commands from history and adding them at the beginning of the current terminal history
+# Set a script to be executed after each other command in the current terminal session
+export PROMPT_COMMAND='rc=$?; if [ $(id -u) -ne 0 ] && ! [ -z $hm_session_id ]; then echo ${hm_session_id}${separator}$(date +"%Y-%m-%d %H:%M:%S")${separator}$(pwd)${separator}"$(history 1 | sed -E "s/^ *[0-9]* *//")"${separator}$rc >> $hm_history_tmp; fi'
+
+# Wrapper for hm-db which adds the selected commands at the beginning of the current terminal history
 hm() {
 SAVE_HISTFILE=$HISTFILE
-
 HISTFILE=$(mktemp extracted_history.XXXXXXXXXX)
 
-hm-db --db $hm_history_db $@ > $HISTFILE && echo hm "$*" >> $HISTFILE && history -r
+hm-db --db $hm_history_db -f $hm_history_tmp -r $separator $@ > $HISTFILE && echo hm "$*" >> $HISTFILE && history -r
 if [ $? -eq 0 ]; then echo "History successfully updated!"; fi
 
-rm -rf $HISTFILE
-
+rm -rf $hm_history_tmp $HISTFILE
 HISTFILE=$SAVE_HISTFILE
 }

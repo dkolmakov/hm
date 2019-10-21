@@ -32,6 +32,10 @@ mkdir -p $db_path
 
 # Create a variable with path to the database
 hm_history_db=$db_path/history.db
+
+# Create a variable with path to the temporary history file
+hm_history_tmp=$db_path/history.tmp
+
 " >> $target
 
 cat ./scripts/scripts-to-bashrc >> $target

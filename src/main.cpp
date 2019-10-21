@@ -25,7 +25,7 @@
 enum Type {
     ADD_SESSION = 1,
     ADD_CMD,
-    SELECT_BY_PATH
+    SELECT_BY_PATH,
 };
 
 enum ErrorCode {
@@ -52,15 +52,20 @@ int main(int argc, char* argv[]) {
 
     std::string db_path = "/not/defined.db";
     int type = 0;
+    bool parse_file = false;
 
     std::string sess_name = "not defined";
 
     int sess_id = 0;
+    std::string datetime = "1972-01-01 00:00:00";
     std::string pwd = "not defined";
     std::string cmd = "not defined";
     int ret_code = 0;
 
     bool recursively = false;
+
+    std::string filename = "/not/defined/filename";
+    std::string separator = "notdefined";
 
     int i = 1;
     while (i < argc) {
@@ -73,9 +78,10 @@ int main(int argc, char* argv[]) {
             if (arg == "--db" && (i + 1) <= argc) {
                 db_path = argv[i++];
             }
-            else if (arg == "-a" && (i + 4) <= argc) {
+            else if (arg == "-a" && (i + 5) <= argc) {
                 type = ADD_CMD;
                 sess_id = atoi(argv[i++]);
+                datetime = argv[i++];
                 pwd = argv[i++];
                 cmd = argv[i++];
                 ret_code = atoi(argv[i++]);
@@ -91,6 +97,13 @@ int main(int argc, char* argv[]) {
             else if (arg == "-R") {
                 recursively = true;
             }
+            else if (arg == "-f" && (i + 1) <= argc) {
+                parse_file = true;
+                filename = argv[i++];
+            }
+            else if (arg == "-r" && (i + 1) <= argc) {
+                separator = argv[i++];
+            }
             else {
                 std::cout << "ERROR! Wrong usage of option: \"" << arg << "\"" << std::endl;
                 show_usage(argv[0]);
@@ -101,6 +114,9 @@ int main(int argc, char* argv[]) {
 
     try {
         History history(db_path);
+        
+        if (parse_file)
+            history.parse_input_file(filename, separator);
 
         switch (type) {
         case ADD_SESSION:
@@ -108,7 +124,7 @@ int main(int argc, char* argv[]) {
             break;
         case ADD_CMD:
             (void)ret_code; // Warning suppression. TODO: add return code to the commands table
-            history.insert_cmd(sess_id, pwd, cmd);
+            history.insert_cmd(sess_id, datetime, pwd, cmd);
             break;
         case SELECT_BY_PATH:
             history.select_by_dir(pwd, recursively);
