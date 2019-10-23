@@ -1,0 +1,2 @@
+#define HM_VERSION "@hm_VERSION@"
+
