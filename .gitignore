@@ -3,3 +3,4 @@ builds/
 
 *.kdev4
 *.testdb
+src/version.hpp

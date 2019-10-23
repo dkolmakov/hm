@@ -21,6 +21,7 @@
 #include <iostream>
 
 #include "history.hpp"
+#include "version.hpp"
 
 enum Type {
     ADD_SESSION = 1,
@@ -47,6 +48,14 @@ static void show_usage(std::string name)
               << std::endl;
 }
 
+static void show_version(std::string name)
+{
+    std::cout << name << " " << HM_VERSION << std::endl
+              << "Copyright (C) 2019 Dmitry Kolmakov." << std::endl
+              << "License ASLv2.0: Apache License, Version 2.0 <http://www.apache.org/licenses/LICENSE-2.0>." << std::endl
+              << "This is free software: you are free to change and redistribute it." << std::endl
+              << "There is NO WARRANTY, to the extent permitted by law." << std::endl;
+}
 
 int main(int argc, char* argv[]) {
 
@@ -103,6 +112,10 @@ int main(int argc, char* argv[]) {
             }
             else if (arg == "-r" && (i + 1) <= argc) {
                 separator = argv[i++];
+            }
+            else if (arg == "-v" || arg == "--version") {
+                show_version(argv[0]);
+                return 0;
             }
             else {
                 std::cout << "ERROR! Wrong usage of option: \"" << arg << "\"" << std::endl;
