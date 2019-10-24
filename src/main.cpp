@@ -69,7 +69,7 @@ int main(int argc, char* argv[]) {
     std::string datetime = "1972-01-01 00:00:00";
     std::string pwd = "not defined";
     std::string cmd = "not defined";
-    int ret_code = 0;
+    std::string ret_code = "0";
 
     bool recursively = false;
 
@@ -93,7 +93,7 @@ int main(int argc, char* argv[]) {
                 datetime = argv[i++];
                 pwd = argv[i++];
                 cmd = argv[i++];
-                ret_code = atoi(argv[i++]);
+                ret_code = argv[i++];
             }
             else if (arg == "-s" && (i + 1) <= argc) {
                 type = ADD_SESSION;
@@ -136,8 +136,7 @@ int main(int argc, char* argv[]) {
             std::cout << history.insert_sess(sess_name);
             break;
         case ADD_CMD:
-            (void)ret_code; // Warning suppression. TODO: add return code to the commands table
-            history.insert_cmd(sess_id, datetime, pwd, cmd);
+            history.insert_cmd(sess_id, datetime, pwd, cmd, ret_code);
             break;
         case SELECT_BY_PATH:
             history.select_by_dir(pwd, recursively);

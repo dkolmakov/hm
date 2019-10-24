@@ -95,7 +95,8 @@ public:
 				sess_id BIGINT, \
 		   		date TEXT, \
 				pwd TEXT, \
-				cmd TEXT);"
+				cmd TEXT, \
+				rc TEXT);"
               "CREATE TABLE IF NOT EXISTS sessions (\
 				id INTEGER PRIMARY KEY, \
 		   		date TEXT, \
@@ -112,8 +113,8 @@ public:
 
         db.exec_sql(sql);
 
-        sql = "INSERT INTO commands (sess_id,date,pwd,cmd) "
-              " VALUES ( :sess , :datetime , :pwd , :cmd );";
+        sql = "INSERT INTO commands (sess_id,date,pwd,cmd,rc) "
+              " VALUES ( :sess , :datetime , :pwd , :cmd, :rc );";
         db.prepare_sql(sql, &insert_cmd_stmt);
 
         sql = "INSERT OR REPLACE INTO last_commands (sess_id, pwd, cmd) "
@@ -133,7 +134,7 @@ public:
     ~History() {
     }
 
-    void insert_cmd(int64_t session, std::string& datetime, std::string& pwd, std::string& cmd) {
+    void insert_cmd(int64_t session, std::string& datetime, std::string& pwd, std::string& cmd, std::string& rc) {
         pwd = prepare_path_for_search(pwd);
 
         std::string last_cmd = get_last_cmd(session, pwd);
@@ -144,6 +145,7 @@ public:
             db.bind_value(insert_cmd_stmt, ":datetime", datetime);
             db.bind_value(insert_cmd_stmt, ":pwd", pwd);
             db.bind_value(insert_cmd_stmt, ":cmd", cmd);
+            db.bind_value(insert_cmd_stmt, ":rc", rc);
 
             while (sqlite3_step(insert_cmd_stmt) != SQLITE_DONE) {};
 
@@ -191,10 +193,10 @@ public:
                 std::cout << val << " ";
             std::cout << std::endl;
             
-            if (elements.size() < 4) 
+            if (elements.size() < 5) 
                 return -12;
             
-            insert_cmd(atoi(elements[0].c_str()), elements[1], elements[2], elements[3]);
+            insert_cmd(atoi(elements[0].c_str()), elements[1], elements[2], elements[3], elements[4]);
         }
         
         input.close();
