@@ -1,12 +1,12 @@
 with import <nixpkgs> {};
 
 stdenv.mkDerivation rec {
-    version = "0.0.1";
-    name = "hm-${version}";
+    version = "@hm_VERSION@";
+    name = "hm-@hm_VERSION@";
     path = dirOf "./build/";
     
     src = fetchurl {
-            url = "https://github.com/dkolmakov/hm/archive/v${version}.tar.gz";
+            url = "https://github.com/dkolmakov/hm/archive/v@hm_VERSION@.tar.gz";
             sha256 = "06jjqxf1s8pv9aygc5s43jqm8gib5x4w8wgh1lpdrmjbinc38sip";
           };
 

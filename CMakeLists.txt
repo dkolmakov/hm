@@ -12,6 +12,9 @@ add_subdirectory(thirdparty/apathy)
 add_subdirectory(src)
 add_subdirectory(misc)
 
+# Prepare nix expression
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/pkgs/nix/hm.nix.in ${CMAKE_CURRENT_SOURCE_DIR}/pkgs/nix/hm.nix)            
+
 install(FILES LICENSE DESTINATION ${CMAKE_INSTALL_DOCDIR})
 install(FILES README.md DESTINATION ${CMAKE_INSTALL_DOCDIR})
 
@@ -22,3 +25,4 @@ set(CPACK_DEBIAN_PACKAGE_SECTION "utils")
 set(CPACK_DEBIAN_PACKAGE_PRIORITY "optional")
 
 INCLUDE(CPack)
+
