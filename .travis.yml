@@ -30,9 +30,10 @@ deploy:
   provider: releases
   api_key:
     secure: WvLU0KaZu7hXc1Rd1QSgDjyj5XIWMcVSsip0ifXtCRBMzOUklc3JufmnF2Gi99k+BfHgK38cIA3Q0PRxPqsRRDk0aERlLsrUCAGUURY6maHiS/H+6MgBu2H4xtY8qPyPYond9hzs2ewBPFg8Rr/5GieOV7RarFMB4sx3ICGsAngdNjj/IhM4kRWnWAhsrK4EF4MBvxFM3Im9I1/Kiv5IFktPaJ9PAZ3pYGkeYcPnFnTWfYJn9yCrdFSg91N6p6QsXzb0o3bYKdn9wJvelj1hP5VON3pLnLgRJ9BEU5ItIbVUObh1J9h9Qc9m5ilzBjcxy5ImTgwRvS8rfke5dP4wSIXDgY2DpFyunCABw/AruTvCODZnPie0jpOxhgTGWN7QwyqQ7Qh5PWf5emuaIPtYc6FqsK1CJ4a7bfPSWRIzlsXaQ5rVZMchCI4xsWnoObnr3Tiz95K0HGutwSKztZht/VePW7fvS+4/f1HWvWXGk0dhr0zabZxacv2lvJGhuJeJ54mepUNtGBXRaIWfR0jXlZwgnfOzwacFHwVJIxFJtg520/tyyo9j+ITUjqF5eeBJslHnHZGK8AuKbNBCxdg9r4e+lPBO3nhdw8LA3XxPR7+h+8xzy43QH4vYZNc5Y1qGa0o4bEBRhpxqHQ6iYUqjppu17ExbwPbVNXhWHGminEo=
+  file_glob: true
   file: 
-    - build/hm-0.1.1-Linux.deb
-    - pkgs/nix/hm.nix
+    - build/hm-*-Linux-x86_64.deb
+    - build/hm-*.nix
   skip_cleanup: true
   draft: true
   on:
