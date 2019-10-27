@@ -4,3 +4,4 @@ builds/
 *.kdev4
 *.testdb
 src/version.hpp
+pkgs/nix/hm.nix
