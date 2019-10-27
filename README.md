@@ -33,7 +33,7 @@ cd hm
 ```Shell
 mkdir build
 cd build
-cmake -DCMAKE_INSTALL_PREFIX=/path/to/installation/directory ..
+cmake ..
 make install
 ```
 
