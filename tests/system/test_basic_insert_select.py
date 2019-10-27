@@ -41,6 +41,13 @@ def test_select_with_hypens(remove_db):
     basic_insert_select(pwd, cmd)
 
 
+def test_select_with_spaces(remove_db):
+    pwd = "/some/arbitrary/path with hyphens"
+    cmd = "some command number three"
+
+    basic_insert_select(pwd, cmd)
+
+
 def test_recursive_select(remove_db, create_db):
     pwd1 = "/some/arbitrary/path"
     cmd1 = "some --arbitrary command"
