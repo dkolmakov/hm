@@ -7,7 +7,7 @@ add_executable(hm-db
     history.hpp
     ${CMAKE_CURRENT_SOURCE_DIR}/version.hpp)
 
-target_link_libraries(hm-db sqlite3 apathy)
+target_link_libraries(hm-db sqlite3 apathy cxxopts)
 
 install(TARGETS hm-db DESTINATION ${CMAKE_INSTALL_BINDIR})
 
