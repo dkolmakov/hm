@@ -87,7 +87,7 @@ hm -d . -R
 
 **TODO:** It is possible to filter out commnads containing specified words:
 ```Shell
-hm --exclude "cd ls git"
+hm -d . --exclude "cd ls git"
 ```
 
 ### Terminal session command history recovery
