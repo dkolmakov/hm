@@ -37,14 +37,14 @@ class History {
     sqlite3_stmt *select_by_dir_stmt;
     sqlite3_stmt *select_by_dir_rec_stmt;
 
-    std::string prepare_path_for_search(std::string& input) {
+    std::string prepare_path_for_search(const std::string& input) {
         Path path(input);
         
         return "\"" + path.absolute().sanitize().trim().string() + "\"";
     }
     
     
-    std::vector<std::string> split(const std::string& s, std::string& separator)
+    std::vector<std::string> split(const std::string& s, const std::string& separator)
     {
         std::vector<std::string> elements;
         size_t pos = 0;
@@ -61,10 +61,10 @@ class History {
         return elements;
     }    
 
-    std::string get_last_cmd(int sess_id, std::string& pwd) {
+    std::string get_last_cmd(const std::string& sess_id, const std::string& pwd) {
         std::string cmd = "";
 
-        db.bind_value(select_last_cmd_stmt, ":sess", std::to_string(sess_id));
+        db.bind_value(select_last_cmd_stmt, ":sess", sess_id);
         db.bind_value(select_last_cmd_stmt, ":pwd", pwd);
 
         while (sqlite3_step(select_last_cmd_stmt) == SQLITE_ROW) {
@@ -76,9 +76,9 @@ class History {
         return cmd;
     }
 
-    void set_last_cmd(int sess_id, std::string& pwd, std::string& cmd) {
-        db.bind_value(insert_last_cmd_stmt, ":sess", std::to_string(sess_id));
-        db.bind_value(insert_last_cmd_stmt, ":pwd", pwd);
+    void set_last_cmd(const std::string& sess_id, const std::string& cwd, const std::string& cmd) {
+        db.bind_value(insert_last_cmd_stmt, ":sess", sess_id);
+        db.bind_value(insert_last_cmd_stmt, ":pwd", cwd);
         db.bind_value(insert_last_cmd_stmt, ":cmd", cmd);
 
         while (sqlite3_step(insert_last_cmd_stmt) != SQLITE_DONE) {};
@@ -88,7 +88,7 @@ class History {
     
 public:
 
-    History(std::string& path) : db(path) {
+    History(const std::string& path) : db(path) {
         std::string sql;
 
         sql = "CREATE TABLE IF NOT EXISTS commands (\
@@ -134,16 +134,15 @@ public:
     ~History() {
     }
 
-    void insert_cmd(int64_t session, std::string& datetime, std::string& pwd, std::string& cmd, std::string& rc) {
-        pwd = prepare_path_for_search(pwd);
-
-        std::string last_cmd = get_last_cmd(session, pwd);
+    void insert_cmd(const std::string& session, const std::string& datetime, const std::string& cwd, const std::string& cmd, const std::string& rc) {
+        std::string path = prepare_path_for_search(cwd);
+        std::string last_cmd = get_last_cmd(session, path);
         
         if (cmd != last_cmd) {
 
-            db.bind_value(insert_cmd_stmt, ":sess", std::to_string(session));
+            db.bind_value(insert_cmd_stmt, ":sess", session);
             db.bind_value(insert_cmd_stmt, ":datetime", datetime);
-            db.bind_value(insert_cmd_stmt, ":pwd", pwd);
+            db.bind_value(insert_cmd_stmt, ":pwd", path);
             db.bind_value(insert_cmd_stmt, ":cmd", cmd);
             db.bind_value(insert_cmd_stmt, ":rc", rc);
 
@@ -151,11 +150,11 @@ public:
 
             sqlite3_reset(insert_cmd_stmt);
             
-            set_last_cmd(session, pwd, cmd);
+            set_last_cmd(session, path, cmd);
         }
     }
 
-    int64_t insert_sess(std::string name) {
+    int64_t insert_sess(const std::string& name) {
         std::string sql = "INSERT INTO sessions (date,name) VALUES (";
         sql += "DATETIME(),";
         sql += "\"" + name + "\");";
@@ -164,8 +163,8 @@ public:
         return db.last_rowid();
     }
 
-    void select_by_dir(std::string& dir, bool recursively) {
-        dir = prepare_path_for_search(dir);
+    void select_by_dir(const std::string& path, bool recursively) {
+        auto dir = prepare_path_for_search(path);
 
         if (recursively)
             dir += "*";
@@ -179,7 +178,7 @@ public:
         sqlite3_reset(select_by_dir_rec_stmt);
     }
     
-    int parse_input_file(std::string& filename, std::string& separator) {
+    int parse_input_file(const std::string& filename, const std::string& separator) {
         std::ifstream input(filename.c_str(), std::ios::in);
         std::string line;
         
@@ -196,7 +195,7 @@ public:
             if (elements.size() < 5) 
                 return -12;
             
-            insert_cmd(atoi(elements[0].c_str()), elements[1], elements[2], elements[3], elements[4]);
+            insert_cmd(elements[0], elements[1], elements[2], elements[3], elements[4]);
         }
         
         input.close();

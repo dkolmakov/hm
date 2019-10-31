@@ -22,31 +22,13 @@
 
 #include "history.hpp"
 #include "version.hpp"
-
-enum Type {
-    ADD_SESSION = 1,
-    ADD_CMD,
-    SELECT_BY_PATH,
-};
+#include "cxxopts.hpp"
 
 enum ErrorCode {
     SUCCESS = 0,
     ARG_ERROR,
     FAILED_TO_ADD
 };
-
-static void show_usage(std::string name)
-{
-    std::cerr << "Usage: " << name << " --db PATH [-s SESSION_NAME] [-a SESSION_ID PATH CMD RET_CODE] [-d PATH [-R]]"
-              << "Options:\n"
-              << "\t-h,--help\ttShow this help message\n"
-              << "\t-db PATH\tPath to the history database\n"
-              << "\t-s SESSION_NAME\tCreates a new session and return its unique identifier.\n\t\t\t    SESSION_NAME - name of a session to be created.\n"
-              << "\t-a SESSION_ID PATH CMD RET_CODE\tAdds a new entry to the command history database.\n\t\t\t    SESSION_ID - session identifier,\n\t\t\t    PATH - working directory,\n\t\t\t    CMD - executed command,\n\t\t\t    RET_CODE - result code.\n"
-              << "\t-d PATH\tPerforms a selection by the working directory column.\n"
-              << "\t-R\tWorks torgether with -d option. Changes selection to be recursive and accept all commands executed in the specified directory and all directories down by hierarchy.\n"
-              << std::endl;
-}
 
 static void show_version(std::string name)
 {
@@ -59,98 +41,148 @@ static void show_version(std::string name)
 
 int main(int argc, char* argv[]) {
 
-    std::string db_path = "/not/defined.db";
-    int type = 0;
-    bool parse_file = false;
-
-    std::string sess_name = "not defined";
-
-    int sess_id = 0;
-    std::string datetime = "1972-01-01 00:00:00";
-    std::string pwd = "not defined";
-    std::string cmd = "not defined";
-    std::string ret_code = "0";
-
-    bool recursively = false;
-
-    std::string filename = "/not/defined/filename";
-    std::string separator = "notdefined";
-
-    int i = 1;
-    while (i < argc) {
-        std::string arg = argv[i++];
-
-        if ((arg == "-h") || (arg == "--help")) {
-            show_usage(argv[0]);
-            return SUCCESS;
-        } else {
-            if (arg == "--db" && (i + 1) <= argc) {
-                db_path = argv[i++];
-            }
-            else if (arg == "-a" && (i + 5) <= argc) {
-                type = ADD_CMD;
-                sess_id = atoi(argv[i++]);
-                datetime = argv[i++];
-                pwd = argv[i++];
-                cmd = argv[i++];
-                ret_code = argv[i++];
-            }
-            else if (arg == "-s" && (i + 1) <= argc) {
-                type = ADD_SESSION;
-                sess_name = argv[i++];
-            }
-            else if (arg == "-d" && (i + 1) <= argc) {
-                type = SELECT_BY_PATH;
-                pwd = argv[i++];
-            }
-            else if (arg == "-R") {
-                recursively = true;
-            }
-            else if (arg == "-f" && (i + 1) <= argc) {
-                parse_file = true;
-                filename = argv[i++];
-            }
-            else if (arg == "-r" && (i + 1) <= argc) {
-                separator = argv[i++];
-            }
-            else if (arg == "-v" || arg == "--version") {
-                show_version(argv[0]);
-                return 0;
-            }
-            else {
-                std::cout << "ERROR! Wrong usage of option: \"" << arg << "\"" << std::endl;
-                show_usage(argv[0]);
-                return ARG_ERROR;
-            }
-        }
-    }
-
     try {
-        History history(db_path);
-        
-        if (parse_file)
-            history.parse_input_file(filename, separator);
+        cxxopts::Options options(argv[0], " - history manager for Bash");
 
-        switch (type) {
-        case ADD_SESSION:
-            std::cout << history.insert_sess(sess_name);
-            break;
-        case ADD_CMD:
-            history.insert_cmd(sess_id, datetime, pwd, cmd, ret_code);
-            break;
-        case SELECT_BY_PATH:
-            history.select_by_dir(pwd, recursively);
-            break;
-        default:
-            std::cout << "ERROR! Unsupported type value!" << std::endl;
-            show_usage(argv[0]);
-            return ARG_ERROR;
+        options
+        .add_options()
+        ("help", "Shows this help message.")
+        ("db", "Path to the history database.", cxxopts::value<std::string>(), "DBFILE")
+        ("s,session", "Creates a new session with given name and return its unique identifier.", cxxopts::value<std::string>()
+         ->implicit_value("Undefined"), "SESSION_NAME")
+        ("a,add", "Adds a new entry to the command history database.", cxxopts::value<std::vector<std::string>>())
+        ("d,directory", "Returns commands executed in the specified directory.", cxxopts::value<std::string>()
+         ->implicit_value("."), "PATH")
+        ("R,recursive", "Works torgether with -d option. Changes selection to be recursive and accept all commands executed in the specified directory and all directories down by hierarchy.", cxxopts::value<bool>()->default_value("false")->implicit_value("true"))
+        ("f,file", "File to parse for new entries", cxxopts::value<std::string>(), "FILE")
+        ("r,separator", "Works torgether with -f option. Specifies separator between values in a file.", cxxopts::value<std::string>()
+         ->implicit_value("notdefined"))
+        ("v,version", "Shows version information")
+        ;
+
+        auto result = options.parse(argc, argv);
+
+        if (result.count("help"))
+        {
+            std::cout << options.help({""}) << std::endl;
+            exit(0);
+        }
+
+        if (result.count("version"))
+        {
+            show_version(argv[0]);
+            exit(0);
+        }
+
+        /*
+        std::string db_path = "/not/defined.db";
+        int type = 0;
+        bool parse_file = false;
+
+        std::string sess_name = "not defined";
+
+        int sess_id = 0;
+        std::string datetime = "1972-01-01 00:00:00";
+        std::string pwd = "not defined";
+        std::string cmd = "not defined";
+        std::string ret_code = "0";
+
+        bool recursively = false;
+
+        std::string filename = "/not/defined/filename";
+        std::string separator = "notdefined";
+
+        int i = 1;
+        while (i < argc) {
+            std::string arg = argv[i++];
+
+            if ((arg == "-h") || (arg == "--help")) {
+                show_usage(argv[0]);
+                return SUCCESS;
+            } else {
+                if (arg == "--db" && (i + 1) <= argc) {
+                    db_path = argv[i++];
+                }
+                else if (arg == "-a" && (i + 5) <= argc) {
+                    type = ADD_CMD;
+                    sess_id = atoi(argv[i++]);
+                    datetime = argv[i++];
+                    pwd = argv[i++];
+                    cmd = argv[i++];
+                    ret_code = argv[i++];
+                }
+                else if (arg == "-s" && (i + 1) <= argc) {
+                    type = ADD_SESSION;
+                    sess_name = argv[i++];
+                }
+                else if (arg == "-d" && (i + 1) <= argc) {
+                    type = SELECT_BY_PATH;
+                    pwd = argv[i++];
+                }
+                else if (arg == "-R") {
+                    recursively = true;
+                }
+                else if (arg == "-f" && (i + 1) <= argc) {
+                    parse_file = true;
+                    filename = argv[i++];
+                }
+                else if (arg == "-r" && (i + 1) <= argc) {
+                    separator = argv[i++];
+                }
+                else if (arg == "-v" || arg == "--version") {
+                    show_version(argv[0]);
+                    return 0;
+                }
+                else {
+                    std::cout << "ERROR! Wrong usage of option: \"" << arg << "\"" << std::endl;
+                    show_usage(argv[0]);
+                    return ARG_ERROR;
+                }
+            }
+        }
+        */
+        
+        if (!result.count("db")) {
+            std::cout << options.help({""}) << std::endl;
+            exit(ARG_ERROR);
+        }
+
+        History history(result["db"].as<std::string>());
+
+        if (result.count("f")) {
+            history.parse_input_file(
+                result["f"].as<std::string>(),
+                result["r"].as<std::string>());
+        }
+        else if (result.count("s")) {
+            std::cout << history.insert_sess(result["s"].as<std::string>());
+        }
+        else if (result.count("a")) {
+            auto& vals = result["a"].as<std::vector<std::string>>();
+
+            if (vals.size() < 5) {
+                std::cout << options.help({""}) << std::endl;
+                exit(ARG_ERROR);
+            }
+
+            history.insert_cmd(vals[0] /*sess_id*/, vals[1] /*datetime*/, vals[2] /*pwd*/, vals[3]/*cmd*/, vals[4]/*ret_code*/);
+        }
+        else if (result.count("d")) {
+            history.select_by_dir(
+                result["d"].as<std::string>(),
+                result["R"].as<bool>());
         }
 
     }
-    catch (int e)
+    catch (const cxxopts::OptionException& e)
     {
-        return FAILED_TO_ADD;
+        std::cout << "Error parsing options: " << e.what() << std::endl;
+        exit(ARG_ERROR);
+    }
+    catch (SqliteException& e)
+    {
+        std::cout << "Error working with database: " << e.what() << std::endl;
+        exit(FAILED_TO_ADD);
     }
 
     return 0;
