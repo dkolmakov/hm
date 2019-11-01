@@ -22,7 +22,8 @@
 
 #include "history.hpp"
 #include "version.hpp"
-#include "cxxopts.hpp"
+// #include "cxxopts.hpp"
+#include "clipp.hpp"
 
 enum ErrorCode {
     SUCCESS = 0,
@@ -39,9 +40,80 @@ static void show_version(std::string name)
               << "There is NO WARRANTY, to the extent permitted by law." << std::endl;
 }
 
+using namespace clipp;
+
 int main(int argc, char* argv[]) {
 
     try {
+        std::string db_path = "/not/defined.db";
+        
+        enum class mode {new_session, add, select, parse, help, version};
+        mode selected = mode::help;
+        
+        std::string sess_name = "not defined";
+
+        int sess_id = 0;
+        std::string datetime = "1972-01-01 00:00:00";
+        std::string cwd = "not defined";
+        std::string cmd = "not defined";
+        std::string ret_code = "0";
+
+        bool by_dir = false;
+        bool recursively = false;
+        std::string selection_path = ".";
+
+        std::string filename = "/not/defined/filename";
+        std::string separator = "notdefined";
+
+        auto session = (
+            command("session").set(selected, mode::new_session), // % "creates a new session with given name and return its unique identifier", 
+            opt_value("session name", sess_name) % "name to be assigned to the created session"
+        );
+        
+        auto add = (
+            command("add").set(selected, mode::add), // % "add a new entry to the command history database",
+            value("sess_id", sess_id),
+            value("datetime", datetime),
+            value("cwd", cwd),
+            value("cmd", cmd),
+            value("rc", ret_code)
+        );
+        
+        auto parse_file = (
+            command("parse").set(selected, mode::parse) % "fill database with entries from file where values are divided by separator",
+            value("file", filename),
+            value("separator", separator)
+        );
+        
+        auto select = (
+            command("select").set(selected, mode::select) % "perform selection from database",
+            option("-d").set(by_dir) & opt_value("path", selection_path) % "returns commands executed in the specified directory",
+            option("-R", "--recursively").set(recursively) % "works with -d option, changes selection to be recursive and accept all commands executed in the specified directory and all directories down by hierarchy"
+        );
+        
+        auto cli = (
+            value("dbfile", db_path) % "path to the history database",
+            (session | add | parse_file | select ),
+            option("-v", "--version").set(selected,mode::version) % "shows version information",
+            option("-h", "--help").set(selected,mode::help) % "shows this help message"
+        );
+
+        
+        if (parse(argc, argv, cli)) {
+            switch(selected) {
+                case mode::new_session: /* ... */ break;
+                case mode::add: /* ... */ break;
+                case mode::parse: /* ... */ break;
+                case mode::select: /* ... */ break;
+                case mode::help: std::cout << make_man_page(cli, argv[0]) << std::endl; break;
+                case mode::version: std::cout << make_man_page(cli, argv[0]) << std::endl; break;
+            }
+        }
+        else {
+            std::cout << usage_lines(cli, argv[0]) << std::endl;            
+        }
+        
+/*
         cxxopts::Options options(argv[0], " - history manager for Bash");
 
         options
@@ -73,7 +145,7 @@ int main(int argc, char* argv[]) {
             show_version(argv[0]);
             exit(0);
         }
-
+*/
         /*
         std::string db_path = "/not/defined.db";
         int type = 0;
@@ -141,44 +213,44 @@ int main(int argc, char* argv[]) {
             }
         }
         */
-        
-        if (!result.count("db")) {
-            std::cout << options.help({""}) << std::endl;
-            exit(ARG_ERROR);
-        }
-
-        History history(result["db"].as<std::string>());
-
-        if (result.count("f")) {
-            history.parse_input_file(
-                result["f"].as<std::string>(),
-                result["r"].as<std::string>());
-        }
-        else if (result.count("s")) {
-            std::cout << history.insert_sess(result["s"].as<std::string>());
-        }
-        else if (result.count("a")) {
-            auto& vals = result["a"].as<std::vector<std::string>>();
-
-            if (vals.size() < 5) {
-                std::cout << options.help({""}) << std::endl;
-                exit(ARG_ERROR);
-            }
-
-            history.insert_cmd(vals[0] /*sess_id*/, vals[1] /*datetime*/, vals[2] /*pwd*/, vals[3]/*cmd*/, vals[4]/*ret_code*/);
-        }
-        else if (result.count("d")) {
-            history.select_by_dir(
-                result["d"].as<std::string>(),
-                result["R"].as<bool>());
-        }
+       
+//         if (!result.count("db")) {
+//             std::cout << options.help({""}) << std::endl;
+//             exit(ARG_ERROR);
+//         }
+// 
+//         History history(result["db"].as<std::string>());
+// 
+//         if (result.count("f")) {
+//             history.parse_input_file(
+//                 result["f"].as<std::string>(),
+//                 result["r"].as<std::string>());
+//         }
+//         else if (result.count("s")) {
+//             std::cout << history.insert_sess(result["s"].as<std::string>());
+//         }
+//         else if (result.count("a")) {
+//             auto& vals = result["a"].as<std::vector<std::string>>();
+// 
+//             if (vals.size() < 5) {
+//                 std::cout << options.help({""}) << std::endl;
+//                 exit(ARG_ERROR);
+//             }
+// 
+//             history.insert_cmd(vals[0] /*sess_id*/, vals[1] /*datetime*/, vals[2] /*pwd*/, vals[3]/*cmd*/, vals[4]/*ret_code*/);
+//         }
+//         else if (result.count("d")) {
+//             history.select_by_dir(
+//                 result["d"].as<std::string>(),
+//                 result["R"].as<bool>());
+//         }
 
     }
-    catch (const cxxopts::OptionException& e)
-    {
-        std::cout << "Error parsing options: " << e.what() << std::endl;
-        exit(ARG_ERROR);
-    }
+//     catch (const cxxopts::OptionException& e)
+//     {
+//         std::cout << "Error parsing options: " << e.what() << std::endl;
+//         exit(ARG_ERROR);
+//     }
     catch (SqliteException& e)
     {
         std::cout << "Error working with database: " << e.what() << std::endl;

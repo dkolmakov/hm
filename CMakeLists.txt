@@ -9,7 +9,7 @@ set(CMAKE_CXX_FLAGS "-std=c++11 -fPIC -fpic -Wall -Wextra -pedantic -O3")
 
 add_subdirectory(thirdparty/sqlite3)
 add_subdirectory(thirdparty/apathy)
-add_subdirectory(thirdparty/cxxopts)
+add_subdirectory(thirdparty/clipp)
 add_subdirectory(src)
 add_subdirectory(misc)
 
