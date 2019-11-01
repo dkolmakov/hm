@@ -40,6 +40,9 @@ static void show_version(std::string name)
               << "There is NO WARRANTY, to the extent permitted by law." << std::endl;
 }
 
+
+const std::string usage_header = " - history manager for Bash";
+
 using namespace clipp;
 
 int main(int argc, char* argv[]) {
@@ -50,7 +53,7 @@ int main(int argc, char* argv[]) {
         enum class mode {new_session, add, select, parse, help, version};
         mode selected = mode::help;
         
-        std::string sess_name = "not defined";
+        std::string sess_name = "notdefined";
 
         int sess_id = 0;
         std::string datetime = "1972-01-01 00:00:00";
@@ -66,23 +69,23 @@ int main(int argc, char* argv[]) {
         std::string separator = "notdefined";
 
         auto session = (
-            command("session").set(selected, mode::new_session), // % "creates a new session with given name and return its unique identifier", 
-            opt_value("session name", sess_name) % "name to be assigned to the created session"
+            command("session").set(selected, mode::new_session) % "creates a new session with given name and return its unique identifier", 
+            opt_value("sname", sess_name) % "name to be assigned to the created session (default: notdefined)\n"
         );
         
         auto add = (
-            command("add").set(selected, mode::add), // % "add a new entry to the command history database",
-            value("sess_id", sess_id),
-            value("datetime", datetime),
-            value("cwd", cwd),
-            value("cmd", cmd),
-            value("rc", ret_code)
+            command("add").set(selected, mode::add) % "adds a new entry to the command history database",
+            value("sess_id", sess_id) % "session unique identifier",
+            value("datetime", datetime) % "time stamp",
+            value("cwd", cwd) % "current working directory",
+            value("cmd", cmd) % "executed command",
+            value("rc", ret_code) % "returned code\n"
         );
         
         auto parse_file = (
-            command("parse").set(selected, mode::parse) % "fill database with entries from file where values are divided by separator",
-            value("file", filename),
-            value("separator", separator)
+            command("parse").set(selected, mode::parse) % "fill database with entries from a file",
+            value("file", filename) % "file to parse",
+            value("separator", separator) % "separator which divides values in an entry\n" 
         );
         
         auto select = (
@@ -90,12 +93,22 @@ int main(int argc, char* argv[]) {
             option("-d").set(by_dir) & opt_value("path", selection_path) % "returns commands executed in the specified directory",
             option("-R", "--recursively").set(recursively) % "works with -d option, changes selection to be recursive and accept all commands executed in the specified directory and all directories down by hierarchy"
         );
+
+        auto version = (
+            option("-v", "--version").set(selected, mode::version).call(show_version) % "shows version information"
+        );
+        
+        auto help = (
+            option("-h", "--help").set(selected, mode::help) % "shows this help message"
+        );
+        
+        auto commands = (
+            value("dbfile", db_path) % "path to the history database\n",
+            (session | add | parse_file | select)
+        );
         
         auto cli = (
-            value("dbfile", db_path) % "path to the history database",
-            (session | add | parse_file | select ),
-            option("-v", "--version").set(selected,mode::version) % "shows version information",
-            option("-h", "--help").set(selected,mode::help) % "shows this help message"
+            (commands | version | help )
         );
 
         
@@ -105,12 +118,15 @@ int main(int argc, char* argv[]) {
                 case mode::add: /* ... */ break;
                 case mode::parse: /* ... */ break;
                 case mode::select: /* ... */ break;
-                case mode::help: std::cout << make_man_page(cli, argv[0]) << std::endl; break;
-                case mode::version: std::cout << make_man_page(cli, argv[0]) << std::endl; break;
+                case mode::help: 
+                    std::cout << argv[0] << usage_header << std::endl << std::endl;
+                    std::cout << make_man_page(cli, argv[0]) << std::endl; break;
+                case mode::version: break;
             }
         }
         else {
-            std::cout << usage_lines(cli, argv[0]) << std::endl;            
+            std::cout << usage_lines(cli, argv[0]) << std::endl; 
+            exit(ARG_ERROR);
         }
         
 /*
