@@ -55,7 +55,7 @@ int main(int argc, char* argv[]) {
 
         std::string sess_name = "notdefined";
 
-        std::string sess_id = 0;
+        std::string sess_id = "0";
         std::string datetime = "1972-01-01 00:00:00";
         std::string cwd = "not defined";
         std::string cmd = "not defined";

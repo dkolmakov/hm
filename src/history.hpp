@@ -76,14 +76,17 @@ class History {
         return cmd;
     }
 
-    void set_last_cmd(const std::string& sess_id, const std::string& cwd, const std::string& cmd) {
+    int set_last_cmd(const std::string& sess_id, const std::string& cwd, const std::string& cmd) {
+        int result = SQLITE_DONE;
         db.bind_value(insert_last_cmd_stmt, ":sess", sess_id);
         db.bind_value(insert_last_cmd_stmt, ":pwd", cwd);
         db.bind_value(insert_last_cmd_stmt, ":cmd", cmd);
 
-        while (sqlite3_step(insert_last_cmd_stmt) != SQLITE_DONE) {};
+        while ((result = sqlite3_step(insert_last_cmd_stmt)) == SQLITE_BUSY) {};
 
         sqlite3_reset(insert_last_cmd_stmt);
+        
+        return result;
     }
     
 public:
@@ -134,7 +137,8 @@ public:
     ~History() {
     }
 
-    void insert_cmd(const std::string& session, const std::string& datetime, const std::string& cwd, const std::string& cmd, const std::string& rc) {
+    int insert_cmd(const std::string& session, const std::string& datetime, const std::string& cwd, const std::string& cmd, const std::string& rc) {
+        int result = SQLITE_DONE;
         std::string path = prepare_path_for_search(cwd);
         std::string last_cmd = get_last_cmd(session, path);
         
@@ -145,13 +149,16 @@ public:
             db.bind_value(insert_cmd_stmt, ":pwd", path);
             db.bind_value(insert_cmd_stmt, ":cmd", cmd);
             db.bind_value(insert_cmd_stmt, ":rc", rc);
-
-            while (sqlite3_step(insert_cmd_stmt) != SQLITE_DONE) {};
+            
+            while ((result = sqlite3_step(insert_cmd_stmt)) == SQLITE_BUSY) {};
 
             sqlite3_reset(insert_cmd_stmt);
-            
-            set_last_cmd(session, path, cmd);
+
+            if (result == SQLITE_DONE)
+                set_last_cmd(session, path, cmd);
         }
+        
+        return result;
     }
 
     int64_t insert_sess(const std::string& name) {
@@ -163,7 +170,8 @@ public:
         return db.last_rowid();
     }
 
-    void select_by_dir(const std::string& path, bool recursively) {
+    int select_by_dir(const std::string& path, bool recursively) {
+        int result = SQLITE_DONE;
         auto dir = prepare_path_for_search(path);
 
         if (recursively)
@@ -171,11 +179,13 @@ public:
 
         db.bind_value(select_by_dir_rec_stmt, ":dir", dir);
 
-        while (sqlite3_step(select_by_dir_rec_stmt) == SQLITE_ROW) {
+        while ((result = sqlite3_step(select_by_dir_rec_stmt)) == SQLITE_ROW) {
             std::cout << sqlite3_column_text(select_by_dir_rec_stmt, 3) << std::endl;
         };
         
         sqlite3_reset(select_by_dir_rec_stmt);
+        
+        return result;
     }
     
     int parse_input_file(const std::string& filename, const std::string& separator) {
@@ -188,12 +198,8 @@ public:
         while (getline(input, line)) {
             std::vector<std::string> elements = split(line, separator);
             
-            for (auto val : elements)
-                std::cout << val << " ";
-            std::cout << std::endl;
-            
-            if (elements.size() < 5) 
-                return -12;
+            if (elements.size() != 5) 
+                continue; // Drop incorrect lines
             
             insert_cmd(elements[0], elements[1], elements[2], elements[3], elements[4]);
         }
