@@ -19,9 +19,8 @@ def create_session(db, name):
     db += ".testdb"
     db = os.path.join(os.path.dirname(os.path.abspath(__file__)), db) 
     
-    create_session_cmd = ['hm-db', 
-                  '--db', db,
-                  '-s', name ]
+    create_session_cmd = ['hm-db', db, 
+                          'session', name ]
 
     rc, stdout, stderr = run_cmd(create_session_cmd)
     
@@ -36,29 +35,27 @@ def insert(db_obj, pwd, cmd, ret_code):
     db, sess_id = db_obj
     
     db += ".testdb"
-    insert_cmd = ['hm-db', 
-                  '--db', db, 
-                  '-a', '{}'.format(sess_id), "\"1972-01-01 00:00:00\"", pwd, cmd, str(ret_code) ]
+    insert_cmd = ['hm-db', db, 
+                  'add', str(sess_id), "\"1972-01-01 00:00:00\"", pwd, cmd, str(ret_code) ]
 
     rc, stdout, stderr = run_cmd(insert_cmd)
 
-    assert rc == 0, "Command failed with code {}".format(rc) 
+    assert rc == 0, f"Command failed with code {rc}" 
 
 
 def select(db_obj, pwd, recursive = False):
     db, sess_id = db_obj
     
     db += ".testdb"
-    select_cmd = ['hm-db', 
-                  '--db', db, 
-                  '-d', pwd]
+    select_cmd = ['hm-db', db, 
+                  'select', '-d', pwd]
     
     if recursive:
         select_cmd.append('-R')
 
     rc, stdout, stderr = run_cmd(select_cmd)
 
-    assert rc == 0, "Command failed with code {}".format(rc) 
+    assert rc == 0, f"Command failed with code {rc}" 
     
     return stdout.strip().split('\n')
 
@@ -69,7 +66,7 @@ def basic_create_db():
     
     sess_id = create_session(db, name)
  
-    print("Session #{} created".format(sess_id))
+    print(f"Session #{sess_id} created")
 
     return db, sess_id
 
