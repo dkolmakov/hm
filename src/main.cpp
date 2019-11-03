@@ -22,8 +22,8 @@
 
 #include "history.hpp"
 #include "version.hpp"
-// #include "cxxopts.hpp"
 #include "clipp.hpp"
+#include "configurator.hpp"
 
 enum ErrorCode {
     SUCCESS = 0,
@@ -50,7 +50,7 @@ int main(int argc, char* argv[]) {
     try {
         std::string db_path = "/not/defined.db";
 
-        enum class mode {new_session, add, select, parse, help, version};
+        enum class mode {new_session, add, select, parse, help, version, configure};
         mode selected = mode::help;
 
         std::string sess_name = "notdefined";
@@ -68,6 +68,8 @@ int main(int argc, char* argv[]) {
         std::string filename = "/not/defined/filename";
         std::string separator = "notdefined";
 
+        std::string conffile = "";
+        
         auto session = (
                            command("session").set(selected, mode::new_session) % "creates a new session with given name and return its unique identifier",
                            opt_value("sname", sess_name) % "name to be assigned to the created session (default: notdefined)\n"
@@ -83,13 +85,13 @@ int main(int argc, char* argv[]) {
                    );
 
         auto parse_file = (
-                              command("parse").set(selected, mode::parse) % "fill database with entries from a file",
+                              command("parse").set(selected, mode::parse) % "fills database with entries from a file",
                               value("file", filename) % "file to parse",
                               value("separator", separator) % "separator which divides values in an entry\n"
                           );
 
         auto select = (
-                          command("select").set(selected, mode::select) % "perform selection from database",
+                          command("select").set(selected, mode::select) % "performs selection from database",
                           option("-d").set(by_dir) & opt_value("path", selection_path) % "returns commands executed in the specified directory",
                           option("-R", "--recursively").set(recursively) % "works with -d option, changes selection to be recursive and accept all commands executed in the specified directory and all directories down by hierarchy"
                       );
@@ -99,8 +101,13 @@ int main(int argc, char* argv[]) {
                        );
 
         auto help = (
-                        option("-h", "--help").set(selected, mode::help) % "shows this help message"
+                        option("-h", "--help").set(selected, mode::help) % "shows this help message\n"
                     );
+
+        auto configure = (
+                             command("configure").set(selected, mode::configure) % "starts hsitory manager configuration",
+                             opt_value("file", conffile) % "file to put the configuration"
+                         );
 
         auto commands = (
                             value("dbfile", db_path) % "path to the history database\n",
@@ -108,7 +115,7 @@ int main(int argc, char* argv[]) {
                         );
 
         auto cli = (
-                       (commands | version | help )
+                       (commands | version | help | configure )
                    );
 
 
@@ -124,6 +131,19 @@ int main(int argc, char* argv[]) {
                 exit(0);
             }
 
+            if (selected == mode::configure) {
+                std::ofstream file;
+                std::streambuf* output = std::cerr.rdbuf();
+
+                if (conffile.length()) {
+                    file.open(conffile, std::ios_base::app);
+                    output = file.rdbuf();
+                }
+                
+                Configurator conf(output);
+                conf.configure();
+                exit(0);
+            }
 
             History history(db_path);
 
