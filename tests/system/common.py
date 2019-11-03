@@ -40,7 +40,7 @@ def insert(db_obj, pwd, cmd, ret_code):
 
     rc, stdout, stderr = run_cmd(insert_cmd)
 
-    assert rc == 0, f"Command failed with code {rc}" 
+    assert rc == 0, "Command failed with code {}".format(rc) 
 
 
 def select(db_obj, pwd, recursive = False):
@@ -55,7 +55,7 @@ def select(db_obj, pwd, recursive = False):
 
     rc, stdout, stderr = run_cmd(select_cmd)
 
-    assert rc == 0, f"Command failed with code {rc}" 
+    assert rc == 0, "Command failed with code {}".format(rc)
     
     return stdout.strip().split('\n')
 
@@ -66,7 +66,7 @@ def basic_create_db():
     
     sess_id = create_session(db, name)
  
-    print(f"Session #{sess_id} created")
+    print("Session #{} created".format(sess_id))
 
     return db, sess_id
 
