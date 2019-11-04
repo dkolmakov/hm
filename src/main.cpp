@@ -69,6 +69,7 @@ int main(int argc, char* argv[]) {
         std::string separator = "notdefined";
 
         std::string conffile = "";
+        std::string hmhome = "$HOME/.hm";
         
         auto session = (
                            command("session").set(selected, mode::new_session) % "creates a new session with given name and return its unique identifier",
@@ -106,7 +107,8 @@ int main(int argc, char* argv[]) {
 
         auto configure = (
                              command("configure").set(selected, mode::configure) % "starts hsitory manager configuration",
-                             opt_value("file", conffile) % "file to put the configuration"
+                             opt_value("file", conffile) % "file to put the configuration",
+                             option("--home") & value("path", hmhome) % "sets the path to store history database (default: $HOME/.hm/)"
                          );
 
         auto commands = (
@@ -141,7 +143,7 @@ int main(int argc, char* argv[]) {
                 }
                 
                 Configurator conf(output);
-                conf.configure();
+                conf.configure(hmhome);
                 exit(0);
             }
 

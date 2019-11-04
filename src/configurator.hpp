@@ -45,26 +45,19 @@ public:
     Configurator(std::streambuf* out_buf) : output(out_buf) {
     }
 
-    int configure() {
+    int configure(const std::string hmhome) {
         std::cout << "Starting history manager configuration" << std::endl;
 
-        configure_home_path();
+        configure_home_path(hmhome);
         print_configuaration();
 
+        std::cout << "Done." << std::endl;
         return 0;
     }
 
-    void configure_home_path() {
-        const std::string default_path = "$HOME/.hm";
-        std::string user_path;
-
-        std::cout << "Directory to store history database (default: "<< default_path << "): ";
-        std::getline(std::cin, user_path);
-
+    void configure_home_path(const std::string hmhome) {
         configuration += "# History manager home directory\n";
-        configuration += "hm_home=";
-        configuration += (user_path.length()) ? user_path : default_path;
-        configuration += "\n\n";
+        configuration += "hm_home=" + hmhome + "\n\n";
     }
 
     void print_configuaration() {
