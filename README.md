@@ -37,12 +37,10 @@ cmake ..
 make install
 ```
 
-Be sure that the installation directory is in your `PATH`.
-
 3. Add `hm` wrapper scripts to the `.bashrc`:
 
 ```Shell
-./install.sh
+hm-db configure ~/.bashrc
 ```
 
 4. To enable `hm` in the current session source the `.bashrc`:
