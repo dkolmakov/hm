@@ -8,6 +8,13 @@ matrix:
     script:
     - nix-shell -A test scripts/shell.nix --run 'mkdir -p build && cd build && cmake -DCMAKE_INSTALL_PREFIX=/usr/local
       .. && make package && sudo make install && cd .. && py.test'
+  - language: nix
+    os: linux
+    dist: xenial
+    compiler: gcc
+    sudo: required
+    install:
+    - tests/test_release_nix.sh 0.3.0
   - language: cpp
     os: linux
     dist: trusty
@@ -23,6 +30,20 @@ matrix:
     install:
     - mkdir -p build && cd build && cmake .. && make package && sudo make install
       && cd .. && hm-db configure ~/.bashrc && . ~/.bashrc
+  - language: cpp
+    os: linux
+    dist: trusty
+    compiler: gcc
+    sudo: required
+    addons:
+      apt:
+        packages:
+        - cmake
+        - g++
+        - python3
+        - python3-pytest
+    install:
+    - tests/test_release_deb.sh 0.3.0
 script:
 - py.test-3
 - source tests/test_interface.sh
