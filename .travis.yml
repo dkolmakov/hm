@@ -1,6 +1,13 @@
+
+script:
+- py.test-3
+- source tests/release/test_interface.sh
+
 matrix:
   include:
-  - language: nix
+  
+  - name: "Test with nix-shell"
+    language: nix
     os: linux
     dist: xenial
     compiler: gcc
@@ -8,7 +15,9 @@ matrix:
     script:
     - nix-shell -A test scripts/shell.nix --run 'mkdir -p build && cd build && cmake -DCMAKE_INSTALL_PREFIX=/usr/local
       .. && make package && sudo make install && cd .. && py.test'
-  - language: cpp
+    
+  - name: "Test on ubuntu"
+    language: cpp
     os: linux
     dist: trusty
     compiler: gcc
@@ -23,9 +32,44 @@ matrix:
     install:
     - mkdir -p build && cd build && cmake .. && make package && sudo make install
       && cd .. && hm-db configure ~/.bashrc && . ~/.bashrc
-script:
-- py.test-3
-- source tests/test_interface.sh
+      
+  - name: "Test Nix release"
+    language: nix
+    os: linux
+    dist: xenial
+    compiler: gcc
+    addons:
+      apt:
+        packages:
+        - python3
+        - python3-pytest
+    install:
+    - tests/release/install_release_nix.sh 0.3.0
+    - hm-db configure ~/.bashrc
+    - . ~/.bashrc
+    script:
+    - . tests/release/test_interface.sh
+
+  - name: "Test Deb release"
+    language: cpp
+    os: linux
+    dist: trusty
+    compiler: gcc
+    sudo: required
+    addons:
+      apt:
+        packages:
+        - cmake
+        - g++
+        - python3
+        - python3-pytest
+    install:
+    - tests/release/install_release_deb.sh 0.3.0
+    - hm-db configure ~/.bashrc
+    - . ~/.bashrc
+    script:
+    - . tests/release/test_interface.sh
+
 deploy:
   provider: releases
   api_key:
