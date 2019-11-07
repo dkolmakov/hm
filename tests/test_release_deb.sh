@@ -9,4 +9,4 @@ then
 fi
 
 wget https://github.com/dkolmakov/hm/releases/download/v${version}/hm-${version}-Linux-x86_64.deb
-sudo dpkg -i hm-${version}-Linux-x86_64.deb
+[[ -f hm-${version}-Linux-x86_64.deb ]] && sudo dpkg -i hm-${version}-Linux-x86_64.deb

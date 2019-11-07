@@ -12,9 +12,15 @@ matrix:
     os: linux
     dist: xenial
     compiler: gcc
-    sudo: required
+    addons:
+      apt:
+        packages:
+        - python3
+        - python3-pytest
     install:
     - tests/test_release_nix.sh 0.3.0
+    - hm-db configure ~/.bashrc
+    - . ~/.bashrc
   - language: cpp
     os: linux
     dist: trusty
@@ -44,6 +50,8 @@ matrix:
         - python3-pytest
     install:
     - tests/test_release_deb.sh 0.3.0
+    - hm-db configure ~/.bashrc
+    - . ~/.bashrc
 script:
 - py.test-3
 - source tests/test_interface.sh

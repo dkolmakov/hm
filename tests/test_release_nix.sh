@@ -9,4 +9,4 @@ then
 fi
 
 wget https://github.com/dkolmakov/hm/releases/download/v${version}/hm-${version}.nix
-nix-env -i -f hm-${version}.nix
+[[ -f hm-${version}.nix ]] && nix-env -i -f hm-${version}.nix
