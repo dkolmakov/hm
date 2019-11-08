@@ -20,12 +20,12 @@ Currently implemented functionality allows to search for commands by the directo
 ## Installation
 
 Install release:
-- [Ubuntu/Debian](docs/installation.md#ubuntu)
-- [Nix/NixOS](docs/installation.md#nix)
-- [From sources](docs/installation.md#sources)
+- [Ubuntu/Debian](docs/installation.md#ubuntudebian)
+- [Nix/NixOS](docs/installation.md#nixnixos)
+- [From sources](docs/installation.md#from-sources)
 
 Install latest version in development: 
-- [From dev sources](docs/installation.md#dev-sources)
+- [From dev sources](docs/installation.md#from-dev-sources)
 
 ## Configuration
 

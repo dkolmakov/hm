@@ -1,12 +1,12 @@
 # History manager installation
 
 Install release:
-- [Ubuntu/Debian](#ubuntu)
-- [Nix/NixOS](#nix)
-- [From sources](#sources)
+- [Ubuntu/Debian](#ubuntudebian)
+- [Nix/NixOS](#nixnixos)
+- [From sources](#from-sources)
 
 Install latest version in development: 
-- [From dev sources](#dev-sources)
+- [From dev sources](#from-dev-sources)
 
 
 ## Ubuntu/Debian
