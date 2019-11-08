@@ -19,40 +19,25 @@ Currently implemented functionality allows to search for commands by the directo
 
 ## Installation
 
-Installation consists of two steps: building the `hm-db` binary and `.bashrc` modification.
+Install release:
+- [Ubuntu/Debian](docs/installation.md#ubuntu)
+- [Nix/NixOS](docs/installation.md#nix)
+- [From sources](docs/installation.md#sources)
 
-1. Use `git` to clone the repository:
+Install latest version in development: 
+- [From dev sources](docs/installation.md#dev-sources)
 
-```Shell
-git clone https://github.com/dkolmakov/hm.git
-cd hm
-```
+## Configuration
 
-2. Build the project with `cmake`:
-
-```Shell
-mkdir build
-cd build
-cmake ..
-make install
-```
-
-3. Add `hm` wrapper scripts to the `.bashrc`:
+Configuration of the history manager is performed by the following command:
 
 ```Shell
 hm-db configure ~/.bashrc
 ```
-
-4. To enable `hm` in the current session source the `.bashrc`:
+To enable `hm` in the current session source the `.bashrc`:
 
 ```Shell
 . ~/.bashrc
-```
-
-5. Run system tests to verify the installation (tests are built with [pytest](https://docs.pytest.org)):
-
-```Shell
-py.test
 ```
 
 ## Usage
