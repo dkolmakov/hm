@@ -30,7 +30,7 @@ Install latest version in development:
 
 ## Configuration
 
-Configuration of the history manager is performed by the following command:
+Configuration of the history manager is performed by:
 
 ```Shell
 hm-db configure ~/.bashrc
@@ -41,8 +41,9 @@ To enable `hm` in the current session source the `.bashrc`:
 . ~/.bashrc
 ```
 
-## Usage
+More details are [here](docs/configuration.md).
 
+## Usage
 
 ### Per-directory history recovery
 
@@ -57,19 +58,6 @@ or for the current working directory:
 hm -d
 ```
 
-All commands executed in the specified directory are combined together and placed at the beginning of the bash built-in history, so it is possible to walk through them using <kbd>&#8593;</kbd> button.
-
-To include commands executed in the nested folders add `-R` flag: 
-
-```Shell
-hm -d . -R
-```
-
-**TODO:** It is possible to filter out commnads containing specified words:
-```Shell
-hm -d . --exclude "cd ls git"
-```
-
 ### Terminal session command history recovery
 
 **TODO:** To set a terminal session name and to recover the command history related to this name run the following:
@@ -82,12 +70,13 @@ hm -s "Session Name"
 hm -s
 ```
 
-**TODO:** It is possible to filter out commnads containing specified words the same way as in per-directory history recovery.
+More usage examples are [here](docs/usage.md).
+
+## Acknowledgements
+
+History manager utilizes the following thirdparty projects:
+- [SQLite](https://www.sqlite.org) - SQL database
+- [apathy](https://github.com/dlecocq/apathy) - header-only path manipulation library
+- [clipp](https://github.com/muellan/clipp) - header-only arguments parsing library
 
 
-### Using both criteria
-
-**TODO:** All criteria described above can be combined together:
-```Shell
-hm -s "Session Name" -d . --exclude "cd ls git"
-```
