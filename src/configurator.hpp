@@ -46,23 +46,24 @@ public:
     }
 
     int configure(const std::string hmhome) {
-        std::cout << "Starting history manager configuration" << std::endl;
-
         configure_home_path(hmhome);
         print_configuaration();
-
-        std::cout << "Done." << std::endl;
         return 0;
     }
 
     void configure_home_path(const std::string hmhome) {
-        configuration += "# History manager home directory\n";
-        configuration += "hm_home=" + hmhome + "\n\n";
+        configuration += "\t# History manager home directory\n";
+        configuration += "\thm_home=" + hmhome + "\n\n";
     }
 
     void print_configuaration() {
+        output << "\n# History manager settings\n";
+        output << "if command -v hm-db > /dev/null\nthen\n";
+        
         output << configuration;
         output << const_configuration;
+
+        output << "fi\n" << std::endl;
     }
 
     ~Configurator() {
