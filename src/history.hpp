@@ -35,7 +35,8 @@ class History {
     sqlite3_stmt *insert_last_cmd_stmt;
     sqlite3_stmt *select_last_cmd_stmt;
     sqlite3_stmt *select_by_dir_stmt;
-    sqlite3_stmt *select_by_dir_rec_stmt;
+    sqlite3_stmt *select_by_dir_and_sess_id_stmt;
+    sqlite3_stmt *select_by_sess_id_stmt;
 
     std::string prepare_path_for_search(const std::string& input) {
         Path path(input);
@@ -113,7 +114,6 @@ public:
               "CREATE TRIGGER IF NOT EXISTS history_update AFTER INSERT ON commands BEGIN \
                     INSERT INTO history_fts(sess_id,date,pwd,cmd) VALUES (new.sess_id,new.date,new.pwd,new.cmd); \
                END;";
-
         db.exec_sql(sql);
 
         sql = "INSERT INTO commands (sess_id,date,pwd,cmd,rc) "
@@ -127,11 +127,14 @@ public:
         sql = "SELECT * FROM last_commands WHERE sess_id = :sess AND pwd = :pwd;";
         db.prepare_sql(sql, &select_last_cmd_stmt);
 
-        sql = "SELECT * FROM (SELECT * FROM history_fts WHERE pwd MATCH :dir) WHERE pwd = :sdir;";
+        sql = "SELECT * FROM history_fts WHERE pwd MATCH :dir;";
         db.prepare_sql(sql, &select_by_dir_stmt);
 
-        sql = "SELECT * FROM history_fts WHERE pwd MATCH :dir;";
-        db.prepare_sql(sql, &select_by_dir_rec_stmt);
+        sql = "SELECT * FROM (SELECT * FROM history_fts WHERE pwd MATCH :dir) WHERE sess_id = :sess_id;";
+        db.prepare_sql(sql, &select_by_dir_and_sess_id_stmt);
+
+        sql = "SELECT * FROM commands WHERE sess_id = :sess_id;";
+        db.prepare_sql(sql, &select_by_sess_id_stmt);
     }
 
     ~History() {
@@ -177,13 +180,13 @@ public:
         if (recursively)
             dir += "*";
 
-        db.bind_value(select_by_dir_rec_stmt, ":dir", dir);
+        db.bind_value(select_by_dir_stmt, ":dir", dir);
 
-        while ((result = sqlite3_step(select_by_dir_rec_stmt)) == SQLITE_ROW) {
-            std::cout << sqlite3_column_text(select_by_dir_rec_stmt, 3) << std::endl;
+        while ((result = sqlite3_step(select_by_dir_stmt)) == SQLITE_ROW) {
+            std::cout << sqlite3_column_text(select_by_dir_stmt, 3) << std::endl;
         };
         
-        sqlite3_reset(select_by_dir_rec_stmt);
+        sqlite3_reset(select_by_dir_stmt);
         
         return result;
     }

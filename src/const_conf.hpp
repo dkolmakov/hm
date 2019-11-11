@@ -44,7 +44,7 @@ const std::string const_configuration = "\
 \t\t# Parse commands saved to the text file\n\
 \t\thm-db $hm_history_db parse $hm_history_tmp $separator\n\
 \t\t# Update history\n\
-\t\thm-db $hm_history_db select $@ > $HISTFILE && echo hm \"$*\" >> $HISTFILE && history -r\n\
+\t\thm-db $hm_history_db select $hm_session_id $@ > $HISTFILE && echo hm \"$*\" >> $HISTFILE && history -r\n\
 \t\tif [ $? -eq 0 ]; then echo \"History successfully updated!\"; fi\n\
 \t\trm -rf $hm_history_tmp $HISTFILE\n\
 \t\tHISTFILE=$SAVE_HISTFILE\n\
