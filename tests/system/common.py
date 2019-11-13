@@ -30,13 +30,12 @@ def create_session(db, name = None):
 
     sess_id = int(stdout)
 
-    return sess_id
+    return db, sess_id
 
 
 def insert(db_obj, pwd, cmd, ret_code):
     db, sess_id = db_obj
     
-    db += ".testdb"
     insert_cmd = ['hm-db', db, 
                   'add', str(sess_id), "\"1972-01-01 00:00:00\"", pwd, cmd, str(ret_code) ]
 
@@ -48,7 +47,6 @@ def insert(db_obj, pwd, cmd, ret_code):
 def select_by_path(db_obj, pwd, recursive = False):
     db, sess_id = db_obj
     
-    db += ".testdb"
     select_cmd = ['hm-db', db, 
                   'select', str(sess_id),
                   '-d']
@@ -70,7 +68,6 @@ def select_by_path(db_obj, pwd, recursive = False):
 def select_by_session(db_obj, sname = None):
     db, sess_id = db_obj
     
-    db += ".testdb"
     select_cmd = ['hm-db', db, 
                   'select', str(sess_id),
                   '-s']
@@ -86,9 +83,7 @@ def select_by_session(db_obj, sname = None):
 
 
 def basic_create_db(name = None):
-    db = "test"
-    
-    sess_id = create_session(db, name)
+    db, sess_id = create_session("test", name)
  
     print("Session #{} created".format(sess_id))
 
