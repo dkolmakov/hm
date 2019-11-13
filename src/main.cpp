@@ -63,10 +63,8 @@ int main(int argc, char* argv[]) {
 
         bool by_dir = false;
         bool recursively = false;
-        std::string selection_path = ".";
-
         bool by_sess = false;
-        std::string session_name = "notdefined";
+        std::string selection_path = ".";
         
         std::string filename = "/not/defined/filename";
         std::string separator = "notdefined";
@@ -99,7 +97,7 @@ int main(int argc, char* argv[]) {
                           value("sess_id", sess_id) % "session unique identifier",
                           option("-d").set(by_dir) & opt_value("path", selection_path) % "returns commands executed in the specified directory",
                           option("-R", "--recursively").set(recursively) % "works with -d option, changes selection to be recursive and accept all commands executed in the specified directory and all directories down by hierarchy",
-                          option("-s").set(by_sess) & opt_value("sname", session_name) % "returns commands executed within the specified session"
+                          option("-s").set(by_sess) & opt_value("sname", sess_name) % "returns commands executed within the specified session"
                       );
 
         auto version = (
@@ -165,7 +163,9 @@ int main(int argc, char* argv[]) {
                 history.parse_input_file(filename, separator);
                 break;
             case mode::select:
-                history.select_by_dir(selection_path, recursively);
+                history.select(by_dir, selection_path, recursively, by_sess, sess_name);
+                if (by_sess) 
+                    history.set_sess_name(sess_id, sess_name);
                 break;
             default:
                 std::cerr << "Error: unsupported mode" << std::endl;

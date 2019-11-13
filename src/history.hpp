@@ -89,7 +89,60 @@ class History {
         
         return result;
     }
-    
+
+    void get_sess_id_by_name(std::vector<int>& ids, const std::string& sess_name) {
+        sqlite3_stmt *select_stmt;
+        std::string sql = "SELECT * FROM sessions WHERE name = :name;";
+        
+        db.prepare_sql(sql, &select_stmt);
+        db.bind_value(select_stmt, ":name", sess_name);
+
+        while (sqlite3_step(select_stmt) == SQLITE_ROW) {
+            ids.push_back(sqlite3_column_int(select_stmt, 0));
+        };
+        
+        sqlite3_reset(select_stmt);
+    }
+
+    sqlite3_stmt *prepare_select(const std::string& path, bool recursively, const std::string& sess) {
+        sqlite3_stmt *select_stmt;
+        std::string sql = "history_fts";
+        
+        std::string phrase = "";
+        if (sess.length()) {
+            std::vector<int> ids;
+            get_sess_id_by_name(ids, sess);
+
+            for (size_t i = 0; i < ids.size(); i++) {
+                phrase += std::to_string(ids[i]);
+                
+                if (i + 1 < ids.size())
+                    phrase += " OR ";
+            }
+        }
+        
+        if (path.length()) {
+            sql = "SELECT * FROM history_fts WHERE pwd MATCH :dir;";
+        }
+
+        if (phrase.length()) {
+            sql = "SELECT * FROM (" + sql + ") WHERE sess_id MATCH " + phrase;
+        }
+        
+        db.prepare_sql(sql, &select_stmt);
+        
+        if (path.length()) {
+            auto dir = prepare_path_for_search(path);
+
+            if (recursively)
+                dir += "*";
+
+            db.bind_value(select_stmt, ":dir", dir);
+        }
+        
+        return select_stmt;
+    }
+        
 public:
 
     History(const std::string& path) : db(path) {
@@ -168,11 +221,32 @@ public:
         std::string sql = "INSERT INTO sessions (date,name) VALUES (";
         sql += "DATETIME(),";
         sql += "\"" + name + "\");";
-        db.exec_sql(sql);
+        int rc = db.exec_sql(sql);
+        
+        if (rc != SQLITE_OK) {
+            std::cout << rc << std::endl;
+            throw -11;
+        }
 
         return db.last_rowid();
     }
 
+    int set_sess_name(const std::string& id, const std::string& sess_name) {
+        int result = SQLITE_DONE;
+        sqlite3_stmt *set_stmt;
+        std::string sql = "UPDATE sessions SET name = :name WHERE id = :id;";
+        
+        db.prepare_sql(sql, &set_stmt);
+        db.bind_value(set_stmt, ":name", sess_name);
+        db.bind_value(set_stmt, ":id", id);
+
+        while ((result = sqlite3_step(set_stmt)) == SQLITE_BUSY) { };
+        
+        sqlite3_reset(set_stmt);
+        
+        return result;
+    }
+    
     int select_by_dir(const std::string& path, bool recursively) {
         int result = SQLITE_DONE;
         auto dir = prepare_path_for_search(path);
@@ -190,6 +264,24 @@ public:
         
         return result;
     }
+    
+    int select(bool by_dir, const std::string& path, bool recursively, bool by_sess, const std::string& sess) {
+        int result = SQLITE_DONE;
+        
+        sqlite3_stmt *select_stmt = prepare_select(
+                            (by_dir) ? path : "", recursively, 
+                            (by_sess) ? sess : "");
+        
+        while ((result = sqlite3_step(select_stmt)) == SQLITE_ROW) {
+            std::cout << sqlite3_column_text(select_stmt, 3) << std::endl;
+        };
+        
+        sqlite3_reset(select_stmt);
+        
+        return result;
+        
+    }
+
     
     int parse_input_file(const std::string& filename, const std::string& separator) {
         std::ifstream input(filename.c_str(), std::ios::in);
