@@ -81,6 +81,27 @@ def select_by_session(db_obj, sname = None):
     
     return stdout.strip().split('\n')
 
+def select_by_session_and_path(db_obj, path=None, recursive=False, sname=None):
+    db, sess_id = db_obj
+    
+    select_cmd = ['hm-db', db, 
+                  'select', str(sess_id)]
+
+    select_cmd.append('-d')
+    if path:
+        select_cmd.append(path)
+    if recursive:
+        select_cmd.append('-R')
+
+    select_cmd.append('-s')
+    if sname:
+        select_cmd.append(sname)
+
+    rc, stdout, stderr = run_cmd(select_cmd)
+
+    assert rc == 0, "Command failed with code {}".format(rc)
+    
+    return stdout.strip().split('\n')
 
 def basic_create_db(name = None):
     db, sess_id = create_session("test", name)

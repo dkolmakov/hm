@@ -35,7 +35,7 @@ def prepare_several_sessions(sess_name):
     insert(second_sess, pwd2, cmd2, 0)
     insert(third_sess, pwd3, cmd3, 0)
     
-    return first_sess, cmd1, second_sess, cmd2
+    return first_sess, cmd1, second_sess, cmd2, pwd1
 
 def test_basic_insert_select(remove_db):
     sess_name = "Some name"
@@ -63,7 +63,7 @@ def test_insert_select_hypens(remove_db):
 
 def test_insert_select_for_several_sessions(remove_db):
     sess_name = "test-name"
-    first_sess, cmd1, _, cmd2 = prepare_several_sessions(sess_name)
+    first_sess, cmd1, _, cmd2, _ = prepare_several_sessions(sess_name)
     
     stdout = select_by_session(first_sess, sess_name)
 
@@ -71,12 +71,30 @@ def test_insert_select_for_several_sessions(remove_db):
     assert cmd1 == stdout[0], "Wrong command in the database!"
     assert cmd2 == stdout[1], "Wrong command in the database!"
 
-
 def test_by_session_default_arg(remove_db):
     sess_name = "test-name"
-    first_sess, cmd1, _, cmd2 = prepare_several_sessions(sess_name)
+    first_sess, cmd1, _, cmd2, _ = prepare_several_sessions(sess_name)
 
     stdout = select_by_session(first_sess)
+
+    assert len(stdout) == 2, "Wrong number of commands!"
+    assert cmd1 == stdout[0], "Wrong command in the database!"
+    assert cmd2 == stdout[1], "Wrong command in the database!"
+
+def test_by_session_and_by_path(remove_db):
+    sess_name = "test-name"
+    first_sess, cmd1, _, cmd2, path = prepare_several_sessions(sess_name)
+
+    stdout = select_by_session_and_path(first_sess, path)
+
+    assert len(stdout) == 1, "Wrong number of commands!"
+    assert cmd1 == stdout[0], "Wrong command in the database!"
+
+def test_by_session_and_by_path_rec(remove_db):
+    sess_name = "test-name"
+    first_sess, cmd1, _, cmd2, path = prepare_several_sessions(sess_name)
+
+    stdout = select_by_session_and_path(first_sess, path, recursive=True)
 
     assert len(stdout) == 2, "Wrong number of commands!"
     assert cmd1 == stdout[0], "Wrong command in the database!"

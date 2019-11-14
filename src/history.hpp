@@ -101,43 +101,49 @@ class History {
         sqlite3_reset(select_stmt);
     }
 
+    std::string logic_phrase_from_ids(std::vector<int>& ids) {
+        std::string phrase = "";
+        
+        for (size_t i = 0; i < ids.size(); i++) {
+            phrase += std::to_string(ids[i]);
+            
+            if (i + 1 < ids.size())
+                phrase += " OR ";
+        }
+    
+        return phrase;
+    }
+    
     sqlite3_stmt *prepare_select(const std::string& path, bool recursively, const std::string& sess) {
         sqlite3_stmt *select_stmt;
-        std::string sql = "history_fts";
-        
+        std::string sql = "SELECT * FROM history_fts WHERE history_fts MATCH '";
+       
         std::string phrase = "";
         if (sess.length()) {
             std::vector<int> ids;
             get_sess_id_by_name(ids, sess);
-
-            for (size_t i = 0; i < ids.size(); i++) {
-                phrase += std::to_string(ids[i]);
-                
-                if (i + 1 < ids.size())
-                    phrase += " OR ";
-            }
+            phrase = logic_phrase_from_ids(ids);
         }
-        
-        if (path.length()) {
-            sql = "SELECT * FROM history_fts WHERE pwd MATCH :dir;";
-        }
-
-        if (phrase.length()) {
-            sql = "SELECT * FROM (" + sql + ") WHERE sess_id MATCH \"" + phrase + "\"";
-        }
-        
-        std::cerr << sql << std::endl;
-        
-        db.prepare_sql(sql, &select_stmt);
         
         if (path.length()) {
             auto dir = prepare_path_for_search(path);
 
             if (recursively)
                 dir += "*";
-
-            db.bind_value(select_stmt, ":dir", dir);
+            
+            sql += " pwd: " + dir + " ";
         }
+
+        if (phrase.length()) {
+            if (path.length())
+                sql += "AND";
+            
+            sql += " sess_id: (1 OR 2) ";
+        }
+        
+        sql += "'";
+        
+        db.prepare_sql(sql, &select_stmt);
         
         return select_stmt;
     }
