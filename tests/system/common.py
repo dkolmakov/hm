@@ -102,17 +102,3 @@ def basic_insert_select(cmd, pwd, recursive = False):
 
     assert cmd == stdout[0], "Wrong command in the database!"
 
-
-def insert_select_by_session_name(cmd, sname):
-    pwd = "/some/arbitrary/path"
-    
-    db_obj = basic_create_db(sname)
-
-    insert(db_obj, pwd, cmd, 0)
-    
-    stdout = select_by_session(db_obj, sname)
-
-    for line in stdout:
-        print(line)
-
-    assert cmd == stdout[0], "Wrong command in the database!"
