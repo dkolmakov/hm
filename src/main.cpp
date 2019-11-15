@@ -28,7 +28,8 @@
 enum ErrorCode {
     SUCCESS = 0,
     ARG_ERROR,
-    FAILED_TO_ADD
+    FAILED_TO_ADD,
+    PARAM_ERROR
 };
 
 static void show_version(std::string name)
@@ -63,8 +64,10 @@ int main(int argc, char* argv[]) {
 
         bool by_dir = false;
         bool recursively = false;
+        bool by_sess = false;
         std::string selection_path = ".";
-
+        std::string session_name = "";
+        
         std::string filename = "/not/defined/filename";
         std::string separator = "notdefined";
 
@@ -93,8 +96,10 @@ int main(int argc, char* argv[]) {
 
         auto select = (
                           command("select").set(selected, mode::select) % "performs selection from database",
-                          option("-d").set(by_dir) & opt_value("path", selection_path) % "returns commands executed in the specified directory",
-                          option("-R", "--recursively").set(recursively) % "works with -d option, changes selection to be recursive and accept all commands executed in the specified directory and all directories down by hierarchy"
+                          value("sess_id", sess_id) % "session unique identifier",
+                          option("-d").set(by_dir) & opt_value("path", selection_path) % "returns commands executed in the specified directory (default: \".\")",
+                          option("-R", "--recursively").set(recursively) % "works with -d option, changes selection to be recursive and accept all commands executed in the specified directory and all directories down by hierarchy",
+                          option("-s").set(by_sess) & opt_value("sname", session_name) % "returns commands executed within the specified session (default: current session name)"
                       );
 
         auto version = (
@@ -160,7 +165,18 @@ int main(int argc, char* argv[]) {
                 history.parse_input_file(filename, separator);
                 break;
             case mode::select:
-                history.select_by_dir(selection_path, recursively);
+                if (by_sess && session_name.length() == 0)
+                    session_name = history.get_sess_name(sess_id);
+                
+                if (session_name != "notdefined") {
+                    history.select(by_dir, selection_path, recursively, by_sess, session_name);
+                
+                    if (by_sess) 
+                        history.set_sess_name(sess_id, sess_name);
+                } else {
+                    std::cerr << "Error: session has no name!" << std::endl;
+                    exit(PARAM_ERROR);
+                }
                 break;
             default:
                 std::cerr << "Error: unsupported mode" << std::endl;

@@ -34,8 +34,6 @@ class History {
     sqlite3_stmt *insert_sess_stmt;
     sqlite3_stmt *insert_last_cmd_stmt;
     sqlite3_stmt *select_last_cmd_stmt;
-    sqlite3_stmt *select_by_dir_stmt;
-    sqlite3_stmt *select_by_dir_rec_stmt;
 
     std::string prepare_path_for_search(const std::string& input) {
         Path path(input);
@@ -88,7 +86,65 @@ class History {
         
         return result;
     }
+
+    void get_sess_id_by_name(std::vector<int>& ids, const std::string& sess_name) {
+        sqlite3_stmt *select_stmt;
+        std::string sql = "SELECT * FROM sessions WHERE name = :name;";
+        
+        db.prepare_sql(sql, &select_stmt);
+        db.bind_value(select_stmt, ":name", sess_name);
+
+        while (sqlite3_step(select_stmt) == SQLITE_ROW) {
+            ids.push_back(sqlite3_column_int(select_stmt, 0));
+        };
+        
+        sqlite3_reset(select_stmt);
+    }
+
+    std::string logic_phrase_from_ids(std::vector<int>& ids) {
+        std::string phrase = "";
+        
+        for (size_t i = 0; i < ids.size(); i++) {
+            phrase += std::to_string(ids[i]);
+            
+            if (i + 1 < ids.size())
+                phrase += " OR ";
+        }
     
+        return phrase;
+    }
+    
+    sqlite3_stmt *prepare_select(const std::string& path, bool recursively, const std::string& sess) {
+        sqlite3_stmt *select_stmt;
+       
+        std::string sess_phrase = "";
+        if (sess.length()) {
+            std::vector<int> ids;
+            get_sess_id_by_name(ids, sess);
+            sess_phrase = "sess_id: (" + logic_phrase_from_ids(ids) + ")";
+        }
+        
+        std::string path_phrase = "";
+        if (path.length()) {
+            auto dir = prepare_path_for_search(path);
+
+            if (recursively)
+                dir += "*";
+            
+            path_phrase = "pwd: " + dir;
+        }
+
+        std::string conjunction = "";
+        if (sess_phrase.length() && path_phrase.length())
+            conjunction = "AND";
+        
+        std::string sql = "SELECT * FROM history_fts WHERE history_fts MATCH '" + 
+                          sess_phrase + " " + conjunction + " " + path_phrase + "'";
+        db.prepare_sql(sql, &select_stmt);
+        
+        return select_stmt;
+    }
+        
 public:
 
     History(const std::string& path) : db(path) {
@@ -113,7 +169,6 @@ public:
               "CREATE TRIGGER IF NOT EXISTS history_update AFTER INSERT ON commands BEGIN \
                     INSERT INTO history_fts(sess_id,date,pwd,cmd) VALUES (new.sess_id,new.date,new.pwd,new.cmd); \
                END;";
-
         db.exec_sql(sql);
 
         sql = "INSERT INTO commands (sess_id,date,pwd,cmd,rc) "
@@ -126,12 +181,6 @@ public:
 
         sql = "SELECT * FROM last_commands WHERE sess_id = :sess AND pwd = :pwd;";
         db.prepare_sql(sql, &select_last_cmd_stmt);
-
-        sql = "SELECT * FROM (SELECT * FROM history_fts WHERE pwd MATCH :dir) WHERE pwd = :sdir;";
-        db.prepare_sql(sql, &select_by_dir_stmt);
-
-        sql = "SELECT * FROM history_fts WHERE pwd MATCH :dir;";
-        db.prepare_sql(sql, &select_by_dir_rec_stmt);
     }
 
     ~History() {
@@ -165,27 +214,64 @@ public:
         std::string sql = "INSERT INTO sessions (date,name) VALUES (";
         sql += "DATETIME(),";
         sql += "\"" + name + "\");";
-        db.exec_sql(sql);
+        int rc = db.exec_sql(sql);
+        
+        if (rc != SQLITE_OK) {
+            std::cout << rc << std::endl;
+            throw -11;
+        }
 
         return db.last_rowid();
     }
 
-    int select_by_dir(const std::string& path, bool recursively) {
-        int result = SQLITE_DONE;
-        auto dir = prepare_path_for_search(path);
+    std::string get_sess_name(const std::string& id) {
+        std::string result = "";
+        sqlite3_stmt *select_stmt;
+        std::string sql = "SELECT * FROM sessions WHERE id = :id;";
+        
+        db.prepare_sql(sql, &select_stmt);
+        db.bind_value(select_stmt, ":id", id);
 
-        if (recursively)
-            dir += "*";
-
-        db.bind_value(select_by_dir_rec_stmt, ":dir", dir);
-
-        while ((result = sqlite3_step(select_by_dir_rec_stmt)) == SQLITE_ROW) {
-            std::cout << sqlite3_column_text(select_by_dir_rec_stmt, 3) << std::endl;
+        while (sqlite3_step(select_stmt) == SQLITE_ROW) {
+            result = std::string(reinterpret_cast< char const* >(sqlite3_column_text(select_stmt, 2)));
         };
         
-        sqlite3_reset(select_by_dir_rec_stmt);
+        sqlite3_reset(select_stmt);
         
         return result;
+    }
+    
+    int set_sess_name(const std::string& id, const std::string& sess_name) {
+        int result = SQLITE_DONE;
+        sqlite3_stmt *set_stmt;
+        std::string sql = "UPDATE sessions SET name = :name WHERE id = :id;";
+        
+        db.prepare_sql(sql, &set_stmt);
+        db.bind_value(set_stmt, ":name", sess_name);
+        db.bind_value(set_stmt, ":id", id);
+
+        while ((result = sqlite3_step(set_stmt)) == SQLITE_BUSY) { };
+        
+        sqlite3_reset(set_stmt);
+        
+        return result;
+    }
+    
+    int select(bool by_dir, const std::string& path, bool recursively, bool by_sess, const std::string& sess) {
+        int result = SQLITE_DONE;
+        
+        sqlite3_stmt *select_stmt = prepare_select(
+                            (by_dir) ? path : "", recursively, 
+                            (by_sess) ? sess : "");
+        
+        while ((result = sqlite3_step(select_stmt)) == SQLITE_ROW) {
+            std::cout << sqlite3_column_text(select_stmt, 3) << std::endl;
+        };
+        
+        sqlite3_reset(select_stmt);
+        
+        return result;
+        
     }
     
     int parse_input_file(const std::string& filename, const std::string& separator) {
