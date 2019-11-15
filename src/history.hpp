@@ -116,33 +116,30 @@ class History {
     
     sqlite3_stmt *prepare_select(const std::string& path, bool recursively, const std::string& sess) {
         sqlite3_stmt *select_stmt;
-        std::string sql = "SELECT * FROM history_fts WHERE history_fts MATCH '";
        
-        std::string phrase = "";
+        std::string sess_phrase = "";
         if (sess.length()) {
             std::vector<int> ids;
             get_sess_id_by_name(ids, sess);
-            phrase = logic_phrase_from_ids(ids);
+            sess_phrase = "sess_id: (" + logic_phrase_from_ids(ids) + ")";
         }
         
+        std::string path_phrase = "";
         if (path.length()) {
             auto dir = prepare_path_for_search(path);
 
             if (recursively)
                 dir += "*";
             
-            sql += " pwd: " + dir + " ";
+            path_phrase = "pwd: " + dir;
         }
 
-        if (phrase.length()) {
-            if (path.length())
-                sql += "AND";
-            
-            sql += " sess_id: (1 OR 2) ";
-        }
+        std::string conjunction = "";
+        if (sess_phrase.length() && path_phrase.length())
+            conjunction = "AND";
         
-        sql += "'";
-        
+        std::string sql = "SELECT * FROM history_fts WHERE history_fts MATCH '" + 
+                          sess_phrase + " " + conjunction + " " + path_phrase + "'";
         db.prepare_sql(sql, &select_stmt);
         
         return select_stmt;
