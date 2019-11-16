@@ -65,7 +65,7 @@ def select_by_path(db_obj, pwd, recursive = False):
     return stdout.strip().split('\n')
 
 
-def select_by_session(db_obj, sname = None, return_code = 0):
+def select_by_session(db_obj, sname = None):
     db, sess_id = db_obj
     
     select_cmd = ['hm-db', db, 
@@ -77,7 +77,7 @@ def select_by_session(db_obj, sname = None, return_code = 0):
 
     rc, stdout, stderr = run_cmd(select_cmd)
 
-    assert rc == return_code, "Expected return code {} but got {}".format(return_code, rc)
+    assert rc == 0, "Command failed with code {}".format(rc)
     
     return stdout.strip().split('\n')
 

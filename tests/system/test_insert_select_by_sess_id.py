@@ -99,13 +99,3 @@ def test_by_session_and_by_path_rec(remove_db):
     assert len(stdout) == 2, "Wrong number of commands!"
     assert cmd1 == stdout[0], "Wrong command in the database!"
     assert cmd2 == stdout[1], "Wrong command in the database!"
-
-def test_select_without_session_name(remove_db):
-    pwd = "/some/arbitrary/path"
-    cmd = "some --arbitrary command"
-    db_obj = basic_create_db()
-
-    insert(db_obj, pwd, cmd, 0)
-    
-    stdout = select_by_session(db_obj, return_code = 3)
-

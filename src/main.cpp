@@ -28,8 +28,7 @@
 enum ErrorCode {
     SUCCESS = 0,
     ARG_ERROR,
-    FAILED_TO_ADD,
-    PARAM_ERROR
+    FAILED_TO_ADD
 };
 
 static void show_version(std::string name)
@@ -168,15 +167,10 @@ int main(int argc, char* argv[]) {
                 if (by_sess && session_name.length() == 0)
                     session_name = history.get_sess_name(sess_id);
                 
-                if (session_name != "notdefined") {
-                    history.select(by_dir, selection_path, recursively, by_sess, session_name);
+                history.select(by_dir, selection_path, recursively, by_sess, session_name);
                 
-                    if (by_sess) 
-                        history.set_sess_name(sess_id, sess_name);
-                } else {
-                    std::cerr << "Error: session has no name!" << std::endl;
-                    exit(PARAM_ERROR);
-                }
+                if (by_sess) 
+                    history.set_sess_name(sess_id, sess_name);
                 break;
             default:
                 std::cerr << "Error: unsupported mode" << std::endl;
