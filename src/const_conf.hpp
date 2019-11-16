@@ -35,7 +35,7 @@ const std::string const_configuration = "\
 \tseparator=\"!!hmseparator!!\"\n\
 \n\
 \t# Set a script to be executed after each other command in the current terminal session\n\
-\texport PROMPT_COMMAND='rc=$?; if [ $(id -u) -ne 0 ] && ! [ -z $hm_session_id ]; then echo ${hm_session_id}${separator}$(date +\"%Y-%m-%d %H:%M:%S\")${separator}$(pwd)${separator}\"$(history 1 | sed -E \"s/^ *[0-9]* *//\")\"${separator}$rc >> $hm_history_tmp; fi'\n\
+\texport PROMPT_COMMAND='rc=$?; if [ $(id -u) -ne 0 ] && ! [ -z $hm_session_id ]; then echo ${hm_session_id}${separator}$(date +\"%Y-%m-%d %H:%M:%S\")${separator}$(pwd)${separator}\"$(history 1 | sed -E \"s/^ *[0-9]* *//\")\"${separator}$rc >> $hm_history_tmp; fi'';'$PROMPT_COMMAND\n\
 \n\
 \t# Wrapper for hm-db which adds the selected commands at the beginning of the current terminal history\n\
 \thm() {\n\
