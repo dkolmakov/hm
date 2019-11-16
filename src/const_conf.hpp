@@ -39,14 +39,35 @@ const std::string const_configuration = "\
 \n\
 \t# Wrapper for hm-db which adds the selected commands at the beginning of the current terminal history\n\
 \thm() {\n\
-\t\tSAVE_HISTFILE=$HISTFILE\n\
-\t\tHISTFILE=$(mktemp extracted_history.XXXXXXXXXX)\n\
-\t\t# Parse commands saved to the text file\n\
-\t\thm-db $hm_history_db parse $hm_history_tmp $separator\n\
-\t\t# Update history\n\
-\t\thm-db $hm_history_db select $hm_session_id $@ > $HISTFILE && echo hm \"$*\" >> $HISTFILE && history -r\n\
-\t\tif [ $? -eq 0 ]; then echo \"History successfully updated!\"; fi\n\
-\t\trm -rf $hm_history_tmp $HISTFILE\n\
-\t\tHISTFILE=$SAVE_HISTFILE\n\
+\t\t# Parse arguments\n\
+\t\tARGS=""\n\
+\t\tfor i in \"$@\"\n\
+\t\tdo \n\
+\t\tcase $i in \n\
+\t\t\t-v|--version)\n\
+\t\t\thm-db --version\n\
+\t\t\t;;\n\
+\t\t\t-h|--help)\n\
+\t\t\thm-db --help\n\
+\t\t\t;;\n\
+\t\t\t*)\n\
+\t\t\tARGS=\"$ARGS $i\"\n\
+\t\t\t;;\n\
+\t\tesac\n\
+\t\tdone\n\
+\n\
+\t\t# Perform history recovery\n\
+\t\tif ! [ -z \"$ARGS\" ]\n\
+\t\tthen\n\
+\t\t\tSAVE_HISTFILE=$HISTFILE\n\
+\t\t\tHISTFILE=$(mktemp extracted_history.XXXXXXXXXX)\n\
+\t\t\t# Parse commands saved to the text file\n\
+\t\t\thm-db $hm_history_db parse $hm_history_tmp $separator\n\
+\t\t\t# Update history\n\
+\t\t\thm-db $hm_history_db select $hm_session_id $ARGS > $HISTFILE && echo hm \"$*\" >> $HISTFILE && history -r\n\
+\t\t\tif [ $? -eq 0 ]; then echo \"History successfully updated!\"; fi\n\
+\t\t\trm -rf $hm_history_tmp $HISTFILE\n\
+\t\t\tHISTFILE=$SAVE_HISTFILE\n\
+\t\tfi\n\
 \t}\n\
 ";
