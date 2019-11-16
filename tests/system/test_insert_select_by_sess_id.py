@@ -71,8 +71,18 @@ def test_insert_select_for_several_sessions(remove_db):
     assert cmd1 == stdout[0], "Wrong command in the database!"
     assert cmd2 == stdout[1], "Wrong command in the database!"
 
-def test_by_session_default_arg(remove_db):
+def test_named_session_with_default_arg(remove_db):
     sess_name = "test-name"
+    first_sess, cmd1, _, cmd2, _ = prepare_several_sessions(sess_name)
+
+    stdout = select_by_session(first_sess)
+
+    assert len(stdout) == 2, "Wrong number of commands!"
+    assert cmd1 == stdout[0], "Wrong command in the database!"
+    assert cmd2 == stdout[1], "Wrong command in the database!"
+
+def test_not_named_session_with_default_arg(remove_db):
+    sess_name = None
     first_sess, cmd1, _, cmd2, _ = prepare_several_sessions(sess_name)
 
     stdout = select_by_session(first_sess)

@@ -5,3 +5,4 @@ builds/
 *.testdb
 src/version.hpp
 pkgs/nix/hm.nix
+__pycache__
