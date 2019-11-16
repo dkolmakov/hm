@@ -60,12 +60,12 @@ hm -d
 
 ### Terminal session command history recovery
 
-**TODO:** To set a terminal session name and to recover the command history related to this name run the following:
+To set a terminal session name and to recover the command history related to this name run the following:
 ```Shell
 hm -s "Session Name"
 ```
 
-**TODO:** To synchronize history with the database:
+To synchronize history with the database using the previously given name:
 ```Shell
 hm -s
 ```
