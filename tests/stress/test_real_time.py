@@ -44,11 +44,18 @@ def select_by_session_and_path():
 
 
 if __name__ == "__main__":
+    import argparse
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-n','--numbers', nargs='+', required=True)
+    flags = parser.parse_args()
+    numbers = [int(x) for x in flags.numbers]
+    
     # Remove all test databases
     remove_previous()
     
     # Generate text files with given number of commands
-    gen_test_data([1, 10, 100, 1000])
+    gen_test_data(numbers)
     
     # Run db_insertion tests first
     db_insertion()
