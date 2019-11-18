@@ -53,7 +53,7 @@ matrix:
   - name: "Test Deb release"
     language: cpp
     os: linux
-    dist: trusty
+    dist: xenial
     compiler: gcc
     sudo: required
     addons:

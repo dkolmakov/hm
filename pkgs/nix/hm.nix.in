@@ -3,7 +3,6 @@ with import <nixpkgs> {};
 stdenv.mkDerivation rec {
     version = "@hm_VERSION@";
     name = "hm-@hm_VERSION@";
-    path = dirOf "./build/";
     
     src = fetchurl {
             url = "https://github.com/dkolmakov/hm/archive/v@hm_VERSION@.tar.gz";
