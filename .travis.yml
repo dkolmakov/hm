@@ -44,7 +44,7 @@ matrix:
         - python3
         - python3-pytest
     install:
-    - tests/release/install_release_nix.sh 0.3.0
+    - tests/release/install_release_nix.sh 0.4.0
     - hm-db configure ~/.bashrc
     - . ~/.bashrc
     script:
@@ -53,7 +53,7 @@ matrix:
   - name: "Test Deb release"
     language: cpp
     os: linux
-    dist: trusty
+    dist: xenial
     compiler: gcc
     sudo: required
     addons:
@@ -64,7 +64,7 @@ matrix:
         - python3
         - python3-pytest
     install:
-    - tests/release/install_release_deb.sh 0.3.0
+    - tests/release/install_release_deb.sh 0.4.0
     - hm-db configure ~/.bashrc
     - . ~/.bashrc
     script:
