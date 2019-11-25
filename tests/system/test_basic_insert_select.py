@@ -42,14 +42,31 @@ def test_select_with_hypens(remove_db):
 
 def test_select_with_spaces(remove_db):
     pwd = "/some/arbitrary/path with hyphens"
-    cmd = "some command number three"
+    cmd = "some command number four"
 
     basic_insert_select(cmd, pwd)
 
 
 def test_select_with_cyrillic (remove_db):
     pwd = "/some/arbitrary/path_with_кириллица"
-    cmd = "some command number three"
+    cmd = "some command number five"
 
     basic_insert_select(cmd, pwd)
-    
+
+def test_select_with_numbers (remove_db):
+   pwd = "/some/arbitrary/path_with/12345"
+   cmd = "some command number six"
+
+   basic_insert_select(cmd, pwd)
+
+def test_select_with_percent (remove_db):
+    pwd = "/some/arbitrary/path_with_%"
+    cmd = "some command number seven"
+
+    basic_insert_select(cmd, pwd)
+
+def test_select_with_pass_min (remove_db):
+    pwd = "/some/arbitrary/path_min/ "
+    cmd = "some command number five"
+
+    basic_insert_select(cmd, pwd)
