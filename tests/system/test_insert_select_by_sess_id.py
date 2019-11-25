@@ -61,6 +61,36 @@ def test_insert_select_hypens(remove_db):
 
     insert_select_by_session_name(cmd, sess_name)
 
+def test_insert_select_numbers (remove_db):
+    sess_name = "Some-name-with-123"
+    cmd = "some --arbitrary command"
+
+    insert_select_by_session_name(cmd, sess_name)
+
+def test_insert_select_cyrillic (remove_db):
+    sess_name = "Some-name-with-кириллица"
+    cmd = "some --arbitrary command"
+
+    insert_select_by_session_name(cmd, sess_name)
+
+def test_insert_select_percent (remove_db):
+    sess_name = "Some-name-with-%"
+    cmd = "some --arbitrary command"
+
+    insert_select_by_session_name(cmd, sess_name)
+
+def test_insert_select_minimum_space (remove_db):
+    sess_name = " "
+    cmd = "some --arbitrary command"
+
+    insert_select_by_session_name(cmd, sess_name)
+
+def test_insert_select_minimum_dot (remove_db):
+    sess_name = "."
+    cmd = "some --arbitrary command"
+
+    insert_select_by_session_name(cmd, sess_name)
+
 def test_insert_select_for_several_sessions(remove_db):
     sess_name = "test-name"
     first_sess, cmd1, _, cmd2, _ = prepare_several_sessions(sess_name)
