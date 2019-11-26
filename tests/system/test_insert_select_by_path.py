@@ -56,24 +56,3 @@ def test_recursive_select(remove_db, create_db):
     assert len(stdout) == 2, "Wrong number of commands!"
     assert cmd1 == stdout[0], "Wrong command in the database!"
     assert cmd2 == stdout[1], "Wrong command in the database!"
-
-
-def prepare_several_sessions_by_pass (sess_name):
-    first_sess = basic_create_db(sess_name)
-    second_sess = basic_create_db(sess_name)
-    third_sess = basic_create_db("Other session name")
-
-    pwd1 = "/some/arbitrary/path"
-    cmd1 = "some --arbitrary command"
-
-    pwd2 = "/some/arbitrary/other_path"
-    cmd2 = "some --other command"
-
-    pwd3 = "/some/arbitrary/path"
-    cmd3 = "some --other command"
-
-    insert(first_sess, pwd1, cmd1, 0)
-    insert(second_sess, pwd2, cmd2, 0)
-    insert(third_sess, pwd3, cmd3, 0)
-
-    return first_sess, cmd1, pwd1, third_sess, cmd3, pwd3
