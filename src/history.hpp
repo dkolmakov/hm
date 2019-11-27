@@ -144,7 +144,23 @@ class History {
         
         return select_stmt;
     }
+
+    int insert(const std::string& session, const std::string& datetime, const std::string& path, const std::string& cmd, const std::string& rc) {
+        int result = SQLITE_DONE;
         
+        db.bind_value(insert_cmd_stmt, ":sess", session);
+        db.bind_value(insert_cmd_stmt, ":datetime", datetime);
+        db.bind_value(insert_cmd_stmt, ":pwd", path);
+        db.bind_value(insert_cmd_stmt, ":cmd", cmd);
+        db.bind_value(insert_cmd_stmt, ":rc", rc);
+            
+        while ((result = sqlite3_step(insert_cmd_stmt)) == SQLITE_BUSY) {};
+
+        sqlite3_reset(insert_cmd_stmt);
+        return result;
+    }
+    
+    
 public:
 
     History(const std::string& path) : db(path) {
@@ -192,16 +208,7 @@ public:
         std::string last_cmd = get_last_cmd(session, path);
         
         if (cmd != last_cmd) {
-
-            db.bind_value(insert_cmd_stmt, ":sess", session);
-            db.bind_value(insert_cmd_stmt, ":datetime", datetime);
-            db.bind_value(insert_cmd_stmt, ":pwd", path);
-            db.bind_value(insert_cmd_stmt, ":cmd", cmd);
-            db.bind_value(insert_cmd_stmt, ":rc", rc);
-            
-            while ((result = sqlite3_step(insert_cmd_stmt)) == SQLITE_BUSY) {};
-
-            sqlite3_reset(insert_cmd_stmt);
+            result = insert(session, datetime, path, cmd, rc);
 
             if (result == SQLITE_DONE)
                 set_last_cmd(session, path, cmd);
@@ -280,15 +287,20 @@ public:
         
         if (!input)
             return -11; // TODO: Add meaningful return code
-            
+
+        // To speed-up loading process - perform all inserts as single transaction
+        db.exec_sql("BEGIN TRANSACTION;");
+
         while (getline(input, line)) {
             std::vector<std::string> elements = split(line, separator);
             
             if (elements.size() != 5) 
                 continue; // Drop incorrect lines
             
-            insert_cmd(elements[0], elements[1], elements[2], elements[3], elements[4]);
+            insert(elements[0], elements[1], elements[2], elements[3], elements[4]);
         }
+        
+        db.exec_sql("COMMIT;");
         
         input.close();
         
