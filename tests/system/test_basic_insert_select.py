@@ -119,12 +119,6 @@ def test_select_with_plus (remove_db):
 
     basic_insert_select(cmd, pwd)
 
-def test_select_with_acute (remove_db):
-    pwd = "/some/arbitrary/path_with_don't"
-    cmd = "some command"
-
-    basic_insert_select(cmd, pwd)
-
 def test_select_with_equals (remove_db):
     pwd = "/some/arbitrary/path_with_="
     cmd = "some command"
