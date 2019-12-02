@@ -56,4 +56,3 @@ def test_recursive_select(remove_db, create_db):
     assert len(stdout) == 2, "Wrong number of commands!"
     assert cmd1 == stdout[0], "Wrong command in the database!"
     assert cmd2 == stdout[1], "Wrong command in the database!"
-
