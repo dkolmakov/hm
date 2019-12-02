@@ -21,35 +21,154 @@ def test_basic_insert_select(remove_db):
 
 def test_select_with_underscores(remove_db):
     pwd = "/some/arbitrary/path_with_underscores"
-    cmd = "some command number one"
+    cmd = "some command"
     
     basic_insert_select(cmd, pwd)
 
 
 def test_select_with_dots(remove_db):
     pwd = "/some/a.r.b.i.t.r.a.r.y/.path"
-    cmd = "some command number two"
+    cmd = "some command"
     
     basic_insert_select(cmd, pwd)
 
 
 def test_select_with_hypens(remove_db):
     pwd = "/some/arbitrary/path-with-hyphens"
-    cmd = "some command number three"
+    cmd = "some command"
     
     basic_insert_select(cmd, pwd)
 
 
 def test_select_with_spaces(remove_db):
     pwd = "/some/arbitrary/path with hyphens"
-    cmd = "some command number three"
+    cmd = "some command"
 
     basic_insert_select(cmd, pwd)
 
 
 def test_select_with_cyrillic (remove_db):
     pwd = "/some/arbitrary/path_with_кириллица"
-    cmd = "some command number three"
+    cmd = "some command"
 
     basic_insert_select(cmd, pwd)
-    
+
+def test_select_with_numbers (remove_db):
+   pwd = "/some/arbitrary/path_with/12345"
+   cmd = "some command"
+
+   basic_insert_select(cmd, pwd)
+
+def test_select_with_percent (remove_db):
+    pwd = "/some/arbitrary/path_with_%"
+    cmd = "some command"
+
+    basic_insert_select(cmd, pwd)
+
+def test_select_with_exclamation_mark (remove_db):
+    pwd = "/some/arbitrary/path_with_!"
+    cmd = "some command"
+
+    basic_insert_select(cmd, pwd)
+
+def test_select_with_at (remove_db):
+    pwd = "/some/arbitrary/path_with_@"
+    cmd = "some command"
+
+    basic_insert_select(cmd, pwd)
+
+def test_select_with_hash (remove_db):
+    pwd = "/some/arbitrary/path_with_#"
+    cmd = "some command"
+
+    basic_insert_select(cmd, pwd)
+
+def test_select_with_dollar (remove_db):
+    pwd = "/some/arbitrary/path_with_$"
+    cmd = "some command"
+
+    basic_insert_select(cmd, pwd)
+
+def test_select_with_caret (remove_db):
+    pwd = "/some/arbitrary/path_with_^"
+    cmd = "some command"
+
+    basic_insert_select(cmd, pwd)
+
+def test_select_with_ampersand (remove_db):
+    pwd = "/some/arbitrary/path_with_&"
+    cmd = "some command"
+
+    basic_insert_select(cmd, pwd)
+
+def test_select_with_question_mark (remove_db):
+    pwd = "/some/arbitrary/path_with_?"
+    cmd = "some command"
+
+    basic_insert_select(cmd, pwd)
+
+def test_select_with_parenthesises (remove_db):
+    pwd = "/some/arbitrary/path_with_()"
+    cmd = "some command"
+
+    basic_insert_select(cmd, pwd)
+
+def test_select_with_plus (remove_db):
+    pwd = "/some/arbitrary/path_with_+"
+    cmd = "some command"
+
+    basic_insert_select(cmd, pwd)
+
+def test_select_with_equals (remove_db):
+    pwd = "/some/arbitrary/path_with_="
+    cmd = "some command"
+
+    basic_insert_select(cmd, pwd)
+
+def test_select_with_curly_braces (remove_db):
+    pwd = "/some/arbitrary/path_with_{}"
+    cmd = "some command"
+
+    basic_insert_select(cmd, pwd)
+
+def test_select_with_square_brackets (remove_db):
+    pwd = "/some/arbitrary/path_with_[]"
+    cmd = "some command"
+
+    basic_insert_select(cmd, pwd)
+
+def test_select_with_colon (remove_db):
+    pwd = "/some/arbitrary/path_with_:"
+    cmd = "some command"
+
+    basic_insert_select(cmd, pwd)
+
+def test_select_with_semi_colon (remove_db):
+    pwd = "/some/arbitrary/path_with_;"
+    cmd = "some command"
+
+    basic_insert_select(cmd, pwd)
+
+def test_select_with_comma (remove_db):
+    pwd = "/some/arbitrary/path_with_,"
+    cmd = "some command"
+
+    basic_insert_select(cmd, pwd)
+
+def test_select_with_number_mark (remove_db):
+    pwd = "/some/arbitrary/path_with_№"
+    cmd = "some command"
+
+    basic_insert_select(cmd, pwd)
+
+def test_select_with_pass_min1 (remove_db):
+    pwd = "/"
+    cmd = "some command"
+
+    basic_insert_select(cmd, pwd)
+
+def test_select_with_pass_min_plus_1 (remove_db):
+    pwd = "/a"
+    cmd = "some command"
+
+    basic_insert_select(cmd, pwd)
