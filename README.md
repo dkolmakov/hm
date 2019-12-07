@@ -16,7 +16,7 @@ It is a quite common issue when you need to repeat some actions with a previousl
 
 ### Synchronize history
 
-The recovery of a history can be assumed as synchronization between previously existed session and the current one. But it may be also useful to synchronize histoties of several simultaneously opened terminal sessions so any executed command can be easily shared. History manager solves this by using the same command selection mechanism as for the history recovery case.
+The recovery of a history can be assumed as synchronization between previously existed session and the current one. But it may be also useful to synchronize histories of several simultaneously opened terminal sessions so any executed command can be easily shared. History manager solves this by using the same command selection mechanism as for the history recovery case.
 
 ## Installation
 
