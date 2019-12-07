@@ -8,15 +8,15 @@ History manager provides an alternative command line history storage with the ab
 
 ## Motivation
 
-There are two main usage scenarios are kept in mind during the development:
+There are two main usage scenarios:
 
 ### Recover history
 
-It is a quite common issue when you return to some project development after a long break and don't remember exact commands you have used to build it, run tests or tune an environment for it. History manager provides a way to recover command history related to the specific directory, particular session or both.
+It is a quite common issue when you need to repeat some actions with a previously developed project but don't remember exact commands you have used for it. History manager provides a way to recover command history related to the specific directory, particular session or both.
 
 ### Synchronize history
 
-Beside the recovery of old histories it can be useful to synchronize histoties of several opened terminal sessions so the recently executed commands are quickly accessible everywhere. History manager completely satisfies this requirement by using the same command selection mechanism as for the history recovery case. 
+The recovery of a history can be assumed as synchronization between previously existed session and the current one. But it may be also useful to synchronize histories of several simultaneously opened terminal sessions so any executed command can be easily shared. History manager solves this by using the same command selection mechanism as for the history recovery case.
 
 ## Installation
 
@@ -30,7 +30,7 @@ Install latest version in development:
 
 ## Configuration
 
-Configuration of the history manager is performed by:
+Configuration of the history manager is performed by adding it's wrapper scripts to the `.bashrc`:
 
 ```Shell
 hm-db configure ~/.bashrc
@@ -47,7 +47,7 @@ More details are [here](docs/configuration.md).
 
 ### Per-directory history recovery
 
-Recovering command history related to the specific directory isdone with:
+Recovering command history related to the specific directory is performed with:
 
 ```Shell
 hm -d /path/of/interest
