@@ -293,7 +293,7 @@ public:
         size_t current_line = 0;
 
         std::cout << "Loading " << total_lines << " commands from the temporary file " << filename << std::endl;
-        ProgressBar<size_t> bar(total_lines, current_line, 70);
+        ProgressBar<size_t> bar(total_lines, current_line);
 
         if (!input)
             return -11; // TODO: Add meaningful return code
