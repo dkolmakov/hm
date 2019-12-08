@@ -24,44 +24,9 @@
 
 #include "database.hpp"
 #include "path.hpp"
+#include "progress_bar.hpp"
 
 using namespace apathy;
-
-template<class T>
-struct ProgressBar {
-    const T total;
-    size_t bar_width;
-        
-    ProgressBar(T _total, T current, size_t _bar_width) : total(_total), bar_width(_bar_width) {
-        show_progress(current);
-    }
-
-    ~ProgressBar() {
-        std::cout << std::endl;
-    }
-    
-    void show_progress(T current) {
-        double progress = current * 1.0 / total;
-        std::cout << "[";
-        size_t pos = bar_width * progress;
-        for (size_t i = 0; i < bar_width; ++i) {
-            if (i < pos) std::cout << "=";
-            else if (i == pos) std::cout << ">";
-            else std::cout << " ";
-        }
-        std::cout << "] ";
-        
-        int percents = int(progress * 100.0);
-        if (percents < 100) { 
-            std::cout << percents << " %\r";
-        }
-        else {
-            std::cout << " Done!\r";
-        }
-        
-        std::cout.flush();
-    }   
-};
 
 class History {
 
@@ -327,7 +292,7 @@ public:
         size_t total_lines = std::count(std::istreambuf_iterator<char>(to_count), std::istreambuf_iterator<char>(), '\n');
         size_t current_line = 0;
 
-        std::cout << "Loading commands from the temporary file " << filename << std::endl;
+        std::cout << "Loading " << total_lines << " commands from the temporary file " << filename << std::endl;
         ProgressBar<size_t> bar(total_lines, current_line, 70);
 
         if (!input)
