@@ -161,12 +161,6 @@ def test_select_with_number_mark (remove_db):
 
     basic_insert_select(cmd, pwd)
 
-def test_select_with_pass_min1 (remove_db):
-    pwd = "/"
-    cmd = "some command"
-
-    basic_insert_select(cmd, pwd)
-
 def test_select_with_pass_min_plus_1 (remove_db):
     pwd = "/a"
     cmd = "some command"
