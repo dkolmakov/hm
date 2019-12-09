@@ -20,9 +20,11 @@
 #include <vector>
 #include <iostream>
 #include <fstream>
+#include <algorithm>
 
 #include "database.hpp"
 #include "path.hpp"
+#include "progress_bar.hpp"
 
 using namespace apathy;
 
@@ -35,6 +37,7 @@ class History {
     sqlite3_stmt *insert_last_cmd_stmt;
     sqlite3_stmt *select_last_cmd_stmt;
 
+   
     std::string prepare_path_for_search(const std::string& input) {
         Path path(input);
         
@@ -284,7 +287,14 @@ public:
     int parse_input_file(const std::string& filename, const std::string& separator) {
         std::ifstream input(filename.c_str(), std::ios::in);
         std::string line;
-        
+
+        std::ifstream to_count(filename.c_str(), std::ios::in); 
+        size_t total_lines = std::count(std::istreambuf_iterator<char>(to_count), std::istreambuf_iterator<char>(), '\n');
+        size_t current_line = 0;
+
+        std::cout << "Loading " << total_lines << " commands from the temporary file " << filename << std::endl;
+        ProgressBar<size_t> bar(total_lines, current_line);
+
         if (!input)
             return -11; // TODO: Add meaningful return code
 
@@ -298,6 +308,9 @@ public:
                 continue; // Drop incorrect lines
             
             insert(elements[0], elements[1], elements[2], elements[3], elements[4]);
+            
+            current_line++;
+            bar.show_progress(current_line);
         }
         
         db.exec_sql("COMMIT;");
