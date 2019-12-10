@@ -110,7 +110,7 @@ int main(int argc, char* argv[]) {
                     );
 
         auto configure = (
-                             command("configure").set(selected, mode::configure) % "starts hsitory manager configuration",
+                             command("configure").set(selected, mode::configure) % "starts history manager configuration",
                              opt_value("file", conffile) % "file to put the configuration",
                              option("--home") & value("path", hmhome) % "sets the path to store history database (default: $HOME/.hm/)"
                          );
