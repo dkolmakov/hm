@@ -26,8 +26,6 @@
 #include "path.hpp"
 #include "progress_bar.hpp"
 
-using namespace apathy;
-
 class History {
 
     SqliteDB db;
@@ -39,7 +37,7 @@ class History {
 
    
     std::string prepare_path_for_search(const std::string& input) {
-        Path path(input);
+        apathy::Path path(input);
         
         return "\"" + path.absolute().sanitize().trim().string() + "\"";
     }
