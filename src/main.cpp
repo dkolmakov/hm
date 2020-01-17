@@ -40,6 +40,11 @@ static void show_version(std::string name)
               << "There is NO WARRANTY, to the extent permitted by law." << std::endl;
 }
 
+static void print_session_info(std::string sess_id, std::string sess_name)
+{
+    std::cout << "Session #" << sess_id << " with name: " << sess_name << std::endl;
+}
+
 
 const std::string usage_header = " - history manager for Bash";
 
@@ -50,7 +55,7 @@ int main(int argc, char* argv[]) {
     try {
         std::string db_path = "/not/defined.db";
 
-        enum class mode {new_session, add, select, parse, help, version, configure};
+        enum class mode {new_session, add, select, parse, help, version, configure, info};
         mode selected = mode::help;
 
         std::string sess_name = "notdefined";
@@ -101,6 +106,11 @@ int main(int argc, char* argv[]) {
                           option("-s").set(by_sess) & opt_value("sname", session_name) % "returns commands executed within the specified session (default: current session name)"
                       );
 
+        auto info = (
+                        command("info").set(selected, mode::info) % "outputs the session info",
+                        value("sess_id", sess_id) % "session unique identifier"
+                    );
+
         auto version = (
                            option("-v", "--version").set(selected, mode::version).call(show_version) % "shows version information"
                        );
@@ -117,7 +127,7 @@ int main(int argc, char* argv[]) {
 
         auto commands = (
                             value("dbfile", db_path) % "path to the history database\n",
-                            (session | add | parse_file | select)
+                            (session | add | parse_file | select | info)
                         );
 
         auto cli = (
@@ -171,6 +181,10 @@ int main(int argc, char* argv[]) {
                 
                 if (by_sess) 
                     history.set_sess_name(sess_id, sess_name);
+                break;
+            case mode::info:
+                sess_name = history.get_sess_name(sess_id); 
+                print_session_info(sess_id, sess_name);
                 break;
             default:
                 std::cerr << "Error: unsupported mode" << std::endl;

@@ -47,6 +47,11 @@ To synchronize history with the database using the previously given name:
 hm -s
 ```
 
+To query the previously given name:
+```Shell
+hm -i
+```
+
 **TODO:** It is possible to filter out commnads containing specified words the same way as in per-directory history recovery.
 
 
