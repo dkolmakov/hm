@@ -267,6 +267,7 @@ public:
     
     int select(bool by_dir, const std::string& path, bool recursively, bool by_sess, const std::string& sess) {
         int result = SQLITE_DONE;
+        size_t counter = 0;
         
         sqlite3_stmt *select_stmt = prepare_select(
                             (by_dir) ? path : "", recursively, 
@@ -274,9 +275,12 @@ public:
         
         while ((result = sqlite3_step(select_stmt)) == SQLITE_ROW) {
             std::cout << sqlite3_column_text(select_stmt, 3) << std::endl;
+            counter++;
         };
         
         sqlite3_reset(select_stmt);
+        
+        std::cerr << "Selected " << counter << " commands..." << std::endl;
         
         return result;
         
