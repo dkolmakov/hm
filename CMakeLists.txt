@@ -7,7 +7,7 @@ find_package(Threads REQUIRED)
 
 set(CMAKE_CXX_FLAGS "-std=c++11 -fPIC -fpic -Wall -Wextra -pedantic -O3")
 
-add_subdirectory(thirdparty/sqlite3)
+add_subdirectory(thirdparty/sqlitecpp)
 add_subdirectory(thirdparty/apathy)
 add_subdirectory(thirdparty/clipp)
 add_subdirectory(src)
