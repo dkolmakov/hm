@@ -198,7 +198,7 @@ int main(int argc, char* argv[]) {
         }
 
     }
-    catch (SqliteException& e) {
+    catch (SQLite::Exception& e) {
         std::cout << "Error: database query failed " << e.what() << std::endl;
         exit(FAILED_TO_ADD);
     }
