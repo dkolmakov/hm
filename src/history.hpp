@@ -22,9 +22,9 @@
 #include <fstream>
 #include <algorithm>
 
-#include "database.hpp"
 #include "path.hpp"
 #include "progress_bar.hpp"
+#include "SQLiteCpp/SQLiteCpp.h"
 
 class History {
 
