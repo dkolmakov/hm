@@ -3,20 +3,10 @@ project(hm VERSION 1.0.0 LANGUAGES CXX)
 
 include(GNUInstallDirs)
 
-find_package(Threads REQUIRED)
-
 set(CMAKE_CXX_FLAGS "-std=c++11 -fPIC -fpic -Wall -Wextra -pedantic -O3")
 
-add_subdirectory(thirdparty/sqlitecpp)
-add_subdirectory(thirdparty/apathy)
-add_subdirectory(thirdparty/clipp)
-
-include_directories(
-  ${CMAKE_CURRENT_LIST_DIR}/thirdparty/sqlitecpp/include
-)
-
+add_subdirectory(thirdparty)
 add_subdirectory(src)
-add_subdirectory(misc)
 
 # Prepare nix expression
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/pkgs/nix/hm.nix.in ${CMAKE_CURRENT_BINARY_DIR}/hm-${hm_VERSION}.nix)            

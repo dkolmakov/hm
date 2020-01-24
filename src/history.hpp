@@ -141,7 +141,7 @@ class History {
     
 public:
 
-    History(const std::string& path) : db(path) {
+    History(const std::string& path) : db(path, SQLite::OPEN_READWRITE | SQLite::OPEN_CREATE) {
         std::string sql;
 
         sql = "CREATE TABLE IF NOT EXISTS commands (\
