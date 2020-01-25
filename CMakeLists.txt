@@ -11,7 +11,6 @@ add_subdirectory(thirdparty/sqlite3)
 add_subdirectory(thirdparty/apathy)
 add_subdirectory(thirdparty/clipp)
 add_subdirectory(src)
-add_subdirectory(misc)
 
 # Prepare nix expression
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/pkgs/nix/hm.nix.in ${CMAKE_CURRENT_BINARY_DIR}/hm-${hm_VERSION}.nix)            
