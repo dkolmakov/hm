@@ -28,14 +28,8 @@
 
 class History {
 
-    SqliteDB db;
+    SqliteDB::Database db;
 
-    sqlite3_stmt *insert_cmd_stmt;
-    sqlite3_stmt *insert_sess_stmt;
-    sqlite3_stmt *insert_last_cmd_stmt;
-    sqlite3_stmt *select_last_cmd_stmt;
-
-   
     std::string prepare_path_for_search(const std::string& input) {
         apathy::Path path(input);
         
@@ -61,45 +55,36 @@ class History {
     }    
 
     std::string get_last_cmd(const std::string& sess_id, const std::string& pwd) {
+        SqliteDB::Query query(db, "SELECT * FROM last_commands WHERE sess_id = :sess AND pwd = :pwd;");
         std::string cmd = "";
 
-        db.bind_value(select_last_cmd_stmt, ":sess", sess_id);
-        db.bind_value(select_last_cmd_stmt, ":pwd", pwd);
+        query.bind(":sess", sess_id);
+        query.bind(":pwd", pwd);
 
-        while (sqlite3_step(select_last_cmd_stmt) == SQLITE_ROW) {
-            cmd = std::string(reinterpret_cast< char const* >(sqlite3_column_text(select_last_cmd_stmt, 2)));
+        while (query.exec_step()) {
+            cmd = query.get_string(2);
         };
-        
-        sqlite3_reset(select_last_cmd_stmt);
 
         return cmd;
     }
 
-    int set_last_cmd(const std::string& sess_id, const std::string& cwd, const std::string& cmd) {
-        int result = SQLITE_DONE;
-        db.bind_value(insert_last_cmd_stmt, ":sess", sess_id);
-        db.bind_value(insert_last_cmd_stmt, ":pwd", cwd);
-        db.bind_value(insert_last_cmd_stmt, ":cmd", cmd);
+    void set_last_cmd(const std::string& sess_id, const std::string& cwd, const std::string& cmd) {
+        SqliteDB::Query query(db, "INSERT OR REPLACE INTO last_commands (sess_id, pwd, cmd) VALUES ( :sess, :pwd, :cmd );");
 
-        while ((result = sqlite3_step(insert_last_cmd_stmt)) == SQLITE_BUSY) {};
-
-        sqlite3_reset(insert_last_cmd_stmt);
-        
-        return result;
+        query.bind(":sess", sess_id);
+        query.bind(":pwd", cwd);
+        query.bind(":cmd", cmd);
+        query.exec();
     }
 
     void get_sess_id_by_name(std::vector<int>& ids, const std::string& sess_name) {
-        sqlite3_stmt *select_stmt;
-        std::string sql = "SELECT * FROM sessions WHERE name = :name;";
-        
-        db.prepare_sql(sql, &select_stmt);
-        db.bind_value(select_stmt, ":name", sess_name);
+        SqliteDB::Query query(db, "SELECT * FROM sessions WHERE name = :name;");
 
-        while (sqlite3_step(select_stmt) == SQLITE_ROW) {
-            ids.push_back(sqlite3_column_int(select_stmt, 0));
+        query.bind(":name", sess_name);
+
+        while (query.exec_step()) {
+            ids.push_back(query.get_int(0));
         };
-        
-        sqlite3_reset(select_stmt);
     }
 
     std::string logic_phrase_from_ids(std::vector<int>& ids) {
@@ -115,9 +100,7 @@ class History {
         return phrase;
     }
     
-    sqlite3_stmt *prepare_select(const std::string& path, bool recursively, const std::string& sess) {
-        sqlite3_stmt *select_stmt;
-       
+    std::string prepare_select(const std::string& path, bool recursively, const std::string& sess) {
         std::string sess_phrase = "";
         if (sess.length()) {
             std::vector<int> ids;
@@ -139,26 +122,19 @@ class History {
         if (sess_phrase.length() && path_phrase.length())
             conjunction = "AND";
         
-        std::string sql = "SELECT * FROM history_fts WHERE history_fts MATCH '" + 
-                          sess_phrase + " " + conjunction + " " + path_phrase + "'";
-        db.prepare_sql(sql, &select_stmt);
-        
-        return select_stmt;
+        return "SELECT * FROM history_fts WHERE history_fts MATCH '" + 
+                sess_phrase + " " + conjunction + " " + path_phrase + "'";
     }
 
-    int insert(const std::string& session, const std::string& datetime, const std::string& path, const std::string& cmd, const std::string& rc) {
-        int result = SQLITE_DONE;
+    void insert(const std::string& session, const std::string& datetime, const std::string& path, const std::string& cmd, const std::string& rc) {
+        SqliteDB::Query query(db, "INSERT INTO commands (sess_id,date,pwd,cmd,rc) VALUES ( :sess , :datetime , :pwd , :cmd, :rc );");
         
-        db.bind_value(insert_cmd_stmt, ":sess", session);
-        db.bind_value(insert_cmd_stmt, ":datetime", datetime);
-        db.bind_value(insert_cmd_stmt, ":pwd", path);
-        db.bind_value(insert_cmd_stmt, ":cmd", cmd);
-        db.bind_value(insert_cmd_stmt, ":rc", rc);
-            
-        while ((result = sqlite3_step(insert_cmd_stmt)) == SQLITE_BUSY) {};
-
-        sqlite3_reset(insert_cmd_stmt);
-        return result;
+        query.bind(":sess", session);
+        query.bind(":datetime", datetime);
+        query.bind(":pwd", path);
+        query.bind(":cmd", cmd);
+        query.bind(":rc", rc);
+        query.exec();
     }
     
     
@@ -186,100 +162,61 @@ public:
               "CREATE TRIGGER IF NOT EXISTS history_update AFTER INSERT ON commands BEGIN \
                     INSERT INTO history_fts(sess_id,date,pwd,cmd) VALUES (new.sess_id,new.date,new.pwd,new.cmd); \
                END;";
-        db.exec_sql(sql);
-
-        sql = "INSERT INTO commands (sess_id,date,pwd,cmd,rc) "
-              " VALUES ( :sess , :datetime , :pwd , :cmd, :rc );";
-        db.prepare_sql(sql, &insert_cmd_stmt);
-
-        sql = "INSERT OR REPLACE INTO last_commands (sess_id, pwd, cmd) "
-              "VALUES ( :sess, :pwd, :cmd );";
-        db.prepare_sql(sql, &insert_last_cmd_stmt);
-
-        sql = "SELECT * FROM last_commands WHERE sess_id = :sess AND pwd = :pwd;";
-        db.prepare_sql(sql, &select_last_cmd_stmt);
+        db.exec(sql);
     }
 
     ~History() {
     }
 
-    int insert_cmd(const std::string& session, const std::string& datetime, const std::string& cwd, const std::string& cmd, const std::string& rc) {
-        int result = SQLITE_DONE;
+    void insert_cmd(const std::string& session, const std::string& datetime, const std::string& cwd, const std::string& cmd, const std::string& rc) {
         std::string path = prepare_path_for_search(cwd);
         std::string last_cmd = get_last_cmd(session, path);
         
         if (cmd != last_cmd) {
-            result = insert(session, datetime, path, cmd, rc);
-
-            if (result == SQLITE_DONE)
-                set_last_cmd(session, path, cmd);
+            insert(session, datetime, path, cmd, rc);
+            set_last_cmd(session, path, cmd);
         }
-        
-        return result;
     }
 
     int64_t insert_sess(const std::string& name) {
-        std::string sql = "INSERT INTO sessions (date,name) VALUES (";
-        sql += "DATETIME(),";
-        sql += "\"" + name + "\");";
-        int rc = db.exec_sql(sql);
+        SqliteDB::Query query(db, "INSERT INTO sessions (date,name) VALUES (DATETIME(), :name );");
         
-        if (rc != SQLITE_OK) {
-            std::cout << rc << std::endl;
-            throw -11;
-        }
+        query.bind(":name", name);
+        query.exec();
 
         return db.last_rowid();
     }
 
     std::string get_sess_name(const std::string& id) {
+        SqliteDB::Query query(db, "SELECT * FROM sessions WHERE id = :id;");
         std::string result = "";
-        sqlite3_stmt *select_stmt;
-        std::string sql = "SELECT * FROM sessions WHERE id = :id;";
         
-        db.prepare_sql(sql, &select_stmt);
-        db.bind_value(select_stmt, ":id", id);
+        query.bind(":id", id);
 
-        while (sqlite3_step(select_stmt) == SQLITE_ROW) {
-            result = std::string(reinterpret_cast< char const* >(sqlite3_column_text(select_stmt, 2)));
+        while (query.exec_step()) {
+            result = query.get_string(2);
         };
         
-        sqlite3_reset(select_stmt);
-        
         return result;
     }
     
-    int set_sess_name(const std::string& id, const std::string& sess_name) {
-        int result = SQLITE_DONE;
-        sqlite3_stmt *set_stmt;
-        std::string sql = "UPDATE sessions SET name = :name WHERE id = :id;";
-        
-        db.prepare_sql(sql, &set_stmt);
-        db.bind_value(set_stmt, ":name", sess_name);
-        db.bind_value(set_stmt, ":id", id);
+    void set_sess_name(const std::string& id, const std::string& sess_name) {
+        SqliteDB::Query query(db, "UPDATE sessions SET name = :name WHERE id = :id;");
 
-        while ((result = sqlite3_step(set_stmt)) == SQLITE_BUSY) { };
-        
-        sqlite3_reset(set_stmt);
-        
-        return result;
+        query.bind(":name", sess_name);
+        query.bind(":id", id);
+        query.exec();
     }
     
-    int select(bool by_dir, const std::string& path, bool recursively, bool by_sess, const std::string& sess) {
-        int result = SQLITE_DONE;
-        
-        sqlite3_stmt *select_stmt = prepare_select(
+    void select(bool by_dir, const std::string& path, bool recursively, bool by_sess, const std::string& sess) {
+        std::string select_sql = prepare_select(
                             (by_dir) ? path : "", recursively, 
                             (by_sess) ? sess : "");
+        SqliteDB::Query query(db, select_sql);
         
-        while ((result = sqlite3_step(select_stmt)) == SQLITE_ROW) {
-            std::cout << sqlite3_column_text(select_stmt, 3) << std::endl;
+        while (query.exec_step()) {
+            std::cout << query.get_string(3) << std::endl;
         };
-        
-        sqlite3_reset(select_stmt);
-        
-        return result;
-        
     }
     
     int parse_input_file(const std::string& filename, const std::string& separator) {
@@ -297,7 +234,7 @@ public:
             return -11; // TODO: Add meaningful return code
 
         // To speed-up loading process - perform all inserts as single transaction
-        db.exec_sql("BEGIN TRANSACTION;");
+        db.exec("BEGIN TRANSACTION;");
 
         while (getline(input, line)) {
             std::vector<std::string> elements = split(line, separator);
@@ -311,7 +248,7 @@ public:
             bar.show_progress(current_line);
         }
         
-        db.exec_sql("COMMIT;");
+        db.exec("COMMIT;");
         
         input.close();
         
