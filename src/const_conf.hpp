@@ -35,7 +35,13 @@ const std::string const_configuration = "\
 \tseparator=\"!!hmseparator!!\"\n\
 \n\
 \t# Set a script to be executed after each other command in the current terminal session\n\
-\texport PROMPT_COMMAND='rc=$?; if [ $(id -u) -ne 0 ] && ! [ -z $hm_session_id ]; then echo ${hm_session_id}${separator}$(date +\"%Y-%m-%d %H:%M:%S\")${separator}$(pwd)${separator}\"$(history 1 | sed -E \"s/^ *[0-9]* *//\")\"${separator}$rc >> $hm_history_tmp; fi'';'$PROMPT_COMMAND\n\
+\tprompt_command() {\n\
+\t\trc=$?;\n\
+\t\tif [ $(id -u) -ne 0 ] && ! [ -z $hm_session_id ];\n\
+\t\tthen\n\
+\t\t\techo ${hm_session_id}${separator}$(date +\"%Y-%m-%d %H:%M:%S\")${separator}$(pwd)${separator}\"$(hm_extract_last_cmd)\"${separator}$rc >> $hm_history_tmp;\n\
+\t\tfi\n\
+\t}\n\
 \n\
 \t# Wrapper for hm-db which adds the selected commands at the beginning of the current terminal history\n\
 \thm() {\n\
@@ -62,15 +68,32 @@ const std::string const_configuration = "\
 \t\t# Perform history recovery\n\
 \t\tif ! [ -z \"$ARGS\" ]\n\
 \t\tthen\n\
-\t\t\tSAVE_HISTFILE=$HISTFILE\n\
-\t\t\tHISTFILE=$(mktemp extracted_history.XXXXXXXXXX)\n\
+\t\t\tTMPFILE=$(mktemp extracted_history.XXXXXXXXXX)\n\
 \t\t\t# Parse commands saved to the text file\n\
 \t\t\thm-db $hm_history_db parse $hm_history_tmp $separator\n\
 \t\t\t# Update history\n\
-\t\t\thm-db $hm_history_db select $hm_session_id $ARGS > $HISTFILE && echo hm \"$*\" >> $HISTFILE && history -r\n\
+\t\t\thm-db $hm_history_db select $hm_session_id $(echo $ARGS) > $TMPFILE && echo hm \"$*\" >> $TMPFILE && hm_load_history $TMPFILE\n\
 \t\t\tif [ $? -eq 0 ]; then echo \"History successfully updated!\"; fi\n\
-\t\t\trm -rf $hm_history_tmp $HISTFILE\n\
-\t\t\tHISTFILE=$SAVE_HISTFILE\n\
+\t\t\trm -rf $hm_history_tmp $TMPFILE\n\
 \t\tfi\n\
 \t}\n\
+\n\
+\tif [ $ZSH_VERSION ]\n\
+\tthen\n\
+\t\thm_load_history() { fc -R $1 }\n\
+\t\thm_extract_last_cmd() { echo $(fc -ln -1) }\n\
+\t\tprecmd_functions=(${precmd_functions} prompt_command)\n\
+\tfi\n\
+\n\
+\tif [ $BASH_VERSION ]\n\
+\tthen\n\
+\t\thm_load_history() { \n\
+\t\t\tSAVE_HISTFILE=$HISTFILE\n\
+\t\t\tHISTFILE=$1\n\
+\t\t\thistory -r\n\
+\t\t\tHISTFILE=$SAVE_HISTFILE\n\
+\t\t}\n\
+\t\thm_extract_last_cmd() { history 1 | sed -E \"s/^ *[0-9]* *//\" }\n\
+\t\texport PROMPT_COMMAND='prompt_command;'$PROMPT_COMMAND\n\
+\tfi\n\
 ";
