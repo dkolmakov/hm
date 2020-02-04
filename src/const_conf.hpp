@@ -80,8 +80,12 @@ const std::string const_configuration = "\
 \n\
 \tif [ $ZSH_VERSION ]\n\
 \tthen\n\
-\t\thm_load_history() { fc -R $1 }\n\
-\t\thm_extract_last_cmd() { echo $(fc -ln -1) }\n\
+\t\thm_load_history() {\n\
+\t\t\tfc -R $1\n\
+\t\t}\n\
+\t\thm_extract_last_cmd() {\n\
+\t\t\techo $(fc -ln -1)\n\
+\t\t}\n\
 \t\tprecmd_functions=(${precmd_functions} prompt_command)\n\
 \tfi\n\
 \n\
@@ -93,7 +97,9 @@ const std::string const_configuration = "\
 \t\t\thistory -r\n\
 \t\t\tHISTFILE=$SAVE_HISTFILE\n\
 \t\t}\n\
-\t\thm_extract_last_cmd() { history 1 | sed -E \"s/^ *[0-9]* *//\" }\n\
+\t\thm_extract_last_cmd() {\n\
+\t\t\thistory 1 | sed -E \"s/^ *[0-9]* *//\"\n\
+\t\t}\n\
 \t\texport PROMPT_COMMAND='prompt_command;'$PROMPT_COMMAND\n\
 \tfi\n\
 ";
