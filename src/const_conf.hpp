@@ -82,6 +82,7 @@ const std::string const_configuration = "\
 \tthen\n\
 \t\thm_load_history() {\n\
 \t\t\tfc -R $1\n\
+\t\t\tfc -W\n\
 \t\t}\n\
 \t\thm_extract_last_cmd() {\n\
 \t\t\techo $(fc -ln -1)\n\
@@ -96,6 +97,7 @@ const std::string const_configuration = "\
 \t\t\tHISTFILE=$1\n\
 \t\t\thistory -r\n\
 \t\t\tHISTFILE=$SAVE_HISTFILE\n\
+\t\t\thistory -w\n\
 \t\t}\n\
 \t\thm_extract_last_cmd() {\n\
 \t\t\thistory 1 | sed -E \"s/^ *[0-9]* *//\"\n\
