@@ -6,6 +6,7 @@ let common = [
 
     python3
     python3Packages.pytest
+    python3Packages.cram
 ]; 
 in {
 	dev = stdenv.mkDerivation rec {
