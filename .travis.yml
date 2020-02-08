@@ -1,43 +1,40 @@
 
+os: linux
+dist: xenial
+compiler: gcc
+sudo: required
+
 script:
 - py.test-3
-- source tests/release/test_interface.sh
+- cram3 -v --shell=bash tests/release/test_interface.t
+- cram3 -v --shell=zsh tests/release/test_interface.t
 
 matrix:
   include:
   
   - name: "Test with nix-shell"
     language: nix
-    os: linux
-    dist: xenial
-    compiler: gcc
-    sudo: required
     script:
     - nix-shell -A test scripts/shell.nix --run 'mkdir -p build && cd build && cmake -DCMAKE_INSTALL_PREFIX=/usr/local
       .. && make package && sudo make install && cd .. && py.test'
     
   - name: "Test on ubuntu"
     language: cpp
-    os: linux
-    dist: trusty
-    compiler: gcc
-    sudo: required
     addons:
       apt:
         packages:
         - cmake
         - g++
+        - zsh
         - python3
         - python3-pytest
+        - python3-cram
     install:
     - mkdir -p build && cd build && cmake .. && make package && sudo make install
       && cd .. && hm-db configure ~/.bashrc && . ~/.bashrc
       
   - name: "Test Nix release"
     language: nix
-    os: linux
-    dist: xenial
-    compiler: gcc
     addons:
       apt:
         packages:
@@ -48,14 +45,11 @@ matrix:
     - hm-db configure ~/.bashrc
     - . ~/.bashrc
     script:
-    - . tests/release/test_interface.sh
+    - . tests/release/prepare_history.sh
+    - . tests/release/check_history.sh
 
   - name: "Test Deb release"
     language: cpp
-    os: linux
-    dist: xenial
-    compiler: gcc
-    sudo: required
     addons:
       apt:
         packages:
@@ -68,7 +62,8 @@ matrix:
     - hm-db configure ~/.bashrc
     - . ~/.bashrc
     script:
-    - . tests/release/test_interface.sh
+    - . tests/release/prepare_history.sh
+    - . tests/release/check_history.sh
 
 deploy:
   provider: releases
