@@ -31,7 +31,7 @@ matrix:
         - python3-cram
     install:
     - mkdir -p build && cd build && cmake .. && make package && sudo make install
-      && cd .. && hm-db configure ~/.bashrc && . ~/.bashrc
+      && cd .. && hm-db configure ~/.bashrc && hm-db configure ~/.zshrc
       
   - name: "Test Nix release"
     language: nix
