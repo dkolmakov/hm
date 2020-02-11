@@ -20,7 +20,7 @@ wget https://github.com/dkolmakov/hm/releases/download/v1.0.0/hm-1.0.0-Linux-x86
 2. Install it:
 
 ```Shell
-sudo dpkg -i hm-${version}-Linux-x86_64.deb
+sudo dpkg -i hm-1.0.0-Linux-x86_64.deb
 ```
 
 ## Nix/NixOS
@@ -34,7 +34,7 @@ wget https://github.com/dkolmakov/hm/releases/download/v1.0.0/hm-1.0.0.nix
 2. Install it:
 
 ```Shell
-nix-env -i -f hm-${version}.nix
+nix-env -i -f hm-1.0.0.nix
 ```
 
 ## From sources
