@@ -28,7 +28,7 @@ sudo dpkg -i hm-${version}-Linux-x86_64.deb
 1. Download the latest .nix expression from [release page](https://github.com/dkolmakov/hm/releases) or with command line:
 
 ```Shell
-wget https://github.com/dkolmakov/hm/releases/download/v${version}/hm-${version}.nix
+wget https://github.com/dkolmakov/hm/releases/download/v1.0.0/hm-1.0.0.nix
 ```
 
 2. Install it:
@@ -42,7 +42,7 @@ nix-env -i -f hm-${version}.nix
 1. Download the latest .tar.gz expression from [release page](https://github.com/dkolmakov/hm/releases) or with command line:
 
 ```Shell
-wget https://github.com/dkolmakov/hm/archive/v${version}.tar.gz
+wget https://github.com/dkolmakov/hm/archive/v1.0.0.tar.gz
 ```
 
 2. Unpack it:
