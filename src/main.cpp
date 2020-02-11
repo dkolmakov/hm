@@ -34,7 +34,7 @@ enum ErrorCode {
 static void show_version(std::string name)
 {
     std::cout << name << " " << HM_VERSION << std::endl
-              << "Copyright (C) 2019 Dmitry Kolmakov." << std::endl
+              << "Copyright (C) 2020 Dmitry Kolmakov." << std::endl
               << "License ASLv2.0: Apache License, Version 2.0 <http://www.apache.org/licenses/LICENSE-2.0>." << std::endl
               << "This is free software: you are free to change and redistribute it." << std::endl
               << "There is NO WARRANTY, to the extent permitted by law." << std::endl;
