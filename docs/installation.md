@@ -14,7 +14,7 @@ Install latest version in development:
 1. Download the latest .deb package from [release page](https://github.com/dkolmakov/hm/releases) or with command line:
 
 ```Shell
-wget https://github.com/dkolmakov/hm/releases/download/v${version}/hm-${version}-Linux-x86_64.deb
+wget https://github.com/dkolmakov/hm/releases/download/v1.0.0/hm-1.0.0-Linux-x86_64.deb
 ```
 
 2. Install it:
