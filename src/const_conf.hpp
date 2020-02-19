@@ -88,10 +88,7 @@ const std::string const_configuration = "\
 \t\t\techo $(fc -ln -1)\n\
 \t\t}\n\
 \t\tprecmd_functions=(${precmd_functions} prompt_command)\n\
-\tfi\n\
-\n\
-\tif [ $BASH_VERSION ]\n\
-\tthen\n\
+\telse\n\
 \t\thm_load_history() { \n\
 \t\t\tSAVE_HISTFILE=$HISTFILE\n\
 \t\t\tHISTFILE=$1\n\
