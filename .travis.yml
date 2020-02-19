@@ -36,21 +36,7 @@ matrix:
         - python3-pytest
     install:
     - mkdir -p build && cd build && cmake .. && make package && sudo make install
-      && cd .. && hm-db configure ~/.bashrc
-      
-  - name: "Test zsh on ubuntu"
-    language: cpp
-    addons:
-      apt:
-        packages:
-        - cmake
-        - g++
-        - zsh
-        - python3
-        - python3-pytest
-    install:
-    - mkdir -p build && cd build && cmake .. && make package && sudo make install
-      && cd .. && hm-db configure ~/.zshrc && zsh -i
+      && cd .. && hm-db configure ~/.bashrc && . ~/.bashrc
       
   - name: "Test Nix release"
     language: nix
