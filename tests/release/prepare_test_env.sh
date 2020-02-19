@@ -3,7 +3,7 @@
 get_last_command() {
     if [ $BASH_VERSION ]
     then
-        echo $(history 3 | head -n 1 | sed -E "s/^ *[0-9]* *//")
+        echo $(history 2 | head -n 1 | sed -E "s/^ *[0-9]* *//")
     fi
     
     if [ $ZSH_VERSION ]

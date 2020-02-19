@@ -8,9 +8,9 @@ script:
 - py.test-3
 - . tests/release/prepare_test_env.sh
 - mkdir -p $test_path && cd $test_path
-- echo "test command"
+- echo test
 - cd -
-- echo "wrong command"
+- echo wrong
 - hm -d $test_path
 - last_command=$(get_last_command)
 - . tests/release/check_test_result.sh
