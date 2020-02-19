@@ -1,14 +1,11 @@
 # Prepare common test environment
 
 get_last_command() {
-    if [ $BASH_VERSION ]
-    then
-        echo $(history 2 | head -n 1 | sed -E "s/^ *[0-9]* *//")
-    fi
-    
     if [ $ZSH_VERSION ]
     then
         echo $(echo "$(fc -l -2)" | head -n 1 | sed -E "s/^ *[0-9]* *//")
+    else
+        echo $(history 2 | head -n 1 | sed -E "s/^ *[0-9]* *//")
     fi
 }
 
