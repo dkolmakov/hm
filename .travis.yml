@@ -12,7 +12,6 @@ script:
 - cd -
 - echo wrong
 - hm -d $test_path
-- last_command=$(get_last_command)
 - . tests/release/check_test_result.sh
 
 matrix:
