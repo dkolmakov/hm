@@ -3,7 +3,7 @@
 get_last_command() {
     if [ $BASH_VERSION ]
     then
-        echo $(history 2 | head -n 1 | sed -E "s/^ *[0-9]* *//")
+        echo $(history 3 | head -n 1 | sed -E "s/^ *[0-9]* *//")
     fi
     
     if [ $ZSH_VERSION ]
@@ -12,20 +12,20 @@ get_last_command() {
     fi
 }
 
+rc=0
+
 # Check database file
-if [ -z $hm_history_db ] || ! [ -f $hm_history_db ]; then echo "Error: no database found!"; fi
+if [ -z $hm_history_db ] || ! [ -f $hm_history_db ]; then echo "Error: no database found!"; rc=1; fi
 
 # Check current session id
-if [ -z $hm_session_id ] || ! [ $hm_session_id -ge 1 ]; then echo "Error: wrong session id!"; fi
+if [ -z $hm_session_id ] || ! [ $hm_session_id -ge 1 ]; then echo "Error: wrong session id!"; rc=1; fi
     
 # Create unique test command and test path
-test_root="$(pwd)"
-test_path_outer="$(pwd)/test/path"
+# test_root="$(pwd)"
+# test_path_outer="$(pwd)/test/path"
 test_path="$(pwd)/test/path/$(date +"%Y-%m-%d_%H:%M:%S")"
 test_session_name="$(date +"%Y-%m-%d_%H:%M:%S")"
-test_command="touch $(date +"%Y-%m-%d %H:%M:%S")"
-
-mkdir -p $test_path
+# test_command="touch $(date +"%Y-%m-%d %H:%M:%S")"
 
 # Create test session name in the database
 # test_session_id=$(hm-db $hm_history_db session $test_session_name)
@@ -39,3 +39,6 @@ mkdir -p $test_path
 # hm -d $test_path
 # if ! [ $? -eq 0 ]; then echo "Error!!! Selecting commands failed!"; rc=1; fi
 # 
+
+# Form error code 
+[ $rc -eq 0 ]

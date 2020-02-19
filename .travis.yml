@@ -6,8 +6,14 @@ sudo: required
 
 script:
 - py.test-3
-- cram3 -v --shell=bash tests/release/test_interface.t
-- cram3 -v --shell=zsh tests/release/test_interface.t
+- . tests/release/prepare_test_env.sh
+- mkdir -p $test_path && cd $test_path
+- echo "test command"
+- cd -
+- echo "wrong command"
+- hm -d $test_path
+- last_command=$(get_last_command)
+- . tests/release/check_test_result.sh
 
 matrix:
   include:
@@ -18,7 +24,7 @@ matrix:
     - nix-shell -A test scripts/shell.nix --run 'mkdir -p build && cd build && cmake -DCMAKE_INSTALL_PREFIX=/usr/local
       .. && make package && sudo make install && cd .. && py.test'
     
-  - name: "Test on ubuntu"
+  - name: "Test bash on ubuntu"
     language: cpp
     addons:
       apt:
@@ -28,10 +34,23 @@ matrix:
         - zsh
         - python3
         - python3-pytest
-        - python3-cram
     install:
     - mkdir -p build && cd build && cmake .. && make package && sudo make install
-      && cd .. && hm-db configure ~/.bashrc && hm-db configure ~/.zshrc
+      && cd .. && hm-db configure ~/.bashrc
+      
+  - name: "Test zsh on ubuntu"
+    language: cpp
+    addons:
+      apt:
+        packages:
+        - cmake
+        - g++
+        - zsh
+        - python3
+        - python3-pytest
+    install:
+    - mkdir -p build && cd build && cmake .. && make package && sudo make install
+      && cd .. && hm-db configure ~/.zshrc && zsh -i
       
   - name: "Test Nix release"
     language: nix
