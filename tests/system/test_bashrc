@@ -1,0 +1,6 @@
+
+. $HOME/.bashrc
+
+PS1='ignore_this\$ '
+
+

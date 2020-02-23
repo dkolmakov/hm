@@ -1,14 +1,21 @@
 with import <nixpkgs> {};
 
-let common = [
-    stdenv
-    cmake
+let deps = {
+    cram_ = pkgs.python3Packages.buildPythonPackage rec {
+        name = "cram";
+        src = /home/dmitry/projects/cram;
+        doCheck = false;
+    };
 
-    python3
-    python3Packages.pytest
-    python3Packages.cram
-]; 
-in {
+    common = [
+        stdenv
+        cmake
+
+        python3
+        python3Packages.pytest
+    ]; 
+};
+in with deps; {
 	dev = stdenv.mkDerivation rec {
 		name = "hm-env";
 
@@ -24,7 +31,7 @@ in {
 
 	test = stdenv.mkDerivation rec {
 		name = "hm-env";
-		buildInputs = common;
+		buildInputs = common ++ [cram_];
 	};
 }
 

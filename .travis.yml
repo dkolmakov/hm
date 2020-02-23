@@ -6,15 +6,7 @@ sudo: required
 
 script:
 - py.test-3
-- . tests/release/prepare_test_env.sh
-- mkdir -p $test_path && cd $test_path
-- echo test
-- cd -
-- echo wrong
-- hm -d $test_path
-- last_command=$(get_last_command)
-- echo $last_command
-- . tests/release/check_test_result.sh
+- cram --shell=bash --shell_args="--rcfile $(pwd)/tests/system/test_bashrc -i" --ignore='.*\$'  $(pwd)/tests/system/*.t
 
 matrix:
   include:
@@ -25,7 +17,7 @@ matrix:
     - nix-shell -A test scripts/shell.nix --run 'mkdir -p build && cd build && cmake -DCMAKE_INSTALL_PREFIX=/usr/local
       .. && make package && sudo make install && cd .. && py.test'
     
-  - name: "Test bash on ubuntu"
+  - name: "Test on ubuntu"
     language: cpp
     addons:
       apt:
@@ -37,7 +29,7 @@ matrix:
         - python3-pytest
     install:
     - mkdir -p build && cd build && cmake .. && make package && sudo make install
-      && cd .. && hm-db configure ~/.bashrc && . ~/.bashrc
+      && cd .. && hm-db configure ~/.bashrc
       
   - name: "Test Nix release"
     language: nix
