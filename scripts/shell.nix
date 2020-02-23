@@ -31,7 +31,7 @@ in with deps; {
 
 	test = stdenv.mkDerivation rec {
 		name = "hm-env";
-		buildInputs = common ++ [cram_];
+		buildInputs = common;
 	};
 }
 
