@@ -1,5 +1,5 @@
 
 git clone -b support-interactive https://github.com/dkolmakov/cram.git
 cd cram
-pip3 install --user .
+sudo pip3 install .
 cd -
