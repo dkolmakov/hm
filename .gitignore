@@ -6,3 +6,4 @@ builds/
 src/version.hpp
 pkgs/nix/hm.nix
 __pycache__
+hm.egg-info
