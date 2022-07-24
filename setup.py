@@ -1,8 +1,16 @@
 from setuptools import setup
+from os import path
 
-setup(name='hm',
-      version='0.1',
+# Get the long description
+cwd = path.abspath(path.dirname(__file__))
+with open(path.join(cwd, 'docs', 'python_package.md'), encoding='utf-8') as f:
+    long_description = f.read()
+
+setup(name='history-manager',
+      version='0.1.1',
       description='Command line history manager for bash',
+      long_description=long_description,
+      long_description_content_type='text/markdown',
       url='http://github.com/dkolmakov/hm',
       author='Dmitrii Kolmakov',
       author_email='dimannadivane@gmail.com',
