@@ -1,0 +1,18 @@
+include ./docs/*
+
+include ./CMakeLists.txt
+
+include ./src/CMakeLists.txt
+include ./src/*.cpp
+include ./src/*.hpp
+include ./src/*.hpp.in
+
+include ./thirdparty/apathy/CMakeLists.txt
+include ./thirdparty/apathy/path.hpp
+
+include ./thirdparty/clipp/CMakeLists.txt
+include ./thirdparty/clipp/clipp.hpp
+
+include ./thirdparty/sqlite3/CMakeLists.txt
+include ./thirdparty/sqlite3/*.h
+include ./thirdparty/sqlite3/*.c
