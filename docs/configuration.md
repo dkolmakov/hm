@@ -6,19 +6,28 @@
 Configuration of the history manager is performed by the following command:
 
 ```Shell
-hm-db configure ~/.bashrc
+hm-init
 ```
-
-To check what will be added to the `~/.bashrc` run:
+or for the installation from sources:
 
 ```Shell
 hm-db configure
+```
+This command will output everything to the terminal. To add the content to `~/.bashrc` run:
+
+```Shell
+hm-init ~/.bashrc
+```
+or
+
+```Shell
+hm-db configure ~/.bashrc
 ```
 
 If it's not convenient to use `~/.bashrc` directly the configuration scripts can be placed to a separate file `~/.hm/configuration`:
 
 ```Shell
-hm-db configure ~/.hm/configuration
+hm-init ~/.hm/configuration
 ```
 and add the following line to the `~/.bashrc`:
 
@@ -31,8 +40,9 @@ and add the following line to the `~/.bashrc`:
 History manager home directory is `~/.hm` by default. Other home path can be specified at configuration step:
 
 ```Shell
-hm-db configure ~/.bashrc --home /custom/hm/home/path
+hm-init ~/.bashrc --home /custom/hm/home/path
 ```
+
 ### Applying changes to the current session
 
 Simply source the `.bashrc`:

@@ -13,7 +13,7 @@ add_subdirectory(thirdparty/clipp)
 add_subdirectory(src)
 
 # Prepare nix expression
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/pkgs/nix/hm.nix.in ${CMAKE_CURRENT_BINARY_DIR}/hm-${hm_VERSION}.nix)            
+# configure_file(${CMAKE_CURRENT_SOURCE_DIR}/pkgs/nix/hm.nix.in ${CMAKE_CURRENT_BINARY_DIR}/hm-${hm_VERSION}.nix)            
 
 install(FILES LICENSE DESTINATION ${CMAKE_INSTALL_DOCDIR})
 install(FILES README.md DESTINATION ${CMAKE_INSTALL_DOCDIR})
