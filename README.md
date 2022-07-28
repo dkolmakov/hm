@@ -20,20 +20,20 @@ The recovery of a history can be assumed as synchronization between previously e
 
 ## Installation
 
-Install release:
-- [Ubuntu/Debian](docs/installation.md#ubuntudebian)
-- [Nix/NixOS](docs/installation.md#nixnixos)
-- [From sources](docs/installation.md#from-sources)
+History manager is available as a python package:
 
-Install latest version in development: 
-- [From dev sources](docs/installation.md#from-dev-sources)
+```Shell
+pip install history-manager
+```
+
+For other installation options please follow the [link](docs/installation.md)
 
 ## Configuration
 
-Configuration of the history manager is performed by adding it's wrapper scripts to the `.bashrc`:
+At the configuration step the history manager adds some wrapper scripts to the `.bashrc`:
 
 ```Shell
-hm-db configure ~/.bashrc
+hm-init ~/.bashrc
 ```
 To enable `hm` in the current session source the `.bashrc`:
 

@@ -29,12 +29,9 @@ class build_ext(build_ext_orig):
         par_ext_dir = path.abspath(path.join(ext_dir, pardir))
         makedirs(ext_dir, exist_ok=True)
         
-        print(ext_dir)
-        print(par_ext_dir)
-        
         #config = 'Debug' if self.debug else 'Release'
         cmake_args = [
-            '-DCMAKE_RUNTIME_OUTPUT_DIRECTORY=' + ext_dir,
+            '-DCMAKE_RUNTIME_OUTPUT_DIRECTORY=' + par_ext_dir,
         ]
 
         build_args = [
@@ -52,7 +49,7 @@ class build_ext(build_ext_orig):
 
 
 setup(name='history-manager',
-      version='0.1.3',
+      version='0.1.6',
       description='Command line history manager for bash',
       long_description=long_description,
       long_description_content_type='text/markdown',
