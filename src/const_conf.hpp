@@ -54,13 +54,19 @@ const std::string const_configuration = "\
 \t\t\thm-db --version\n\
 \t\t\t;;\n\
 \t\t\t-h|--help)\n\
-\t\t\thm-db --help\n\
+\t\t\techo \"hm - history manager command line wrapper.\"\n\
+\t\t\techo \"\"\n\
+\t\t\techo \"usage: hm [PATH] [OPTIONS]\"\n\
+\t\t\techo \"    PATH - a directory for which execution history will be resotred\"\n\
+\t\t\techo \"    -h|--help - prints this help.\"\n\
+\t\t\techo \"    -v|--version - shows version of the hm-db application.\"\n\
+\t\t\techo \"    -i|--info - outputs the current session info.\"\n\
 \t\t\t;;\n\
 \t\t\t-i|--info)\n\
 \t\t\thm-db $hm_history_db info $hm_session_id\n\
 \t\t\t;;\n\
 \t\t\t*)\n\
-\t\t\tARGS=\"$ARGS $i\"\n\
+\t\t\tARGS=\"-d $i\"\n\
 \t\t\t;;\n\
 \t\tesac\n\
 \t\tdone\n\
