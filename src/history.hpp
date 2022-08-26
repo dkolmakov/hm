@@ -23,13 +23,34 @@
 #include <algorithm>
 
 #include "database.hpp"
+#include "query.hpp"
 #include "path.hpp"
 #include "progress_bar.hpp"
+#include "utils.hpp"
+
+
+struct HistoryException : UtilException {
+    HistoryException(const std::string& _reason) :
+        UtilException("History manager error ", _reason) {}
+};
+
+
+// TODO: Implement schema class to remove explicit digits in fields
+// class Schema {
+//     const std::vector<std::string> schema;
+// 
+// public:
+//     
+//     Schema(const std::initializer_list& list) : schema(list) {
+//         
+//     }
+// };
 
 class History {
 
-    SqliteDB::Database db;
-
+    const sqlite::Database db;
+    const size_t correctNumberOfElements = 5; // TODO: take this from the corresponding schema
+    
     std::string prepare_path_for_search(const std::string& input) {
         apathy::Path path(input);
         
@@ -55,42 +76,42 @@ class History {
     }    
 
     std::string get_last_cmd(const std::string& sess_id, const std::string& pwd) {
-        SqliteDB::Query query(db, "SELECT * FROM last_commands WHERE sess_id = :sess AND pwd = :pwd;");
+        sqlite::Query query(db, "SELECT * FROM last_commands WHERE sess_id = :sess AND pwd = :pwd;");
         std::string cmd = "";
 
         query.bind(":sess", sess_id);
         query.bind(":pwd", pwd);
 
         while (query.exec_step()) {
-            cmd = query.get_string(2);
+            cmd = query.get_string(2); // TODO: make a schema class and take positions from it
         };
 
         return cmd;
     }
 
     void set_last_cmd(const std::string& sess_id, const std::string& cwd, const std::string& cmd) {
-        SqliteDB::Query query(db, "INSERT OR REPLACE INTO last_commands (sess_id, pwd, cmd) VALUES ( :sess, :pwd, :cmd );");
+        sqlite::Query query(db, "INSERT OR REPLACE INTO last_commands (sess_id, pwd, cmd) VALUES ( :sess, :pwd, :cmd );");
 
-        query.bind(":sess", sess_id);
+        query.bind(":sess", sess_id); // TODO: make a schema class and take positions from it
         query.bind(":pwd", cwd);
         query.bind(":cmd", cmd);
         query.exec();
     }
 
     void get_sess_id_by_name(std::vector<int>& ids, const std::string& sess_name) {
-        SqliteDB::Query query(db, "SELECT * FROM sessions WHERE name = :name;");
+        sqlite::Query query(db, "SELECT * FROM sessions WHERE name = :name;");
 
         query.bind(":name", sess_name);
 
         while (query.exec_step()) {
-            ids.push_back(query.get_int(0));
+            ids.push_back(query.get_int(0)); // TODO: make a schema class and take positions from it
         };
     }
 
     std::string logic_phrase_from_ids(std::vector<int>& ids) {
         std::string phrase = "";
         
-        for (size_t i = 0; i < ids.size(); i++) {
+        for (size_t i = 0; i < ids.size(); ++i) {
             phrase += std::to_string(ids[i]);
             
             if (i + 1 < ids.size())
@@ -100,8 +121,9 @@ class History {
         return phrase;
     }
     
-    std::string prepare_select(const std::string& path, bool recursively, const std::string& sess) {
+    std::string prepare_select(const std::string& path, const bool recursively, const std::string& sess) {
         std::string sess_phrase = "";
+        
         if (sess.length()) {
             std::vector<int> ids;
             get_sess_id_by_name(ids, sess);
@@ -127,7 +149,7 @@ class History {
     }
 
     void insert(const std::string& session, const std::string& datetime, const std::string& path, const std::string& cmd, const std::string& rc) {
-        SqliteDB::Query query(db, "INSERT INTO commands (sess_id,date,pwd,cmd,rc) VALUES ( :sess , :datetime , :pwd , :cmd, :rc );");
+        sqlite::Query query(db, "INSERT INTO commands (sess_id,date,pwd,cmd,rc) VALUES ( :sess , :datetime , :pwd , :cmd, :rc );");
         
         query.bind(":sess", session);
         query.bind(":datetime", datetime);
@@ -169,8 +191,8 @@ public:
     }
 
     void insert_cmd(const std::string& session, const std::string& datetime, const std::string& cwd, const std::string& cmd, const std::string& rc) {
-        std::string path = prepare_path_for_search(cwd);
-        std::string last_cmd = get_last_cmd(session, path);
+        const std::string path = prepare_path_for_search(cwd);
+        const std::string last_cmd = get_last_cmd(session, path);
         
         if (cmd != last_cmd) {
             insert(session, datetime, path, cmd, rc);
@@ -179,7 +201,7 @@ public:
     }
 
     int64_t insert_sess(const std::string& name) {
-        SqliteDB::Query query(db, "INSERT INTO sessions (date,name) VALUES (DATETIME(), :name );");
+        sqlite::Query query(db, "INSERT INTO sessions (date,name) VALUES (DATETIME(), :name );");
         
         query.bind(":name", name);
         query.exec();
@@ -188,20 +210,20 @@ public:
     }
 
     std::string get_sess_name(const std::string& id) {
-        SqliteDB::Query query(db, "SELECT * FROM sessions WHERE id = :id;");
+        sqlite::Query query(db, "SELECT * FROM sessions WHERE id = :id;");
         std::string result = "";
         
         query.bind(":id", id);
 
         while (query.exec_step()) {
-            result = query.get_string(2);
+            result = query.get_string(2); // TODO: make a schema class and take positions from it
         };
         
         return result;
     }
     
     void set_sess_name(const std::string& id, const std::string& sess_name) {
-        SqliteDB::Query query(db, "UPDATE sessions SET name = :name WHERE id = :id;");
+        sqlite::Query query(db, "UPDATE sessions SET name = :name WHERE id = :id;");
 
         query.bind(":name", sess_name);
         query.bind(":id", id);
@@ -212,14 +234,14 @@ public:
         std::string select_sql = prepare_select(
                             (by_dir) ? path : "", recursively, 
                             (by_sess) ? sess : "");
-        SqliteDB::Query query(db, select_sql);
+        sqlite::Query query(db, select_sql);
         
         while (query.exec_step()) {
-            std::cout << query.get_string(3) << std::endl;
+            std::cout << query.get_string(3) << std::endl; // TODO: make a schema class and take positions from it
         };
     }
     
-    int parse_input_file(const std::string& filename, const std::string& separator) {
+    void parse_input_file(const std::string& filename, const std::string& separator) {
         std::ifstream input(filename.c_str(), std::ios::in);
         std::string line;
 
@@ -231,7 +253,7 @@ public:
         ProgressBar<size_t> bar(total_lines, current_line);
 
         if (!input)
-            return -11; // TODO: Add meaningful return code
+            throw HistoryException("Failed to read commands from file " + filename);
 
         // To speed-up loading process - perform all inserts as single transaction
         db.exec("BEGIN TRANSACTION;");
@@ -239,7 +261,7 @@ public:
         while (getline(input, line)) {
             std::vector<std::string> elements = split(line, separator);
             
-            if (elements.size() != 5) 
+            if (elements.size() != correctNumberOfElements) 
                 continue; // Drop incorrect lines
             
             insert(elements[0], elements[1], elements[2], elements[3], elements[4]);
@@ -251,8 +273,6 @@ public:
         db.exec("COMMIT;");
         
         input.close();
-        
-        return 0;
     }
 
 };
