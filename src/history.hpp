@@ -27,29 +27,106 @@
 #include "path.hpp"
 #include "progress_bar.hpp"
 #include "utils.hpp"
-
+#include "schema.hpp"
 
 struct HistoryException : UtilException {
     HistoryException(const std::string& _reason) :
         UtilException("History manager error ", _reason) {}
 };
 
+using schema::Schema;
 
-// TODO: Implement schema class to remove explicit digits in fields
-// class Schema {
-//     const std::vector<std::string> schema;
-// 
-// public:
-//     
-//     Schema(const std::initializer_list& list) : schema(list) {
-//         
-//     }
-// };
+struct LastCommandsSchema : Schema {
+    const Column<unsigned long int> sess_id{"sess_id", "INTEGER PRIMARY KEY"};
+    const Column<std::string> pwd{"pwd", "TEXT"};
+    const Column<std::string> cmd{"cmd", "TEXT"};
+    
+    const std::string select = "SELECT * FROM " + table_name +
+                               " WHERE " + sess_id.name + " = " + sess_id.bName + 
+                               " AND " +  pwd.name + " = " + pwd.bName + ";";
+    
+    const std::string list = getList(sess_id, pwd, cmd);
+    const std::string bindingsList = getBindingsList(sess_id, pwd, cmd);
+    const std::string insertOrReplace = "INSERT OR REPLACE INTO " + table_name +
+                                        " (" + list + ") VALUES (" + bindingsList + ");";
+        
+    const std::string listWithTypes = getListWithTypes(sess_id, pwd, cmd);
+    const std::string create_table = "CREATE TABLE IF NOT EXISTS " + table_name + " (" +
+                                      listWithTypes + ");";
+                                      
+    LastCommandsSchema() : Schema("last_commands") { setPositions(sess_id, pwd, cmd); }
+};
+
+struct SessionsSchema : Schema {
+    const Column<unsigned long int> id{"id", "INTEGER PRIMARY KEY"};
+    const Column<std::string> date{"date", "TEXT"};
+    const Column<std::string> name{"name", "TEXT"};
+
+    const std::string select_by_name = "SELECT * FROM " + table_name +
+                                       " WHERE " + name.name + " = " + name.bName + ";";
+    const std::string select_by_id = "SELECT * FROM " + table_name + 
+                                     " WHERE " + id.name + " = " + id.bName + ";";
+
+    const std::string listWithTypes = getListWithTypes(id, date, name);
+    const std::string create_table = "CREATE TABLE IF NOT EXISTS " + table_name + " (" +
+                                      listWithTypes + ");";
+
+    const std::string insert = "INSERT INTO " + table_name + 
+                               " (" + getList(date, name) + ") VALUES (DATETIME(), " + getBindingsList(name) + ");";
+
+    const std::string update = "UPDATE " + table_name + 
+                               " SET " + name.name + " = " + name.bName + 
+                               " WHERE " + id.name + " = " + id.bName + ";";
+                               
+    SessionsSchema() : Schema("sessions") { setPositions(id, date, name); }
+};
+
+struct HistoryFtsSchema : Schema {
+    const Column<unsigned long int> sess_id{"sess_id", ""};
+    const Column<std::string> date{"date", ""};
+    const Column<std::string> pwd{"pwd", ""};
+    const Column<std::string> cmd{"cmd", ""};
+
+    const std::string list = getList(sess_id, date, pwd, cmd);
+    const std::string create_table = "CREATE VIRTUAL TABLE IF NOT EXISTS " + table_name + " USING \
+                                      fts5(" + list + ", tokenize=\"unicode61 tokenchars \'-._/\'\");";
+
+    std::string getCustomList(const std::function<std::string(const ColumnBase&)>& func) const {
+        return getAnyList(func, sess_id, date, pwd, cmd);
+    }
+                                      
+    HistoryFtsSchema() : Schema("history_fts") { setPositions(sess_id, date, pwd, cmd); }
+};
+
+struct CommandsSchema : Schema {
+    const Column<unsigned long int> sess_id{"sess_id", "BIGINT"};
+    const Column<std::string> date{"date", "TEXT"};
+    const Column<std::string> pwd{"pwd", "TEXT"};
+    const Column<std::string> cmd{"cmd", "TEXT"};
+    const Column<std::string> rc{"rc", "TEXT"};
+    const size_t size = setPositions(sess_id, date, pwd, cmd, rc);
+    
+    const std::string list = getList(sess_id, date, pwd, cmd, rc);
+    const std::string bindingsList = getBindingsList(sess_id, date, pwd, cmd, rc);
+    const std::string insert = "INSERT INTO " + table_name + 
+                               " (" + list + ") VALUES (" + bindingsList + ");";
+
+    const std::string listWithTypes = getListWithTypes(sess_id, date, pwd, cmd, rc);
+    const std::string create_table = "CREATE TABLE IF NOT EXISTS " + table_name + " (" +
+                                      listWithTypes + ");";
+                                      
+    CommandsSchema() : Schema("commands") {} 
+    
+};
+
 
 class History {
+    const LastCommandsSchema lcSch;
+    const SessionsSchema sSch;
+    const HistoryFtsSchema ftsSch;
+    const CommandsSchema cSch;
 
     const sqlite::Database db;
-    const size_t correctNumberOfElements = 5; // TODO: take this from the corresponding schema
     
     std::string prepare_path_for_search(const std::string& input) {
         apathy::Path path(input);
@@ -76,35 +153,35 @@ class History {
     }    
 
     std::string get_last_cmd(const std::string& sess_id, const std::string& pwd) {
-        sqlite::Query query(db, "SELECT * FROM last_commands WHERE sess_id = :sess AND pwd = :pwd;");
+        sqlite::Query query(db, lcSch.select);
         std::string cmd = "";
 
-        query.bind(":sess", sess_id);
-        query.bind(":pwd", pwd);
+        query.bind(lcSch.sess_id.bName, sess_id); // TODO: Implement type safe binding
+        query.bind(lcSch.pwd.bName, pwd);
 
         while (query.exec_step()) {
-            cmd = query.get_string(2); // TODO: make a schema class and take positions from it
+            cmd = query.get_string(lcSch.cmd.getPos());
         };
 
         return cmd;
     }
 
     void set_last_cmd(const std::string& sess_id, const std::string& cwd, const std::string& cmd) {
-        sqlite::Query query(db, "INSERT OR REPLACE INTO last_commands (sess_id, pwd, cmd) VALUES ( :sess, :pwd, :cmd );");
+        sqlite::Query query(db, lcSch.insertOrReplace);
 
-        query.bind(":sess", sess_id); // TODO: make a schema class and take positions from it
-        query.bind(":pwd", cwd);
-        query.bind(":cmd", cmd);
+        query.bind(lcSch.sess_id.bName, sess_id); // TODO: Implement type safe binding
+        query.bind(lcSch.pwd.bName, cwd);
+        query.bind(lcSch.cmd.bName, cmd);
         query.exec();
     }
 
     void get_sess_id_by_name(std::vector<int>& ids, const std::string& sess_name) {
-        sqlite::Query query(db, "SELECT * FROM sessions WHERE name = :name;");
+        sqlite::Query query(db, sSch.select_by_name);
 
-        query.bind(":name", sess_name);
+        query.bind(sSch.name.bName, sess_name); // TODO: Implement type safe binding
 
         while (query.exec_step()) {
-            ids.push_back(query.get_int(0)); // TODO: make a schema class and take positions from it
+            ids.push_back(query.get_int(sSch.id.getPos()));
         };
     }
 
@@ -127,7 +204,7 @@ class History {
         if (sess.length()) {
             std::vector<int> ids;
             get_sess_id_by_name(ids, sess);
-            sess_phrase = "sess_id: (" + logic_phrase_from_ids(ids) + ")";
+            sess_phrase = ftsSch.sess_id.name + ":(" + logic_phrase_from_ids(ids) + ")";
         }
         
         std::string path_phrase = "";
@@ -137,25 +214,25 @@ class History {
             if (recursively)
                 dir += "*";
             
-            path_phrase = "pwd: " + dir;
+            path_phrase = ftsSch.pwd.name + ": " + dir;
         }
 
         std::string conjunction = "";
         if (sess_phrase.length() && path_phrase.length())
             conjunction = "AND";
         
-        return "SELECT * FROM history_fts WHERE history_fts MATCH '" + 
+        return "SELECT * FROM " + ftsSch.table_name + " WHERE " + ftsSch.table_name + " MATCH '" + 
                 sess_phrase + " " + conjunction + " " + path_phrase + "'";
     }
 
     void insert(const std::string& session, const std::string& datetime, const std::string& path, const std::string& cmd, const std::string& rc) {
-        sqlite::Query query(db, "INSERT INTO commands (sess_id,date,pwd,cmd,rc) VALUES ( :sess , :datetime , :pwd , :cmd, :rc );");
+        sqlite::Query query(db, cSch.insert);
         
-        query.bind(":sess", session);
-        query.bind(":datetime", datetime);
-        query.bind(":pwd", path);
-        query.bind(":cmd", cmd);
-        query.bind(":rc", rc);
+        query.bind(cSch.sess_id.bName, session); 
+        query.bind(cSch.date.bName, datetime);
+        query.bind(cSch.pwd.bName, path);
+        query.bind(cSch.cmd.bName, cmd);
+        query.bind(cSch.rc.bName, rc);
         query.exec();
     }
     
@@ -163,27 +240,16 @@ class History {
 public:
 
     History(const std::string& path) : db(path) {
-        std::string sql;
-
-        sql = "CREATE TABLE IF NOT EXISTS commands (\
-				sess_id BIGINT, \
-		   		date TEXT, \
-				pwd TEXT, \
-				cmd TEXT, \
-				rc TEXT);"
-              "CREATE TABLE IF NOT EXISTS sessions (\
-				id INTEGER PRIMARY KEY, \
-		   		date TEXT, \
-				name TEXT);"
-              "CREATE TABLE IF NOT EXISTS last_commands (\
-				sess_id INTEGER PRIMARY KEY, \
-		   		pwd TEXT, \
-				cmd TEXT);"
-              "CREATE VIRTUAL TABLE IF NOT EXISTS history_fts USING \
-	 		   fts5(sess_id,date,pwd,cmd, tokenize=\"unicode61 tokenchars \'-._/\'\");"
-              "CREATE TRIGGER IF NOT EXISTS history_update AFTER INSERT ON commands BEGIN \
-                    INSERT INTO history_fts(sess_id,date,pwd,cmd) VALUES (new.sess_id,new.date,new.pwd,new.cmd); \
-               END;";
+        auto sql = cSch.create_table +
+                   sSch.create_table +
+                   lcSch.create_table +
+                   ftsSch.create_table + 
+                   "CREATE TRIGGER IF NOT EXISTS history_update AFTER INSERT ON " + cSch.table_name + " BEGIN \
+                            INSERT INTO " + ftsSch.table_name + " (" +
+                                ftsSch.list + ") VALUES (" + 
+                                ftsSch.getCustomList([](const HistoryFtsSchema::ColumnBase& v){ return "new." + v.name; }) + 
+                            "); \
+                   END;";
         db.exec(sql);
     }
 
@@ -201,32 +267,32 @@ public:
     }
 
     int64_t insert_sess(const std::string& name) {
-        sqlite::Query query(db, "INSERT INTO sessions (date,name) VALUES (DATETIME(), :name );");
+        sqlite::Query query(db, sSch.insert);
         
-        query.bind(":name", name);
+        query.bind(sSch.name.bName, name);
         query.exec();
 
         return db.last_rowid();
     }
 
     std::string get_sess_name(const std::string& id) {
-        sqlite::Query query(db, "SELECT * FROM sessions WHERE id = :id;");
+        sqlite::Query query(db, sSch.select_by_id);
         std::string result = "";
         
-        query.bind(":id", id);
+        query.bind(sSch.id.bName, id);
 
         while (query.exec_step()) {
-            result = query.get_string(2); // TODO: make a schema class and take positions from it
+            result = query.get_string(sSch.name.getPos());
         };
         
         return result;
     }
     
     void set_sess_name(const std::string& id, const std::string& sess_name) {
-        sqlite::Query query(db, "UPDATE sessions SET name = :name WHERE id = :id;");
+        sqlite::Query query(db, sSch.update);
 
-        query.bind(":name", sess_name);
-        query.bind(":id", id);
+        query.bind(sSch.name.bName, sess_name);
+        query.bind(sSch.id.bName, id);
         query.exec();
     }
     
@@ -237,7 +303,7 @@ public:
         sqlite::Query query(db, select_sql);
         
         while (query.exec_step()) {
-            std::cout << query.get_string(3) << std::endl; // TODO: make a schema class and take positions from it
+            std::cout << query.get_string(ftsSch.cmd.getPos()) << std::endl;
         };
     }
     
@@ -261,8 +327,10 @@ public:
         while (getline(input, line)) {
             std::vector<std::string> elements = split(line, separator);
             
-            if (elements.size() != correctNumberOfElements) 
+            if (elements.size() != cSch.size) {
+                --total_lines;
                 continue; // Drop incorrect lines
+            }
             
             insert(elements[0], elements[1], elements[2], elements[3], elements[4]);
             
@@ -271,6 +339,8 @@ public:
         }
         
         db.exec("COMMIT;");
+
+        std::cout << "Loaded " << total_lines << " commands." << std::endl;
         
         input.close();
     }

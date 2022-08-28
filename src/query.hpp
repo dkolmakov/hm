@@ -19,6 +19,7 @@
 #include <string>
 #include <sqlite3.h>
 #include <memory>
+#include <functional>
 
 #include "utils.hpp"
 #include "database.hpp"
@@ -27,7 +28,7 @@ namespace sqlite {
     
 class Query {
     const Database& db;
-    std::unique_ptr<sqlite3_stmt, void(*)(sqlite3_stmt*)> stmt;
+    std::unique_ptr<sqlite3_stmt, std::function<void(sqlite3_stmt*)>> stmt;
     
 public:
     Query(const Database& _db, const std::string& sql) : db(_db), stmt(
@@ -35,8 +36,6 @@ public:
             [](sqlite3_stmt* _stmt) { sqlite3_finalize(_stmt); }
          ) { }
 
-    ~Query() { }
-    
     void bind(const std::string& str, const std::string& value) const {
         db.bind_value(stmt.get(), str, value);
     }

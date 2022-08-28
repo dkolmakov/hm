@@ -19,6 +19,7 @@
 #include <string>
 #include <sqlite3.h>
 #include <memory>
+#include <functional>
 
 #include "utils.hpp"
 
@@ -31,7 +32,7 @@ struct SqliteException : UtilException {
 
 class Database {
     
-    std::unique_ptr<sqlite3, void(*)(sqlite3*)> db;
+    std::unique_ptr<sqlite3, std::function<void(sqlite3*)>> db;
 
 public:
 
@@ -50,8 +51,6 @@ public:
                 sqlite3_close(_db);
             }
         ) {}
-
-    ~Database() {}
 
     void exec(const std::string sql) const {
         char *zErrMsg = nullptr;
