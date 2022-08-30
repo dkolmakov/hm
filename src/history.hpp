@@ -34,16 +34,14 @@ struct HistoryException : UtilException {
         UtilException("History manager error ", _reason) {}
 };
 
-using schema::Schema;
-
-struct LastCommandsSchema : Schema {
+struct LastCommandsSchema : schema::Schema {
     const Column<unsigned long int> sess_id{"sess_id", "INTEGER PRIMARY KEY"};
     const Column<std::string> pwd{"pwd", "TEXT"};
     const Column<std::string> cmd{"cmd", "TEXT"};
     
     const std::string select = "SELECT * FROM " + table_name +
-                               " WHERE " + sess_id.name + " = " + sess_id.bName + 
-                               " AND " +  pwd.name + " = " + pwd.bName + ";";
+                               " WHERE " + sess_id.binding + 
+                               " AND " +  pwd.binding + ";";
     
     const std::string list = getList(sess_id, pwd, cmd);
     const std::string bindingsList = getBindingsList(sess_id, pwd, cmd);
@@ -57,15 +55,15 @@ struct LastCommandsSchema : Schema {
     LastCommandsSchema() : Schema("last_commands") { setPositions(sess_id, pwd, cmd); }
 };
 
-struct SessionsSchema : Schema {
+struct SessionsSchema : schema::Schema {
     const Column<unsigned long int> id{"id", "INTEGER PRIMARY KEY"};
     const Column<std::string> date{"date", "TEXT"};
     const Column<std::string> name{"name", "TEXT"};
 
     const std::string select_by_name = "SELECT * FROM " + table_name +
-                                       " WHERE " + name.name + " = " + name.bName + ";";
+                                       " WHERE " + name.binding + ";";
     const std::string select_by_id = "SELECT * FROM " + table_name + 
-                                     " WHERE " + id.name + " = " + id.bName + ";";
+                                     " WHERE " + id.binding + ";";
 
     const std::string listWithTypes = getListWithTypes(id, date, name);
     const std::string create_table = "CREATE TABLE IF NOT EXISTS " + table_name + " (" +
@@ -75,13 +73,13 @@ struct SessionsSchema : Schema {
                                " (" + getList(date, name) + ") VALUES (DATETIME(), " + getBindingsList(name) + ");";
 
     const std::string update = "UPDATE " + table_name + 
-                               " SET " + name.name + " = " + name.bName + 
-                               " WHERE " + id.name + " = " + id.bName + ";";
+                               " SET " + name.binding + 
+                               " WHERE " + id.binding + ";";
                                
     SessionsSchema() : Schema("sessions") { setPositions(id, date, name); }
 };
 
-struct HistoryFtsSchema : Schema {
+struct HistoryFtsSchema : schema::Schema {
     const Column<unsigned long int> sess_id{"sess_id", ""};
     const Column<std::string> date{"date", ""};
     const Column<std::string> pwd{"pwd", ""};
@@ -94,11 +92,11 @@ struct HistoryFtsSchema : Schema {
     std::string getCustomList(const std::function<std::string(const ColumnBase&)>& func) const {
         return getAnyList(func, sess_id, date, pwd, cmd);
     }
-                                      
+
     HistoryFtsSchema() : Schema("history_fts") { setPositions(sess_id, date, pwd, cmd); }
 };
 
-struct CommandsSchema : Schema {
+struct CommandsSchema : schema::Schema {
     const Column<unsigned long int> sess_id{"sess_id", "BIGINT"};
     const Column<std::string> date{"date", "TEXT"};
     const Column<std::string> pwd{"pwd", "TEXT"};
@@ -116,7 +114,6 @@ struct CommandsSchema : Schema {
                                       listWithTypes + ");";
                                       
     CommandsSchema() : Schema("commands") {} 
-    
 };
 
 

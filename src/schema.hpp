@@ -16,36 +16,33 @@
 
 #pragma once
 
-#include <vector>
-#include <initializer_list>
 #include <string>
-#include <unordered_map>
 
 #include "query.hpp"
 #include "utils.hpp"
-
-struct SchemaException : UtilException {
-    SchemaException(const std::string& _reason) :
-        UtilException("History manager error ", _reason) {}
-};
 
 namespace schema {
 
 struct Schema {
     const std::string table_name;
     
+    Schema(const std::string& _name) noexcept : table_name(_name) {} 
+    
+    
     class ColumnBase {
         mutable int pos;
+        void setPos(const int p) const { pos = p; }
+        friend Schema;
     public:
         const std::string name;
         const std::string sqlType;
         const std::string bName;
+        const std::string binding;
 
         int getPos() const { return pos; }
-        void setPos(const int p) const { pos = p; }
         
-        ColumnBase(const std::string& _name, const std::string& _sqlType) 
-            : name(_name), sqlType(_sqlType), bName(":" + name) {}
+        ColumnBase(const std::string& _name, const std::string& _sqlType) noexcept
+            : name(_name), sqlType(_sqlType), bName(":" + name), binding(name + " = " + bName) {}
         
         virtual ~ColumnBase() = default;
     };
@@ -60,16 +57,16 @@ struct Schema {
         }
     };
     
-    void doForAll(const std::function<void(const ColumnBase&)>&) const {}
+    static void doForAll(const std::function<void(const ColumnBase&)>&) {}
     
     template<typename T, typename ...Others>
-    void doForAll(const std::function<void(const ColumnBase&)>& lambda, const Column<T>& value, const Column<Others>&... others) const {
+    static void doForAll(const std::function<void(const ColumnBase&)>& lambda, const Column<T>& value, const Column<Others>&... others) {
         lambda(value);
         doForAll(lambda, others...);
     }
 
     template<typename ...Others>
-    std::string getAnyList(const std::function<std::string(const ColumnBase&)>& getVal, const Column<Others>&... others) const {
+    static std::string getAnyList(const std::function<std::string(const ColumnBase&)>& getVal, const Column<Others>&... others) {
         std::string result;
         
         doForAll([&result, &getVal](const ColumnBase& value) {
@@ -82,22 +79,22 @@ struct Schema {
     }
 
     template<typename ...Others>
-    std::string getList(const Column<Others>&... others) const {
+    static std::string getList(const Column<Others>&... others) {
         return getAnyList([](const ColumnBase& v) {return v.name;}, others...);
     }
 
     template<typename ...Others>
-    std::string getBindingsList(const Column<Others>&... others) const {
+    static std::string getBindingsList(const Column<Others>&... others) {
         return getAnyList([](const ColumnBase& v) {return ":" + v.name;}, others...);
     }
 
     template<typename ...Others>
-    std::string getListWithTypes(const Column<Others>&... others) const {
+    static std::string getListWithTypes(const Column<Others>&... others) {
         return getAnyList([](const ColumnBase& v) {return v.name + " " + v.sqlType;}, others...);
     }
     
     template<typename ...Others>
-    int setPositions(const Column<Others>&... others) const {
+    static int setPositions(const Column<Others>&... others) {
         int pos = 0;
         
         doForAll([&pos](const ColumnBase& value) {
@@ -107,47 +104,7 @@ struct Schema {
         
         return pos;
     }
-    
-    Schema(const std::string& _name) : table_name(_name) {} 
-    
 };
 
-// class Schema {
-//     const std::vector<std::string> schema;
-//     std::unordered_map<std::string, int> fieldToPos;
-// 
-// public:
-//     
-//     const std::string fieldsList;
-//     const std::string bindFieldsList;
-//     
-//     template<typename ...Args>
-//     Schema(const std::initializer_list<Field<Args...>>& list) : 
-//         schema(list), fieldsList(getFieldsList(false)), bindFieldsList(getFieldsList(true)) 
-//     {
-//         for (size_t i = 0; i < schema.size(); ++i) {
-//             fieldToPos[schema[i]] = i;
-//         }
-//     }
-//     
-//     std::string getFieldsList(const bool bindable, const char separator = ',') const {
-//         std::string list;
-//         
-//         for (const auto& field : schema) {
-//             if (bindable)
-//                 list += ":";
-//             
-//             list += field + separator;
-//         }
-//         
-//         list.pop_back();
-//         return list;
-//     }
-//     
-//     int getFieldPos(const std::string& field) {
-//         return fieldToPos[field];
-//     }
-//     
-// };
+} // End of schema namespace
 
-}

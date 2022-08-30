@@ -26,7 +26,6 @@
 #include "configurator.hpp"
 #include "parser.hpp"
 
-// TODO: use system_error codes
 enum ErrorCode {
     SUCCESS = 0,
     ARG_ERROR,
@@ -99,12 +98,8 @@ int main(int argc, char* argv[]) {
             throw AgrgumentException("Error: unsupported mode");
         }
     }
-    catch (sqlite::SqliteException& e) {
-        std::cout << "Error: database query failed " << e.what() << std::endl;
-        exit(FAILED_TO_PROCESS);
-    }
-    catch (HistoryException& e) {
-        std::cout << "Error: history manager failed " << e.what() << std::endl;
+    catch (const UtilException& e) {
+        std::cout << "Error: " << e.what() << std::endl;
         exit(FAILED_TO_PROCESS);
     }
     catch (AgrgumentException& e) {
