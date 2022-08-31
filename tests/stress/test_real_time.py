@@ -20,7 +20,7 @@ def select_by_path():
     results = {}
     for key in sorted(test_data.keys()):
         hm_history_db = test_data[key]
-        cmd = ['hm-db', hm_history_db, 'select', '1', '-d', '/some/fixed/path']
+        cmd = ['hm-db', hm_history_db, 'select', '1', '/some/fixed/path']
         results[key], stdout = run_test(cmd, key)
         
         assert len(stdout.strip().split('\n')) == key
@@ -35,7 +35,7 @@ def select_by_session_and_path():
     results = {}
     for key in sorted(test_data.keys()):
         hm_history_db = test_data[key]
-        cmd = ['hm-db', hm_history_db, 'select', '1', '-d', '/some/fixed/path', '-s']
+        cmd = ['hm-db', hm_history_db, 'select', '1', '/some/fixed/path', '-s']
         results[key], stdout = run_test(cmd, key)
 
         assert len(stdout.strip().split('\n')) == key

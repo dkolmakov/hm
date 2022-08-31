@@ -44,16 +44,12 @@ def insert(db_obj, pwd, cmd, ret_code):
     assert rc == 0, "Command failed with code {}".format(rc) 
 
 
-def select_by_path(db_obj, pwd, recursive = False):
+def select_by_path(db_obj, pwd=".", recursive = False):
     db, sess_id = db_obj
     
     select_cmd = ['hm-db', db, 
-                  'select', str(sess_id),
-                  '-d']
+                  'select', str(sess_id), pwd]
 
-    if pwd:
-        select_cmd.append(pwd)
-    
     if recursive:
         select_cmd.append('-R')
 
@@ -81,15 +77,12 @@ def select_by_session(db_obj, sname = None):
     
     return stdout.strip().split('\n')
 
-def select_by_session_and_path(db_obj, path=None, recursive=False, sname=None):
+def select_by_session_and_path(db_obj, path=".", recursive=False, sname=None):
     db, sess_id = db_obj
     
     select_cmd = ['hm-db', db, 
-                  'select', str(sess_id)]
+                  'select', str(sess_id), path]
 
-    select_cmd.append('-d')
-    if path:
-        select_cmd.append(path)
     if recursive:
         select_cmd.append('-R')
 
