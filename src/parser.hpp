@@ -57,11 +57,11 @@ public:
     mode selected = mode::help;
 
     // session command
-    std::string sess_name = "notdefined";
+    std::string session_name = "";
     const group session = (
                         command("session").set(selected, mode::new_session),
                         "session - creates a new session and return its unique identifier" % group(
-                            opt_value("sname", sess_name) % "name to be assigned to the created session (default: notdefined)"
+                            opt_value("sname", session_name) % "name to be assigned to the created session (default: notdefined)"
                         )
                     );
 
@@ -87,11 +87,11 @@ public:
     bool recursively = false;
     bool by_sess = false;
     std::string selection_path = ".";
-    std::string session_name = "";
+    std::string selection_session_name = "";
     const group select_options = (
                         opt_value("path", selection_path).set(by_dir) % "returns commands executed in the specified directory (default: \".\")",
                         option("-R", "--recursively").set(recursively) % "works with -d option, changes selection to be recursive and accept all commands executed in the specified directory and all directories down by hierarchy",
-                        option("-s").set(by_sess) & opt_value("sname", session_name) % "returns commands executed within the specified session (default: current session name)"
+                        option("-s").set(by_sess) & opt_value("sname", selection_session_name) % "returns commands executed within the specified session (default: current session name)"
                     );
     const group select = (
                             command("select").set(selected, mode::select),
@@ -149,11 +149,12 @@ public:
                     );
         
     const std::string program_name;
-    void print_usage() {
+    
+    void print_usage() const {
         std::cerr << usage_lines(cli, program_name) << std::endl;
     }
     
-    void parse(int argc, char* argv[]) {
+    void parse(int argc, char* argv[]) const {
         if (!clipp::parse(argc, argv, cli)) {
             throw AgrgumentException("Failed to parse arguments");
         }
@@ -166,7 +167,8 @@ public:
         }
     }
 
-    ArgParser(const std::string& pname) : program_name(pname) {}
+    ArgParser(const std::string& pname) noexcept 
+        : program_name(pname) {}
 };
 
 
@@ -191,13 +193,13 @@ struct WrappedArgsParser {
     const group wrapper_cli = ( help | version | info | selection_options );
 
     
-    void print_help() {
+    void print_help() const {
         const auto clipp_fmt = doc_formatting{} .first_column(4) .doc_column(28) .last_column(80);
         
         std::cout << program_name << " - history manager command line wrapper, which eases access to hm-db application" << std::endl << std::endl;
         std::cout << make_man_page(wrapper_cli, program_name, clipp_fmt) << std::endl;
     }
             
-    WrappedArgsParser(const std::string& pname, const group& sel) 
+    WrappedArgsParser(const std::string& pname, const group& sel) noexcept
         : program_name(pname), selection_options(sel) {}
 };

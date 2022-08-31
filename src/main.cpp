@@ -32,13 +32,12 @@ enum ErrorCode {
     FAILED_TO_ADD
 };
 
-static void print_session_info(std::string sess_id, std::string sess_name)
-{
+static void print_session_info(std::string sess_id, std::string sess_name) {
     std::cout << "Session #" << sess_id << " with name: " << sess_name << std::endl;
 }
 
 int main(int argc, char* argv[]) {
-    ArgParser args("hm-db");
+    const ArgParser args("hm-db");
 
     try {
         args.parse(argc, argv);
@@ -48,7 +47,7 @@ int main(int argc, char* argv[]) {
         }
         
         if (args.selected == mode::wrapped_help) {
-            WrappedArgsParser wrappedArgs("hm", args.select_options);
+            const WrappedArgsParser wrappedArgs("hm", args.select_options);
             wrappedArgs.print_help();
             exit(0);
         }
@@ -70,28 +69,31 @@ int main(int argc, char* argv[]) {
         History history(args.db_path);
 
         switch(args.selected) {
-        case mode::new_session:
-            std::cout << history.insert_sess(args.sess_name);
-            break;
+        case mode::new_session: {
+            std::string session_name = args.session_name.length() == 0 ? "notdefined" : args.session_name;
+            std::cout << history.insert_sess(session_name);
+        }   break;
         case mode::add:
             history.insert_cmd(args.sess_id, args.datetime, args.cwd, args.cmd, args.ret_code);
             break;
         case mode::parse:
             history.parse_input_file(args.filename, args.separator);
             break;
-        case mode::select:
-            if (args.by_sess && args.session_name.length() == 0)
-                args.session_name = history.get_sess_name(args.sess_id);
+        case mode::select: {
+            std::string session_name = args.selection_session_name;
+
+            if (args.by_sess && session_name.length() == 0)
+                    session_name = history.get_sess_name(args.sess_id);
             
-            history.select(args.by_dir, args.selection_path, args.recursively, args.by_sess, args.session_name);
+            history.select(args.by_dir, args.selection_path, args.recursively, args.by_sess, session_name);
             
             if (args.by_sess) 
-                history.set_sess_name(args.sess_id, args.sess_name);
-            break;
-        case mode::info:
-            args.sess_name = history.get_sess_name(args.sess_id); 
-            print_session_info(args.sess_id, args.sess_name);
-            break;
+                history.set_sess_name(args.sess_id, session_name);
+        }   break;
+        case mode::info: {
+            std::string session_name = history.get_sess_name(args.sess_id); 
+            print_session_info(args.sess_id, session_name);
+        }   break;
         default:
             throw AgrgumentException("Error: unsupported mode");
         }
