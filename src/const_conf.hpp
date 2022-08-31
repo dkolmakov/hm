@@ -54,7 +54,7 @@ const std::string const_configuration = "\
 \t\t\thm-db --version\n\
 \t\t\t;;\n\
 \t\t\t-h|--help)\n\
-\t\t\thm-db --help\n\
+\t\t\thm-db --wrapped-help\n\
 \t\t\t;;\n\
 \t\t\t-i|--info)\n\
 \t\t\thm-db $hm_history_db info $hm_session_id\n\
