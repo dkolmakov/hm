@@ -19,7 +19,7 @@ jobs:
         cache: 'pip'
     - run: pip install pytest
     
-    - name: Install hm
-      run: pip install . && hm-init ~/.bashrc && . ~/.bashrc
-    - name: Run tests
+    - name: Make hm-db
+      run: mkdir -p build && cd build && cmake .. && export PATH=$PATH:src/* && cd ..
+    - name: Run hm-db tests
       run: py.test
