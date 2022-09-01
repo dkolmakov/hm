@@ -20,8 +20,6 @@ jobs:
     - run: pip install pytest
     
     - name: Install hm
-      run: |
-        tests/release/install_release_deb.sh 0.4.0
-        hm-db configure ~/.bashrc
+      run: pip install . && hm-init ~/.bashrc && . ~/.bashrc
     - name: Run tests
       run: py.test
