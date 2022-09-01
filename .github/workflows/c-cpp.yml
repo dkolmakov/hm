@@ -23,9 +23,6 @@ jobs:
       run: |
         mkdir -p build && cd build 
         cmake .. && make 
-        export PATH=$PATH:`pwd`/src/
-        cd ..
-        hm-db --version
     - name: Run hm-db tests
       run: |
         export PATH=$PATH:`pwd`/build/src/
