@@ -24,10 +24,11 @@ jobs:
         mkdir -p build && cd build 
         cmake .. && make 
         export PATH=$PATH:`pwd`/src/
-        ls -l `pwd`/src/
-        src/hm-db --version
-        hm-db --version
         cd ..
         hm-db --version
     - name: Run hm-db tests
-      run: py.test
+      run: |
+        hm-db --version
+        export PATH=$PATH:`pwd`/build/src/
+        hm-db --version
+        py.test
