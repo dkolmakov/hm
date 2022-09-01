@@ -16,7 +16,6 @@ jobs:
     - uses: actions/setup-python@v4
       with:
         python-version: '3.10'
-        cache: 'pip'
     - run: pip install pytest
     
     - name: Make hm-db
@@ -28,3 +27,9 @@ jobs:
         export PATH=$PATH:`pwd`/build/src/
         hm-db --version
         py.test
+
+    - name: C++ Style Check
+      uses: coleaeason/actions-uncrustify@v1
+          #with:
+            # Alternate configuration file to use
+          #  configPath: # optional
