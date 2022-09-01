@@ -20,7 +20,7 @@ jobs:
     - run: pip install pytest
     
     - name: Make hm-db
-      run: 
+      run: |
         mkdir -p build && cd build 
         cmake .. && make 
         export PATH=$PATH:`pwd`/src/* 
