@@ -27,9 +27,3 @@ jobs:
         export PATH=$PATH:`pwd`/build/src/
         hm-db --version
         py.test
-
-    - name: C++ Style Check
-      uses: coleaeason/actions-uncrustify@v1
-          #with:
-            # Alternate configuration file to use
-          #  configPath: # optional
