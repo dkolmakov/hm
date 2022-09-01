@@ -17,9 +17,7 @@ jobs:
       with:
         python-version: '3.10'
         cache: 'pip'
-    - name: Install Dependencies
-      run: pip install pytest
-    
+
     - name: Install hm
       run: |
         tests/release/install_release_deb.sh 0.4.0
