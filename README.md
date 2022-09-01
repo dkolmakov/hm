@@ -1,3 +1,4 @@
+![Build Status](https://github.com/dkolmakov/hm/blob/try-workflow/.github/workflows/c-cpp.yml/badge.svg)
 ![Build Status](https://travis-ci.com/dkolmakov/hm.svg?branch=master)
 
 # hm
