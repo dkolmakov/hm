@@ -26,13 +26,13 @@
 namespace sqlite {
 
 struct SqliteException : UtilException {
-    SqliteException(const std::string& _reason, int rc) :
-        UtilException("SQLite error ", _reason, rc) {}
+    SqliteException(const std::string& _reason, int rc) noexcept
+        : UtilException("SQLite error ", _reason, rc) {}
 };
 
 class Database {
     
-    std::unique_ptr<sqlite3, std::function<void(sqlite3*)>> db;
+    const std::unique_ptr<sqlite3, std::function<void(sqlite3*)>> db;
 
 public:
 

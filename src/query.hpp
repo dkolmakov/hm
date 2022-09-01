@@ -28,7 +28,7 @@ namespace sqlite {
     
 class Query {
     const Database& db;
-    std::unique_ptr<sqlite3_stmt, std::function<void(sqlite3_stmt*)>> stmt;
+    const std::unique_ptr<sqlite3_stmt, std::function<void(sqlite3_stmt*)>> stmt;
     
 public:
     Query(const Database& _db, const std::string& sql) : db(_db), stmt(
