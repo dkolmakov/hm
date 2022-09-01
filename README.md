@@ -1,5 +1,4 @@
-![Build Status](https://github.com/dkolmakov/hm/blob/try-workflow/.github/workflows/c-cpp.yml/badge.svg)
-![Build Status](https://travis-ci.com/dkolmakov/hm.svg?branch=master)
+![Build Status](https://github.com/dkolmakov/hm/actions/workflows/c-cpp.yml/badge.svg)
 
 # hm
 Command line history manager for bash. 
