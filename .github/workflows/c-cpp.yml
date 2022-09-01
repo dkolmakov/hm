@@ -23,8 +23,7 @@ jobs:
       run: |
         mkdir -p build && cd build 
         cmake .. && make 
-        export PATH=$PATH:`pwd`/src/* 
-        echo PATH=$PATH:`pwd`/src/* 
+        export PATH=$PATH:`pwd`/src/
         cd ..
     - name: Run hm-db tests
       run: py.test
