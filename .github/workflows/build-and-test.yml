@@ -1,0 +1,29 @@
+name: Build Status
+
+on:
+  push:
+    branches: [ "develop", "master" ]
+  pull_request:
+    branches: [ "develop", "master" ]
+
+jobs:
+  build:
+    name: ubuntu-build-and-test
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+    - uses: actions/setup-python@v4
+      with:
+        python-version: '3.10'
+    - run: pip install pytest
+    
+    - name: Make hm-db
+      run: |
+        mkdir -p build && cd build 
+        cmake .. && make 
+    - name: Run hm-db tests
+      run: |
+        export PATH=$PATH:`pwd`/build/src/
+        hm-db --version
+        py.test
