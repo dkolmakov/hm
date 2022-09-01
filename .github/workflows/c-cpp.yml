@@ -1,0 +1,28 @@
+name: C/C++ CI
+
+on:
+  push:
+    branches: [ "develop", "master" ]
+  pull_request:
+    branches: [ "develop", "master" ]
+
+jobs:
+  build:
+    name: ubuntu-build-and-test
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+    - uses: actions/setup-python@v4
+      with:
+        python-version: '3.10'
+        cache: 'pip'
+    - name: Install Dependencies
+      run: pip install pytest
+    
+    - name: Install hm
+      run: |
+        tests/release/install_release_deb.sh 0.4.0
+        hm-db configure ~/.bashrc
+    - name: Run tests
+      run: py.test
