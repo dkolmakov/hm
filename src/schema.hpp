@@ -23,40 +23,36 @@
 
 namespace schema {
 
+class ColumnBase {
+    mutable int pos;
+    void setPos(const int p) const { pos = p; }
+    friend struct Schema;
+public:
+    const std::string name;
+    const std::string sqlType;
+    const std::string bName;
+    const std::string binding;
+
+    int getPos() const { return pos; }
+    
+    ColumnBase(const std::string& _name, const std::string& _sqlType) noexcept
+        : name(_name), sqlType(_sqlType), bName(":" + name), binding(name + " = " + bName) {}
+    
+    virtual ~ColumnBase() = default;
+};
+
+template<typename T>
+struct Column : public ColumnBase {
+    Column(const std::string& _name, const std::string& _sqlType) noexcept 
+        : ColumnBase(_name, _sqlType) {}
+    
+    void safeBind(const sqlite::Query& q, T value) const {
+        q.bind(bName, value);
+    }
+};
+    
+    
 struct Schema {
-    const std::string table_name;
-    
-    Schema(const std::string& _name) noexcept : table_name(_name) {} 
-    
-    
-    class ColumnBase {
-        mutable int pos;
-        void setPos(const int p) const { pos = p; }
-        friend Schema;
-    public:
-        const std::string name;
-        const std::string sqlType;
-        const std::string bName;
-        const std::string binding;
-
-        int getPos() const { return pos; }
-        
-        ColumnBase(const std::string& _name, const std::string& _sqlType) noexcept
-            : name(_name), sqlType(_sqlType), bName(":" + name), binding(name + " = " + bName) {}
-        
-        virtual ~ColumnBase() = default;
-    };
-
-    template<typename T>
-    struct Column : public ColumnBase {
-        Column(const std::string& _name, const std::string& _sqlType) noexcept 
-            : ColumnBase(_name, _sqlType) {}
-        
-        void safeBind(const sqlite::Query& q, T value) const {
-            q.bind(bName, value);
-        }
-    };
-    
     static void doForAll(const std::function<void(const ColumnBase&)>&) {}
     
     template<typename T, typename ...Others>
@@ -94,7 +90,7 @@ struct Schema {
     }
     
     template<typename ...Others>
-    static int setPositions(const Column<Others>&... others) {
+    static int countColumns(const Column<Others>&... others) {
         int pos = 0;
         
         doForAll([&pos](const ColumnBase& value) {
@@ -104,6 +100,24 @@ struct Schema {
         
         return pos;
     }
+
+    const std::string table_name;
+    const size_t size;
+    const std::string list;
+    const std::string bindingsList;
+    const std::string listWithTypes;
+    const std::function<std::string(const std::function<std::string(const ColumnBase&)>&)>  getCustomList;
+    
+    template<typename ...Cols>
+    Schema(const std::string& _name, const Cols& ...cols) noexcept 
+        : table_name(_name), 
+          size(countColumns(cols...)), 
+          list(getList(cols...)), 
+          bindingsList(getBindingsList(cols...)),
+          listWithTypes(getListWithTypes(cols...)),
+          getCustomList([cols...](const std::function<std::string(const ColumnBase&)>& func) {
+                return getAnyList(func, cols...);
+          }) { } 
 };
 
 } // End of schema namespace

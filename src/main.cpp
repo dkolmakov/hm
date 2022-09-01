@@ -95,17 +95,17 @@ int main(int argc, char* argv[]) {
             print_session_info(args.sess_id, session_name);
         }   break;
         default:
-            throw AgrgumentException("Error: unsupported mode");
+            throw AgrgumentException("unsupported mode");
         }
+    }
+    catch (const AgrgumentException& e) {
+        std::cout << "Error: " << e.what() << std::endl;
+        args.print_usage();
+        exit(ARG_ERROR);
     }
     catch (const UtilException& e) {
         std::cout << "Error: " << e.what() << std::endl;
         exit(FAILED_TO_PROCESS);
-    }
-    catch (AgrgumentException& e) {
-        std::cout << "Error: " << e.what() << std::endl;
-        args.print_usage();
-        exit(ARG_ERROR);
     }
 
     return 0;

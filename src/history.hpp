@@ -29,91 +29,88 @@
 #include "utils.hpp"
 #include "schema.hpp"
 
+using schema::ColumnBase;
+using schema::Column;
+using schema::Schema;
+
 struct HistoryException : UtilException {
-    HistoryException(const std::string& _reason) :
-        UtilException("History manager error ", _reason) {}
+    HistoryException(const std::string& _reason) noexcept
+        : UtilException("History manager error ", _reason) {}
 };
 
-struct LastCommandsSchema : schema::Schema {
+struct LastCommandsSchemaColumnsList {
     const Column<unsigned long int> sess_id{"sess_id", "INTEGER PRIMARY KEY"};
     const Column<std::string> pwd{"pwd", "TEXT"};
     const Column<std::string> cmd{"cmd", "TEXT"};
-    
+};
+
+struct LastCommandsSchema : LastCommandsSchemaColumnsList, Schema {
     const std::string select = "SELECT * FROM " + table_name +
                                " WHERE " + sess_id.binding + 
                                " AND " +  pwd.binding + ";";
-    
-    const std::string list = getList(sess_id, pwd, cmd);
-    const std::string bindingsList = getBindingsList(sess_id, pwd, cmd);
     const std::string insertOrReplace = "INSERT OR REPLACE INTO " + table_name +
                                         " (" + list + ") VALUES (" + bindingsList + ");";
-        
-    const std::string listWithTypes = getListWithTypes(sess_id, pwd, cmd);
     const std::string create_table = "CREATE TABLE IF NOT EXISTS " + table_name + " (" +
                                       listWithTypes + ");";
                                       
-    LastCommandsSchema() : Schema("last_commands") { setPositions(sess_id, pwd, cmd); }
+    LastCommandsSchema() noexcept
+        : Schema("last_commands", sess_id, pwd, cmd) {}
 };
 
-struct SessionsSchema : schema::Schema {
+struct SessionsSchemaColumnsList {
     const Column<unsigned long int> id{"id", "INTEGER PRIMARY KEY"};
     const Column<std::string> date{"date", "TEXT"};
     const Column<std::string> name{"name", "TEXT"};
+};
 
+struct SessionsSchema : SessionsSchemaColumnsList, Schema {
     const std::string select_by_name = "SELECT * FROM " + table_name +
                                        " WHERE " + name.binding + ";";
     const std::string select_by_id = "SELECT * FROM " + table_name + 
                                      " WHERE " + id.binding + ";";
-
-    const std::string listWithTypes = getListWithTypes(id, date, name);
     const std::string create_table = "CREATE TABLE IF NOT EXISTS " + table_name + " (" +
                                       listWithTypes + ");";
-
     const std::string insert = "INSERT INTO " + table_name + 
                                " (" + getList(date, name) + ") VALUES (DATETIME(), " + getBindingsList(name) + ");";
-
     const std::string update = "UPDATE " + table_name + 
                                " SET " + name.binding + 
                                " WHERE " + id.binding + ";";
                                
-    SessionsSchema() : Schema("sessions") { setPositions(id, date, name); }
+    SessionsSchema() noexcept
+        : Schema("sessions", id, date, name) {}
 };
 
-struct HistoryFtsSchema : schema::Schema {
+struct HistoryFtsSchemaColumnsList {
     const Column<unsigned long int> sess_id{"sess_id", ""};
     const Column<std::string> date{"date", ""};
     const Column<std::string> pwd{"pwd", ""};
     const Column<std::string> cmd{"cmd", ""};
+};
 
-    const std::string list = getList(sess_id, date, pwd, cmd);
+struct HistoryFtsSchema : HistoryFtsSchemaColumnsList, Schema {
     const std::string create_table = "CREATE VIRTUAL TABLE IF NOT EXISTS " + table_name + " USING \
                                       fts5(" + list + ", tokenize=\"unicode61 tokenchars \'-._/\'\");";
 
-    std::string getCustomList(const std::function<std::string(const ColumnBase&)>& func) const {
-        return getAnyList(func, sess_id, date, pwd, cmd);
-    }
-
-    HistoryFtsSchema() : Schema("history_fts") { setPositions(sess_id, date, pwd, cmd); }
+    HistoryFtsSchema() noexcept
+        : Schema("history_fts", sess_id, date, pwd, cmd) {}
 };
 
-struct CommandsSchema : schema::Schema {
+struct CommandsSchemaColumnsList {
     const Column<unsigned long int> sess_id{"sess_id", "BIGINT"};
     const Column<std::string> date{"date", "TEXT"};
     const Column<std::string> pwd{"pwd", "TEXT"};
     const Column<std::string> cmd{"cmd", "TEXT"};
     const Column<std::string> rc{"rc", "TEXT"};
-    const size_t size = setPositions(sess_id, date, pwd, cmd, rc);
-    
-    const std::string list = getList(sess_id, date, pwd, cmd, rc);
-    const std::string bindingsList = getBindingsList(sess_id, date, pwd, cmd, rc);
+};
+
+struct CommandsSchema : CommandsSchemaColumnsList, Schema {
     const std::string insert = "INSERT INTO " + table_name + 
                                " (" + list + ") VALUES (" + bindingsList + ");";
-
-    const std::string listWithTypes = getListWithTypes(sess_id, date, pwd, cmd, rc);
     const std::string create_table = "CREATE TABLE IF NOT EXISTS " + table_name + " (" +
                                       listWithTypes + ");";
                                       
-    CommandsSchema() : Schema("commands") {} 
+    CommandsSchema() noexcept
+        : Schema("commands", sess_id, date, pwd, cmd, rc) {} 
 };
 
 
@@ -244,7 +241,7 @@ public:
                    "CREATE TRIGGER IF NOT EXISTS history_update AFTER INSERT ON " + cSch.table_name + " BEGIN \
                             INSERT INTO " + ftsSch.table_name + " (" +
                                 ftsSch.list + ") VALUES (" + 
-                                ftsSch.getCustomList([](const HistoryFtsSchema::ColumnBase& v){ return "new." + v.name; }) + 
+                                ftsSch.getCustomList([](const ColumnBase& v){ return "new." + v.name; }) + 
                             "); \
                    END;";
         db.exec(sql);

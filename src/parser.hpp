@@ -19,19 +19,16 @@
 #include <iostream>
 
 #include "version.hpp"
+#include "utils.hpp"
 #include "clipp.hpp"
 
 using namespace clipp;
 
-struct AgrgumentException : public std::exception {
-    std::string reason;
-
-    AgrgumentException(const std::string& reason_) : reason(reason_) {}
-
-    const char * what () const throw () {
-        return reason.c_str();
-    }
+struct AgrgumentException : UtilException {
+    AgrgumentException(const std::string& _reason) :
+        UtilException("Argument parsing error: ", _reason) {}
 };
+
 
 enum class mode {new_session, add, select, parse, help, wrapped_help, version, configure, info};
 
@@ -156,7 +153,7 @@ public:
     
     void parse(int argc, char* argv[]) const {
         if (!clipp::parse(argc, argv, cli)) {
-            throw AgrgumentException("Failed to parse arguments");
+            throw AgrgumentException("failed to parse arguments");
         }
         
         const auto clipp_fmt = doc_formatting{} .first_column(4) .doc_column(28) .last_column(80);
