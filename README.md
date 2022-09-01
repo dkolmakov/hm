@@ -1,4 +1,4 @@
-![Build Status](https://travis-ci.com/dkolmakov/hm.svg?branch=master)
+![Build Status](https://github.com/dkolmakov/hm/actions/workflows/build-and-test.yml/badge.svg)
 
 # hm
 Command line history manager for bash. 
