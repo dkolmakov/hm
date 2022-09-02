@@ -1,5 +1,9 @@
 name: Build
 
+defaults:
+  run:
+    shell: bash
+    
 on:
   push:
     branches: [ "develop", "master" ]
@@ -33,8 +37,9 @@ jobs:
     - name: Check python package
       run: |
         pip install .
-        hm-init ~/.bashrc
+        hm-init bashrc
         . ~/.bashrc
+        hm -v
         py.test
         . tests/release/prepare_history.sh
         . tests/release/check_history.sh        
