@@ -40,8 +40,8 @@ jobs:
         hm-init bashrc --home `pwd`
         . bashrc
         py.test
+        cat bashrc
         echo +++++++++++++
-        hm -h
         hm .
         . tests/release/prepare_history.sh
         echo $test_path
