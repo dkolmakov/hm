@@ -226,6 +226,9 @@ public:
         std::ifstream to_count(filename.c_str(), std::ios::in); 
         size_t total_lines = std::count(std::istreambuf_iterator<char>(to_count), std::istreambuf_iterator<char>(), '\n');
         size_t current_line = 0;
+	    
+	if (total_lines == 0)
+	    return 0;
 
         std::cout << "Loading " << total_lines << " commands from the temporary file " << filename << std::endl;
         ProgressBar<size_t> bar(total_lines, current_line);
