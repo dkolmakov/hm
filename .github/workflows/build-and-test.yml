@@ -44,4 +44,9 @@ jobs:
         . bashrc
         py.test
         . tests/release/prepare_history.sh
+        echo $test_path
+        echo $test_command
+        hm -h
+        hm .
+        echo +++++++++++++
         . tests/release/check_history.sh        
