@@ -37,8 +37,13 @@ jobs:
     - name: Check python package
       run: |
         pip install .
+        hm-init
+        which hm-init
+        ls -l $(which hm-init)/..
         hm-init bashrc
         . ~/.bashrc
+        echo $PATH
+        cat ~/.bashrc
         hm -v
         py.test
         . tests/release/prepare_history.sh
