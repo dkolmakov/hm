@@ -37,9 +37,6 @@ jobs:
     - name: Check python package
       run: |
         pip install .
-        hm-init
-        which hm-init
-        ls -l /opt/hostedtoolcache/Python/3.10.6/x64/lib/python3.10/site-packages
         hm-init bashrc --home `pwd`
         . bashrc
         py.test
