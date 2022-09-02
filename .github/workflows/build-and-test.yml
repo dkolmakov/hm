@@ -30,6 +30,7 @@ jobs:
         PATH=$PATH:`pwd`/build/src/ py.test
         
     - name: Check python package
+      run: |
         pip install .
         hm-init ~/.bashrc
         . ~/.bashrc
