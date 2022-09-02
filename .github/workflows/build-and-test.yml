@@ -50,6 +50,8 @@ jobs:
         hm-db $hm_history_db select $hm_session_id . > $TMPFILE
         echo hm \".\" >> $TMPFILE
         cat $TMPFILE
+        HISTFILE=.bash_history
+        set -o history        
         echo "hm_load_history $TMPFILE"
         hm_load_history $TMPFILE
         echo --------------
