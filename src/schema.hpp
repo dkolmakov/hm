@@ -18,107 +18,122 @@
 
 #include <string>
 
-#include "query.hpp"
-#include "utils.hpp"
+#include "./query.hpp"
+#include "./utils.hpp"
 
 namespace schema {
 
 class ColumnBase {
-    mutable int pos;
-    void setPos(const int p) const { pos = p; }
-    friend struct Schema;
-public:
-    const std::string name;
-    const std::string sqlType;
-    const std::string bName;
-    const std::string binding;
+  mutable int pos;
+  void setPos(const int p) const { pos = p; }
+  friend struct Schema;
 
-    int getPos() const { return pos; }
-    
-    ColumnBase(const std::string& _name, const std::string& _sqlType) noexcept
-        : name(_name), sqlType(_sqlType), bName(":" + name), binding(name + " = " + bName) {}
-    
-    virtual ~ColumnBase() = default;
+ public:
+  const std::string name;
+  const std::string sqlType;
+  const std::string bName;
+  const std::string binding;
+
+  int getPos() const { return pos; }
+
+  ColumnBase(const std::string& _name, const std::string& _sqlType) noexcept
+      : name(_name),
+        sqlType(_sqlType),
+        bName(":" + name),
+        binding(name + " = " + bName) {}
+
+  virtual ~ColumnBase() = default;
 };
 
-template<typename T>
+template <typename T>
 struct Column : public ColumnBase {
-    Column(const std::string& _name, const std::string& _sqlType) noexcept 
-        : ColumnBase(_name, _sqlType) {}
-    
-    void safeBind(const sqlite::Query& q, T value) const {
-        q.bind(bName, value);
-    }
+  Column(const std::string& _name, const std::string& _sqlType) noexcept
+      : ColumnBase(_name, _sqlType) {}
+
+  void safeBind(const sqlite::Query& q, T value) const { q.bind(bName, value); }
 };
-    
-    
+
 struct Schema {
-    static void doForAll(const std::function<void(const ColumnBase&)>&) {}
-    
-    template<typename T, typename ...Others>
-    static void doForAll(const std::function<void(const ColumnBase&)>& lambda, const Column<T>& value, const Column<Others>&... others) {
-        lambda(value);
-        doForAll(lambda, others...);
-    }
+  static void doForAll(const std::function<void(const ColumnBase&)>&) {}
 
-    template<typename ...Others>
-    static std::string getAnyList(const std::function<std::string(const ColumnBase&)>& getVal, const Column<Others>&... others) {
-        std::string result;
-        
-        doForAll([&result, &getVal](const ColumnBase& value) {
-                    result += getVal(value);
-                    result += ",";
-                 }, others...);
-        
-        result.pop_back();
-        return result;
-    }
+  template <typename T, typename... Others>
+  static void doForAll(const std::function<void(const ColumnBase&)>& lambda,
+                       const Column<T>& value,
+                       const Column<Others>&... others) {
+    lambda(value);
+    doForAll(lambda, others...);
+  }
 
-    template<typename ...Others>
-    static std::string getList(const Column<Others>&... others) {
-        return getAnyList([](const ColumnBase& v) {return v.name;}, others...);
-    }
+  template <typename... Others>
+  static std::string getAnyList(
+      const std::function<std::string(const ColumnBase&)>& getVal,
+      const Column<Others>&... others) {
+    std::string result;
 
-    template<typename ...Others>
-    static std::string getBindingsList(const Column<Others>&... others) {
-        return getAnyList([](const ColumnBase& v) {return ":" + v.name;}, others...);
-    }
+    doForAll(
+        [&result, &getVal](const ColumnBase& value) {
+          result += getVal(value);
+          result += ",";
+        },
+        others...);
 
-    template<typename ...Others>
-    static std::string getListWithTypes(const Column<Others>&... others) {
-        return getAnyList([](const ColumnBase& v) {return v.name + " " + v.sqlType;}, others...);
-    }
-    
-    template<typename ...Others>
-    static int countColumns(const Column<Others>&... others) {
-        int pos = 0;
-        
-        doForAll([&pos](const ColumnBase& value) {
-                    value.setPos(pos);
-                    ++pos;
-                 }, others...);
-        
-        return pos;
-    }
+    result.pop_back();
+    return result;
+  }
 
-    const std::string table_name;
-    const size_t size;
-    const std::string list;
-    const std::string bindingsList;
-    const std::string listWithTypes;
-    const std::function<std::string(const std::function<std::string(const ColumnBase&)>&)>  getCustomList;
-    
-    template<typename ...Cols>
-    Schema(const std::string& _name, const Cols& ...cols) noexcept 
-        : table_name(_name), 
-          size(countColumns(cols...)), 
-          list(getList(cols...)), 
-          bindingsList(getBindingsList(cols...)),
-          listWithTypes(getListWithTypes(cols...)),
-          getCustomList([cols...](const std::function<std::string(const ColumnBase&)>& func) {
-                return getAnyList(func, cols...);
-          }) { } 
+  template <typename... Others>
+  static std::string getList(const Column<Others>&... others) {
+    return getAnyList([](const ColumnBase& v) { return v.name; }, others...);
+  }
+
+  template <typename... Others>
+  static std::string getBindingsList(const Column<Others>&... others) {
+    return getAnyList([](const ColumnBase& v) { return ":" + v.name; },
+                      others...);
+  }
+
+  template <typename... Others>
+  static std::string getListWithTypes(const Column<Others>&... others) {
+    return getAnyList(
+        [](const ColumnBase& v) { return v.name + " " + v.sqlType; },
+        others...);
+  }
+
+  template <typename... Others>
+  static int countColumns(const Column<Others>&... others) {
+    int pos = 0;
+
+    doForAll(
+        [&pos](const ColumnBase& value) {
+          value.setPos(pos);
+          ++pos;
+        },
+        others...);
+
+    return pos;
+  }
+
+  const std::string table_name;
+  const size_t size;
+  const std::string list;
+  const std::string bindingsList;
+  const std::string listWithTypes;
+  const std::function<std::string(
+      const std::function<std::string(const ColumnBase&)>&)>
+      getCustomList;
+
+  template <typename... Cols>
+  Schema(const std::string& _name, const Cols&... cols) noexcept
+      : table_name(_name),
+        size(countColumns(cols...)),
+        list(getList(cols...)),
+        bindingsList(getBindingsList(cols...)),
+        listWithTypes(getListWithTypes(cols...)),
+        getCustomList(
+            [cols...](
+                const std::function<std::string(const ColumnBase&)>& func) {
+              return getAnyList(func, cols...);
+            }) {}
 };
 
-} // End of schema namespace
-
+}  // namespace schema
