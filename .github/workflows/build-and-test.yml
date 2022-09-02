@@ -39,11 +39,11 @@ jobs:
         pip install .
         hm-init
         which hm-init
-        ls -l $(which hm-init)/..
+        ls -l /opt/hostedtoolcache/Python/3.10.6/x64/lib/python3.10/site-packages
         hm-init bashrc
-        . ~/.bashrc
+        . bashrc
         echo $PATH
-        cat ~/.bashrc
+        cat bashrc
         hm -v
         py.test
         . tests/release/prepare_history.sh
