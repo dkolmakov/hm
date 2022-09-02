@@ -16,162 +16,84 @@
 
 #pragma once
 
-#include <exception>
 #include <string>
 #include <sqlite3.h>
+#include <memory>
+#include <functional>
 
-namespace SqliteDB {
+#include "utils.hpp"
 
-    
-struct SqliteException : public std::exception {
-    std::string reason;
+namespace sqlite {
 
-    SqliteException(std::string _reason, int rc) {
-        reason = "SQLite error " + std::to_string(rc) + ": " + _reason;
-    }
-
-    const char * what () const throw () {
-        return reason.c_str();
-    }
+struct SqliteException : UtilException {
+    SqliteException(const std::string& _reason, int rc) noexcept
+        : UtilException("SQLite error ", _reason, rc) {}
 };
 
-
 class Database {
-
-    sqlite3 *db;
+    
+    const std::unique_ptr<sqlite3, std::function<void(sqlite3*)>> db;
 
 public:
 
-    Database(const std::string path) {
-        int rc;
+    explicit Database(const std::string path) : db(
+            [path]() {
+                sqlite3 *_db;
+                int rc = sqlite3_open(path.c_str(), &_db);
 
-        rc = sqlite3_open(path.c_str(), &db);
+                if (rc != SQLITE_OK) {
+                    throw SqliteException("can't open database: " + std::string(sqlite3_errmsg(_db)), rc);
+                }
+                
+                return _db;
+            }(),
+            [] (sqlite3 *_db) {
+                sqlite3_close(_db);
+            }
+        ) {}
 
-        if ( rc ) {
-            std::string reason = "can't open database: ";
-            reason += sqlite3_errmsg(db);
-            SqliteException e(reason, rc);
-            throw e;
-        }
+    void exec(const std::string sql) const {
+        char *zErrMsg = nullptr;
+        
+        int rc = sqlite3_exec(db.get(), sql.c_str(), NULL, 0, &zErrMsg);
 
-    }
-
-    ~Database() {
-        sqlite3_close(db);
-    }
-
-    int exec(const std::string sql) {
-        char *zErrMsg = 0;
-        int rc;
-
-        rc = sqlite3_exec(db, sql.c_str(), NULL, 0, &zErrMsg);
-
-        if( rc != SQLITE_OK ) {
+        if (rc != SQLITE_OK) {
             SqliteException e(zErrMsg, rc);
             sqlite3_free(zErrMsg);
             throw e;
         }
-
-        return rc;
     }
 
+    sqlite3_stmt* prepare_sql(const std::string& sql) const {
+        sqlite3_stmt *stmt = nullptr;
+        
+        int rc = sqlite3_prepare_v2(db.get(), sql.c_str(), -1, &stmt, NULL);
 
-    int prepare_sql(const std::string& sql, sqlite3_stmt **stmt) {
-        int rc;
-
-        rc = sqlite3_prepare_v2(db, sql.c_str(), -1, stmt, NULL);
-
-        if( rc != SQLITE_OK ) {
-            SqliteException e("SQL preparation error", rc);
-            throw e;
+        if (rc != SQLITE_OK) {
+            throw SqliteException("SQL preparation error", rc);
         }
-
-        return rc;
+        
+        return stmt;
     }
 
-    int bind_value(sqlite3_stmt *stmt, const char *name, const std::string& value) {
-        int index = sqlite3_bind_parameter_index(stmt, name);
+    void bind_value(sqlite3_stmt *stmt, const std::string& name, const std::string& value) const {
+        int index = sqlite3_bind_parameter_index(stmt, name.c_str());
 
-        if( index == 0 ) {
-            std::string reason = "SQL bind parameter index error: no ";
-            reason += name;
-            reason += " parameter";
-            std::cout << reason << std::endl;
-            SqliteException e(reason, -1);
-            std::cout << e.reason << std::endl;
-            throw e;
+        if (index == 0) {
+            throw SqliteException("SQL bind parameter index error: no " + name + " parameter", -1);
         }
 
         int rc = sqlite3_bind_text(stmt, index, value.c_str(), -1, SQLITE_TRANSIENT);
 
         if( rc != SQLITE_OK ) {
-            SqliteException e("SQL bind error", rc);
-            throw e;
+            throw SqliteException("SQL bind error", rc);
         }
-
-        return rc;
     }
 
-    int last_rowid() {
-        return sqlite3_last_insert_rowid(db);
+    int last_rowid() const {
+        return sqlite3_last_insert_rowid(db.get());
     }
 };
 
-
-class Query {
-    Database& db;
-    sqlite3_stmt *stmt;
-    
-public:
-    Query(Database& _db, const std::string& sql) : db(_db) {
-        db.prepare_sql(sql, &stmt);
-    }
-
-    Query(Database& _db, const char *sql) : db(_db) {
-        db.prepare_sql(sql, &stmt);
-    }
-    
-    ~Query() {
-        sqlite3_finalize(stmt);
-    }
-    
-    void bind(const std::string& str, const std::string& value) {
-        db.bind_value(stmt, str.c_str(), value);
-    }
-
-    void bind(const char *str, const std::string& value) {
-        db.bind_value(stmt, str, value);
-    }
-
-    void exec() {
-        int result = SQLITE_DONE;
-        
-        while ((result = sqlite3_step(stmt)) == SQLITE_BUSY) {};
-        
-        if (result != SQLITE_DONE) {
-            SqliteException e("SQL exec error", result);
-            throw e;
-        }
-    }
-
-    bool exec_step() {
-        int result = sqlite3_step(stmt);
-        
-        if (result != SQLITE_ROW && result != SQLITE_DONE) {
-            SqliteException e("SQL exec_step error", result);
-            throw e;
-        }
-        
-        return result == SQLITE_ROW;
-    }
-
-    std::string get_string(int number) {
-        return reinterpret_cast<char const*>(sqlite3_column_text(stmt, number));
-    }
-
-    int get_int(int number) {
-        return sqlite3_column_int(stmt, number);
-    }
-};
 
 }

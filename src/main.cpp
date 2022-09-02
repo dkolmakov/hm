@@ -29,7 +29,7 @@
 enum ErrorCode {
     SUCCESS = 0,
     ARG_ERROR,
-    FAILED_TO_ADD
+    FAILED_TO_PROCESS
 };
 
 static void print_session_info(std::string sess_id, std::string sess_name) {
@@ -95,17 +95,17 @@ int main(int argc, char* argv[]) {
             print_session_info(args.sess_id, session_name);
         }   break;
         default:
-            throw AgrgumentException("Error: unsupported mode");
+            throw AgrgumentException("unsupported mode");
         }
     }
-    catch (SqliteDB::SqliteException& e) {
-        std::cout << "Error: database query failed " << e.what() << std::endl;
-        exit(FAILED_TO_ADD);
-    }
-    catch (AgrgumentException& e) {
+    catch (const AgrgumentException& e) {
         std::cout << "Error: " << e.what() << std::endl;
         args.print_usage();
         exit(ARG_ERROR);
+    }
+    catch (const UtilException& e) {
+        std::cout << "Error: " << e.what() << std::endl;
+        exit(FAILED_TO_PROCESS);
     }
 
     return 0;
