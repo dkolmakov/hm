@@ -42,6 +42,14 @@ jobs:
         py.test
         cat bashrc
         echo +++++++++++++
+        echo hm-db $hm_history_db parse $hm_history_tmp $separator
+        hm-db $hm_history_db parse $hm_history_tmp $separator
+        echo TMPFILE=$(mktemp extracted_history.XXXXXXXXXX)
+        TMPFILE=$(mktemp extracted_history.XXXXXXXXXX)
+        echo hm-db $hm_history_db select $hm_session_id $(echo $ARGS)
+        hm-db $hm_history_db select $hm_session_id $(echo $ARGS) > $TMPFILE
+        echo hm "$*"
+        echo --------------
         hm .
         . tests/release/prepare_history.sh
         echo $test_path
