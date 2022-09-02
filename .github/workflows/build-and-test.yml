@@ -42,6 +42,9 @@ jobs:
         hm-init bashrc --home `pwd`
         . bashrc
         py.test
-        echo +++++++++++++
+        echo +++++++++++++ System tests
         . tests/release/prepare_history.sh
         . tests/release/check_history.sh        
+        echo +++++++++++++ Cram test
+        - cram3 -v --shell=bash tests/release/test_interface.t
+        - cram3 -v --shell=zsh tests/release/test_interface.t
