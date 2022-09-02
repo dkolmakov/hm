@@ -47,4 +47,3 @@ jobs:
         . tests/release/check_history.sh        
         echo +++++++++++++ Cram test
         cram -v --shell=bash tests/release/test_interface.t
-        cram -v --shell=zsh tests/release/test_interface.t
