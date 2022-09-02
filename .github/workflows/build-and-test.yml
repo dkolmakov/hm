@@ -46,9 +46,12 @@ jobs:
         hm-db $hm_history_db parse $hm_history_tmp $separator
         echo TMPFILE=$(mktemp extracted_history.XXXXXXXXXX)
         TMPFILE=$(mktemp extracted_history.XXXXXXXXXX)
-        echo hm-db $hm_history_db select $hm_session_id $(echo $ARGS)
-        hm-db $hm_history_db select $hm_session_id $(echo $ARGS) > $TMPFILE
-        echo hm "$*"
+        echo hm-db $hm_history_db select $hm_session_id .
+        hm-db $hm_history_db select $hm_session_id . > $TMPFILE
+        echo hm \".\" >> $TMPFILE
+        cat $TMPFILE
+        echo "hm_load_history $TMPFILE"
+        hm_load_history $TMPFILE
         echo --------------
         hm .
         . tests/release/prepare_history.sh
