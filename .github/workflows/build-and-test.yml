@@ -36,30 +36,12 @@ jobs:
         
     - name: Check python package
       run: |
+        HISTFILE=.bash_history
+        set -o history        
         pip install .
         hm-init bashrc --home `pwd`
         . bashrc
         py.test
-        cat bashrc
         echo +++++++++++++
-        echo hm-db $hm_history_db parse $hm_history_tmp $separator
-        hm-db $hm_history_db parse $hm_history_tmp $separator
-        echo TMPFILE=$(mktemp extracted_history.XXXXXXXXXX)
-        TMPFILE=$(mktemp extracted_history.XXXXXXXXXX)
-        echo hm-db $hm_history_db select $hm_session_id .
-        hm-db $hm_history_db select $hm_session_id . > $TMPFILE
-        echo hm \".\" >> $TMPFILE
-        cat $TMPFILE
-        HISTFILE=.bash_history
-        set -o history        
-        echo "hm_load_history $TMPFILE"
-        hm_load_history $TMPFILE
-        echo --------------
-        hm .
         . tests/release/prepare_history.sh
-        echo $test_path
-        echo $test_command
-        hm -h
-        hm .
-        echo +++++++++++++
         . tests/release/check_history.sh        
