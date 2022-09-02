@@ -16,7 +16,7 @@ hm-db $hm_history_db add $hm_session_id "$(date +"%Y-%m-%d %H:%M:%S")" $test_pat
 if ! [ $? -eq 0 ]; then echo "Error!!! Adding entry to database failed!"; rc=1; fi
 
 # Select commands from the test path
-hm -d $test_path
+hm $test_path
 if ! [ $? -eq 0 ]; then echo "Error!!! Selecting commands failed!"; rc=1; fi
 
 # Form error code 
