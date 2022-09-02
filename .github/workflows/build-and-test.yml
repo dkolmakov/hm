@@ -1,5 +1,9 @@
-name: Build Status
+name: Build
 
+defaults:
+  run:
+    shell: bash
+    
 on:
   push:
     branches: [ "develop", "master" ]
@@ -9,6 +13,7 @@ on:
 jobs:
   build:
     name: ubuntu-build-and-test
+    
     runs-on: ubuntu-latest
 
     steps:
@@ -16,14 +21,29 @@ jobs:
     - uses: actions/setup-python@v4
       with:
         python-version: '3.10'
-    - run: pip install pytest
+    - run: pip install -r requirements.txt
     
     - name: Make hm-db
       run: |
         mkdir -p build && cd build 
-        cmake .. && make 
+        cmake .. && make
+        
     - name: Run hm-db tests
       run: |
         export PATH=$PATH:`pwd`/build/src/
         hm-db --version
         py.test
+        
+    - name: Check python package
+      run: |
+        HISTFILE=.bash_history
+        set -o history        
+        pip install .
+        hm-init bashrc --home `pwd`
+        . bashrc
+        py.test
+        echo +++++++++++++ System tests
+        . tests/release/prepare_history.sh
+        . tests/release/check_history.sh        
+        echo +++++++++++++ Cram test
+        cram -v --shell=bash tests/release/test_interface.t
