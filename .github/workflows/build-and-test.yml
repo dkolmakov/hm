@@ -9,6 +9,7 @@ on:
 jobs:
   build:
     name: ubuntu-build-and-test
+    
     runs-on: ubuntu-latest
 
     steps:
@@ -21,9 +22,17 @@ jobs:
     - name: Make hm-db
       run: |
         mkdir -p build && cd build 
-        cmake .. && make 
+        cmake .. && make
+        
     - name: Run hm-db tests
       run: |
-        export PATH=$PATH:`pwd`/build/src/
         hm-db --version
+        PATH=$PATH:`pwd`/build/src/ py.test
+        
+    - name: Check python package
+        pip install .
+        hm-init ~/.bashrc
+        . ~/.bashrc
         py.test
+        . tests/release/prepare_history.sh
+        . tests/release/check_history.sh        
