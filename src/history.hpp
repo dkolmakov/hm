@@ -309,36 +309,34 @@ public:
         size_t total_lines = std::count(std::istreambuf_iterator<char>(to_count), std::istreambuf_iterator<char>(), '\n');
         size_t current_line = 0;
 	    
-	if (total_lines == 0)
-	    return 0;
+        if (total_lines > 0) {
+            std::cout << "Loading " << total_lines << " commands from the temporary file " << filename << std::endl;
+            ProgressBar<size_t> bar(total_lines, current_line);
 
-        std::cout << "Loading " << total_lines << " commands from the temporary file " << filename << std::endl;
-        ProgressBar<size_t> bar(total_lines, current_line);
+            if (!input)
+                throw HistoryException("Failed to read commands from file " + filename);
 
-        if (!input)
-            throw HistoryException("Failed to read commands from file " + filename);
+            // To speed-up loading process - perform all inserts as single transaction
+            db.exec("BEGIN TRANSACTION;");
 
-        // To speed-up loading process - perform all inserts as single transaction
-        db.exec("BEGIN TRANSACTION;");
+            while (getline(input, line)) {
+                std::vector<std::string> elements = split(line, separator);
 
-        while (getline(input, line)) {
-            std::vector<std::string> elements = split(line, separator);
-            
-            if (elements.size() != cSch.size) {
+                if (elements.size() != cSch.size) {
                 --total_lines;
                 continue; // Drop incorrect lines
+                }
+
+                insert(elements[0], elements[1], elements[2], elements[3], elements[4]);
+
+                current_line++;
+                bar.show_progress(current_line);
             }
-            
-            insert(elements[0], elements[1], elements[2], elements[3], elements[4]);
-            
-            current_line++;
-            bar.show_progress(current_line);
+
+            db.exec("COMMIT;");
         }
         
-        db.exec("COMMIT;");
-
         std::cout << "Loaded " << total_lines << " commands." << std::endl;
-        
         input.close();
     }
 
