@@ -23,14 +23,14 @@
 #include "./utils.hpp"
 #include "./version.hpp"
 
-using clipp::group;
-using clipp::opt_value;
-using clipp::parameter;
-using clipp::value;
-using clipp::option;
 using clipp::command;
 using clipp::doc_formatting;
+using clipp::group;
+using clipp::opt_value;
+using clipp::option;
+using clipp::parameter;
 using clipp::usage_lines;
+using clipp::value;
 
 struct AgrgumentException : UtilException {
   explicit AgrgumentException(const std::string& _reason)
