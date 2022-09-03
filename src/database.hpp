@@ -16,84 +16,83 @@
 
 #pragma once
 
-#include <string>
 #include <sqlite3.h>
-#include <memory>
-#include <functional>
 
-#include "utils.hpp"
+#include <functional>
+#include <memory>
+#include <string>
+
+#include "./utils.hpp"
 
 namespace sqlite {
 
 struct SqliteException : UtilException {
-    SqliteException(const std::string& _reason, int rc) noexcept
-        : UtilException("SQLite error ", _reason, rc) {}
+  SqliteException(const std::string& _reason, int rc) noexcept
+      : UtilException("SQLite error ", _reason, rc) {}
 };
 
 class Database {
-    
-    const std::unique_ptr<sqlite3, std::function<void(sqlite3*)>> db;
+  const std::unique_ptr<sqlite3, std::function<void(sqlite3*)>> db;
 
-public:
-
-    explicit Database(const std::string path) : db(
+ public:
+  explicit Database(const std::string path)
+      : db(
             [path]() {
-                sqlite3 *_db;
-                int rc = sqlite3_open(path.c_str(), &_db);
+              sqlite3* _db;
+              int rc = sqlite3_open(path.c_str(), &_db);
 
-                if (rc != SQLITE_OK) {
-                    throw SqliteException("can't open database: " + std::string(sqlite3_errmsg(_db)), rc);
-                }
-                
-                return _db;
+              if (rc != SQLITE_OK) {
+                throw SqliteException(
+                    "can't open database: " + std::string(sqlite3_errmsg(_db)),
+                    rc);
+              }
+
+              return _db;
             }(),
-            [] (sqlite3 *_db) {
-                sqlite3_close(_db);
-            }
-        ) {}
+            [](sqlite3* _db) { sqlite3_close(_db); }) {}
 
-    void exec(const std::string sql) const {
-        char *zErrMsg = nullptr;
-        
-        int rc = sqlite3_exec(db.get(), sql.c_str(), NULL, 0, &zErrMsg);
+  void exec(const std::string sql) const {
+    char* zErrMsg = nullptr;
 
-        if (rc != SQLITE_OK) {
-            SqliteException e(zErrMsg, rc);
-            sqlite3_free(zErrMsg);
-            throw e;
-        }
+    int rc = sqlite3_exec(db.get(), sql.c_str(), NULL, 0, &zErrMsg);
+
+    if (rc != SQLITE_OK) {
+      SqliteException e(zErrMsg, rc);
+      sqlite3_free(zErrMsg);
+      throw e;
+    }
+  }
+
+  sqlite3_stmt* prepare_sql(const std::string& sql) const {
+    sqlite3_stmt* stmt = nullptr;
+
+    int rc = sqlite3_prepare_v2(db.get(), sql.c_str(), -1, &stmt, NULL);
+
+    if (rc != SQLITE_OK) {
+      throw SqliteException("SQL preparation error", rc);
     }
 
-    sqlite3_stmt* prepare_sql(const std::string& sql) const {
-        sqlite3_stmt *stmt = nullptr;
-        
-        int rc = sqlite3_prepare_v2(db.get(), sql.c_str(), -1, &stmt, NULL);
+    return stmt;
+  }
 
-        if (rc != SQLITE_OK) {
-            throw SqliteException("SQL preparation error", rc);
-        }
-        
-        return stmt;
+  void bind_value(sqlite3_stmt* stmt, const std::string& name,
+                  const std::string& value) const {
+    int index = sqlite3_bind_parameter_index(stmt, name.c_str());
+
+    if (index == 0) {
+      throw SqliteException(
+          "SQL bind parameter index error: no " + name + " parameter", -1);
     }
 
-    void bind_value(sqlite3_stmt *stmt, const std::string& name, const std::string& value) const {
-        int index = sqlite3_bind_parameter_index(stmt, name.c_str());
+    int rc =
+        sqlite3_bind_text(stmt, index, value.c_str(), -1, SQLITE_TRANSIENT);
 
-        if (index == 0) {
-            throw SqliteException("SQL bind parameter index error: no " + name + " parameter", -1);
-        }
-
-        int rc = sqlite3_bind_text(stmt, index, value.c_str(), -1, SQLITE_TRANSIENT);
-
-        if( rc != SQLITE_OK ) {
-            throw SqliteException("SQL bind error", rc);
-        }
+    if (rc != SQLITE_OK) {
+      throw SqliteException("SQL bind error", rc);
     }
+  }
 
-    int last_rowid() const {
-        return sqlite3_last_insert_rowid(db.get());
-    }
+  int last_rowid() const { return sqlite3_last_insert_rowid(db.get()); }
 };
 
-
-}
+}  // namespace sqlite

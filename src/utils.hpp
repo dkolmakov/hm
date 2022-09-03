@@ -20,16 +20,14 @@
 #include <string>
 
 struct UtilException : public std::exception {
-    const std::string reason;
+  const std::string reason;
 
-    UtilException(const std::string& _title, const std::string& _reason, const int rc) noexcept
-        : reason(_title + std::to_string(rc) + ": " + _reason) {}
+  UtilException(const std::string& _title, const std::string& _reason,
+                const int rc) noexcept
+      : reason(_title + std::to_string(rc) + ": " + _reason) {}
 
-    UtilException(const std::string& _title, const std::string& _reason) noexcept
-        : reason(_title + ": " + _reason) {}
-        
-    const char * what () const throw () {
-        return reason.c_str();
-    }
+  UtilException(const std::string& _title, const std::string& _reason) noexcept
+      : reason(_title + ": " + _reason) {}
+
+  const char* what() const throw() { return reason.c_str(); }
 };
-

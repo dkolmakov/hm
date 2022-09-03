@@ -20,52 +20,45 @@
 #include <iostream>
 #include <string>
 
-#include "const_conf.hpp"
+#include "./const_conf.hpp"
 
 struct ConfException : public std::exception {
-    std::string reason;
+  std::string reason;
 
-    ConfException(std::string _reason) {
-        reason = "Configurator error: " + _reason;
-    }
+  explicit ConfException(std::string _reason) {
+    reason = "Configurator error: " + _reason;
+  }
 
-    const char * what () const throw () {
-        return reason.c_str();
-    }
+  const char* what() const throw() { return reason.c_str(); }
 };
 
-
 class Configurator {
+  std::string configuration = "";
+  std::ostream output;
 
-    std::string configuration = "";
-    std::ostream output;
+ public:
+  explicit Configurator(std::streambuf* out_buf) : output(out_buf) {}
 
-public:
+  int configure(const std::string hmhome) {
+    configure_home_path(hmhome);
+    print_configuaration();
+    return 0;
+  }
 
-    Configurator(std::streambuf* out_buf) : output(out_buf) {
-    }
+  void configure_home_path(const std::string hmhome) {
+    configuration += "\t# History manager home directory\n";
+    configuration += "\thm_home=" + hmhome + "\n\n";
+  }
 
-    int configure(const std::string hmhome) {
-        configure_home_path(hmhome);
-        print_configuaration();
-        return 0;
-    }
+  void print_configuaration() {
+    output << "\n# History manager settings\n";
+    output << "if command -v hm-db > /dev/null\nthen\n";
 
-    void configure_home_path(const std::string hmhome) {
-        configuration += "\t# History manager home directory\n";
-        configuration += "\thm_home=" + hmhome + "\n\n";
-    }
+    output << configuration;
+    output << const_configuration;
 
-    void print_configuaration() {
-        output << "\n# History manager settings\n";
-        output << "if command -v hm-db > /dev/null\nthen\n";
-        
-        output << configuration;
-        output << const_configuration;
+    output << "fi\n" << std::endl;
+  }
 
-        output << "fi\n" << std::endl;
-    }
-
-    ~Configurator() {
-    }
+  ~Configurator() {}
 };
