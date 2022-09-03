@@ -1,0 +1,22 @@
+name: Code Style
+on: [push, pull_request]
+jobs:
+  cpplint:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - uses: actions/setup-python@v4
+    - run: pip install cpplint
+    - run: cpplint --recursive --exclude=src/const_conf.hpp --exclude=src/version.hpp --extensions=cpp,hpp src/
+
+  clang-format:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+    - uses: DoozyX/clang-format-lint-action@v0.14
+      with:
+        source: 'src/'
+        extensions: 'hpp,cpp'
+        clangFormatVersion: 14
+        style: google
