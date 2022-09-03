@@ -17,6 +17,7 @@
 #pragma once
 
 #include <sqlite3.h>
+
 #include <functional>
 #include <memory>
 #include <string>
