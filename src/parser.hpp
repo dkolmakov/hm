@@ -1,5 +1,5 @@
 /*
-   Copyright 2019 Dmitry Kolmakov
+   Copyright 2019-2022 Dmitry Kolmakov
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -53,7 +53,7 @@ class ArgParser {
   static void show_version(std::string name) {
     std::cout
         << name << " " << HM_VERSION << std::endl
-        << "Copyright (C) 2020 Dmitry Kolmakov." << std::endl
+        << "Copyright 2019-2022 Dmitry Kolmakov." << std::endl
         << "License ASLv2.0: Apache License, Version 2.0 "
            "<http://www.apache.org/licenses/LICENSE-2.0>."
         << std::endl
