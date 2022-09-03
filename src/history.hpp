@@ -198,7 +198,7 @@ class History {
     std::string sess_phrase = "";
 
     if (sess.length()) {
-      std::vector<int> ids = get_sess_id_by_name(ids, sess);
+      std::vector<int> ids = get_sess_id_by_name(sess);
       sess_phrase =
           ftsSch.sess_id.name + ":(" + logic_phrase_from_ids(ids) + ")";
     }

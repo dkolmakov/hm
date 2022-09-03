@@ -25,7 +25,7 @@ template <class T>
 struct ProgressBar {
   const T total;
   size_t bar_width;
-  const char done[] = "Done!";
+  const char* done = "Done!";
 
   ProgressBar(T _total, T current) : total(_total) {
     struct winsize w;
