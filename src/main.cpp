@@ -64,6 +64,12 @@ int main(int argc, char* argv[]) {
       exit(0);
     }
 
+    if (args.selected == mode::add) {
+      if (fork() != 0) {
+        return 0;
+      }
+    }
+
     History history(args.db_path);
 
     switch (args.selected) {
