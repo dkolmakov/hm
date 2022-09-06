@@ -22,16 +22,6 @@
 
 #include "./const_conf.hpp"
 
-struct ConfException : public std::exception {
-  std::string reason;
-
-  explicit ConfException(std::string _reason) {
-    reason = "Configurator error: " + _reason;
-  }
-
-  const char* what() const throw() { return reason.c_str(); }
-};
-
 class Configurator {
   std::string configuration = "";
   std::ostream output;
@@ -52,7 +42,8 @@ class Configurator {
 
   void print_configuaration() {
     output << "\n# History manager settings\n";
-    output << "if command -v hm-db > /dev/null\nthen\n";
+    output << "if command -v hm-db > /dev/null && [ $(id -u) -ne 0 ] && [ -z "
+              "$hm_home ]\nthen\n";
 
     output << configuration;
     output << const_configuration;

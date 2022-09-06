@@ -64,7 +64,7 @@ int main(int argc, char* argv[]) {
       exit(0);
     }
 
-    if (args.selected == mode::add) {
+    if (args.selected == mode::add && args.asynchronous) {
       if (fork() != 0) {
         return 0;
       }
