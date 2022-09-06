@@ -6,7 +6,7 @@ import time
 def run_cmd(cmd_list):
     process = subprocess.Popen(cmd_list, stdout=subprocess.PIPE, stderr=subprocess.PIPE, bufsize=1, universal_newlines=True)
 
-    print("Running command: {}".format(subprocess.list2cmdline(process.args)))
+    #print("Running command: {}".format(subprocess.list2cmdline(process.args)))
 
     stdout, stderr = process.communicate()
     rc = process.wait()

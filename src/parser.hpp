@@ -86,6 +86,7 @@ class ArgParser {
   std::string cwd = "not defined";
   std::string cmd = "not defined";
   std::string ret_code = "0";
+  bool asynchronous = false;
   const group add =
       (command("add").set(selected, mode::add),
        "add - adds a new entry to the command history database" %
@@ -93,7 +94,10 @@ class ArgParser {
             value("datetime", datetime) % "time stamp",
             value("cwd", cwd) % "current working directory",
             value("cmd", cmd) % "executed command",
-            value("rc", ret_code) % "returned code"));
+            value("rc", ret_code) % "returned code",
+            option("--async").set(asynchronous) %
+                "forces the command to be executed in a separate thread "
+                "returning control without waiting for  completion"));
 
   // select command
   bool by_dir = false;
