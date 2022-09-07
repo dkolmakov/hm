@@ -292,8 +292,8 @@ class History {
 
   void select(bool by_dir, const std::string& path, bool recursively,
               bool by_sess, const std::string& sess) {
-    std::string select_sql = prepare_select((by_dir) ? path : "", recursively,
-                                            (by_sess) ? sess : "");
+    const std::string select_sql = prepare_select(
+        (by_dir) ? path : "", recursively, (by_sess) ? sess : "");
     sqlite::Query query(db, select_sql);
 
     while (query.exec_step()) {
