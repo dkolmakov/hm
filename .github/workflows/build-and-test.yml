@@ -39,7 +39,7 @@ jobs:
         HISTFILE=.bash_history
         set -o history        
         pip install .
-        hm-init --home `pwd`
+        history-manager-init --home `pwd`
         . `pwd`/configuration
         py.test
         echo +++++++++++++ System tests
