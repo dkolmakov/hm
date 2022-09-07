@@ -9,10 +9,9 @@ cwd = path.abspath(path.dirname(__file__))
 with open(path.join(cwd, 'docs', 'python_package.md'), encoding='utf-8') as f:
     long_description = f.read()
 
-class CMakeExtension(Extension):
 
+class CMakeExtension(Extension):
     def __init__(self, name):
-        # don't invoke the original build_ext for this special extension
         super().__init__(name, sources=[])
 
 
@@ -29,7 +28,6 @@ class build_ext(build_ext_orig):
         par_ext_dir = path.abspath(path.join(ext_dir, pardir))
         makedirs(ext_dir, exist_ok=True)
         
-        #config = 'Debug' if self.debug else 'Release'
         cmake_args = [
             '-DCMAKE_RUNTIME_OUTPUT_DIRECTORY=' + par_ext_dir,
         ]
@@ -43,8 +41,6 @@ class build_ext(build_ext_orig):
         if not self.dry_run:
             self.spawn(['cmake', '--build', '.'] + build_args)
             
-        print(self.build_temp)
-
         chdir(cwd)
 
 
@@ -63,7 +59,7 @@ setup(name='history-manager',
         'build_ext': build_ext,
       },
       entry_points = {
-        'console_scripts': ['hm-init=hm_initializer:main'],
+        'console_scripts': ['history-manager-init=hm_initializer:main'],
       },
       zip_safe=False)
 

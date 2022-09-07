@@ -1,53 +1,53 @@
 
 ## Configuration
 
-### Adding `hm` scripts to the Bash configuration
+### Adding `hm` scripts to the Bash configuration (python package)
 
-Configuration of the history manager is performed by the following command:
+Configuration of the history manager is generated with python script when installed with `pip`:
 
 ```Shell
 hm-init
 ```
-or for the installation from sources:
+To enable `hm` in the current session execute:
+
+```Shell
+. ~/.hm/configuration
+```
+
+And modify `~/.bashrc` to enable `hm` by default in future sessions:
+
+```Shell
+echo ". ~/.hm/configuration" >> ~/.bashrc
+```
+
+### Adding `hm` scripts to the Bash configuration (installed from sources)
+
+Call `hm-db` directly:
 
 ```Shell
 hm-db configure
 ```
-This command will output everything to the terminal. To add the content to `~/.bashrc` run:
-
-```Shell
-hm-init ~/.bashrc
-```
-or
+which will output everything to the terminal or to a specified file, for example:
 
 ```Shell
 hm-db configure ~/.bashrc
 ```
 
-If it's not convenient to use `~/.bashrc` directly the configuration scripts can be placed to a separate file `~/.hm/configuration`:
+If it's not convenient to use `~/.bashrc` directly the configuration scripts can be placed to an arbitrary file:
 
 ```Shell
-hm-init ~/.hm/configuration
+hm-db configure <filename>
 ```
 and add the following line to the `~/.bashrc`:
 
 ```Shell
-[[ -f ~/.hm/configuration ]] && . ~/.hm/configuration
+. <filename>
 ```
 
-### Directory to store `hm` database
+### Home directory for history manager
 
-History manager home directory is `~/.hm` by default. Other home path can be specified at configuration step:
+By default it is `~/.hm`. Other home path can be specified at configuration step:
 
 ```Shell
-hm-init ~/.bashrc --home /custom/hm/home/path
+hm-init --home /custom/hm/home/path
 ```
-
-### Applying changes to the current session
-
-Simply source the `.bashrc`:
-
-```Shell
-. ~/.bashrc
-```
-

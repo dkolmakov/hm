@@ -31,15 +31,21 @@ For other installation options please follow the [link](docs/installation.md)
 
 ## Configuration
 
-At the configuration step the history manager adds some wrapper scripts to the `.bashrc`:
+At the configuration step the history manager generates configuration file with:
 
 ```Shell
-hm-init ~/.bashrc
+hm-init
 ```
-To enable `hm` in the current session source the `.bashrc`:
+To enable `hm` in the current session execute:
 
 ```Shell
-. ~/.bashrc
+. ~/.hm/configuration
+```
+
+And modify `~/.bashrc` to enable `hm` by default in future sessions:
+
+```Shell
+echo ". ~/.hm/configuration" >> ~/.bashrc
 ```
 
 More details are [here](docs/configuration.md).
