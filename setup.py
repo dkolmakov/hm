@@ -4,6 +4,8 @@ from os import path, makedirs, chdir, pardir
 from setuptools import setup, Extension
 from setuptools.command.build_ext import build_ext as build_ext_orig
 
+MINIMUM_CMAKE_VERSION = "3.2"
+
 # Get the long description
 cwd = path.abspath(path.dirname(__file__))
 with open(path.join(cwd, 'docs', 'python_package.md'), encoding='utf-8') as f:
@@ -15,6 +17,25 @@ class CMakeExtension(Extension):
         super().__init__(name, sources=[])
 
 
+def check_cmake():
+    """
+    Returns true if cmake is intalled.
+    """
+    import tempfile
+    import subprocess
+    f = tempfile.NamedTemporaryFile('w', suffix='.txt', delete=False)
+    f.write('cmake_minimum_required(VERSION {})'.format(MINIMUM_CMAKE_VERSION))
+    f.close()
+    ret = True
+    try:
+        rc = subprocess.call(['cmake', '-P', f.name])
+        ret = rc == 0
+    except:
+        ret = False
+    os.unlink(f.name)
+    return ret
+
+
 class build_ext(build_ext_orig):
 
     def run(self):
@@ -23,6 +44,14 @@ class build_ext(build_ext_orig):
         super().run()
 
     def build_cmake(self, ext):
+        
+        if not check_cmake():
+            raise Exception("\n" + "!"*80 + "\n\n"
+                            "\tCommand \'cmake\' not found or it has version less than {}.\n "
+                            "\tPlease install \'cmake\' to your system and try again.\n"
+                            "\tCmake is required to build history manager binary.\n".format(MINIMUM_CMAKE_VERSION) +
+                            "\n" + "!"*80 + "\n\n")
+        
         makedirs(self.build_temp, exist_ok=True)
         ext_dir = self.get_ext_fullpath(ext.name)
         par_ext_dir = path.abspath(path.join(ext_dir, pardir))
@@ -42,10 +71,10 @@ class build_ext(build_ext_orig):
             self.spawn(['cmake', '--build', '.'] + build_args)
             
         chdir(cwd)
-
+        
 
 setup(name='history-manager',
-      version='0.1.6',
+      version='0.1.7',
       description='Command line history manager for bash',
       long_description=long_description,
       long_description_content_type='text/markdown',
@@ -59,7 +88,7 @@ setup(name='history-manager',
         'build_ext': build_ext,
       },
       entry_points = {
-        'console_scripts': ['history-manager-init=hm_initializer:main'],
+        'console_scripts': ['hm-init=hm_initializer:main'],
       },
       zip_safe=False)
 
