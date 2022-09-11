@@ -14,12 +14,12 @@ Usage with other tools:
 Recovering command history related to the specific directory is done with:
 
 ```Shell
-hm -d /path/of/interest
+hm /path/of/interest
 ```
 or for the current working directory:
 
 ```Shell
-hm -d
+hm .
 ```
 
 All commands executed in the specified directory are combined together and placed at the beginning of the bash built-in history, so it is possible to walk through them using <kbd>&#8593;</kbd> button.
@@ -27,12 +27,12 @@ All commands executed in the specified directory are combined together and place
 To include commands executed in the nested folders add `-R` flag: 
 
 ```Shell
-hm -d . -R
+hm . -R
 ```
 
 **TODO:** It is possible to filter out commnads containing specified words:
 ```Shell
-hm -d . --exclude "cd ls git"
+hm . --exclude "cd ls git"
 ```
 
 ### By session name 
@@ -59,7 +59,7 @@ hm -i
 
 Both path and session name can be combined together in a single recovery request:
 ```Shell
-hm -s "Session Name" -d .
+hm /some/path -s "Session Name"
 ```
 ## Usage with other tools
 
