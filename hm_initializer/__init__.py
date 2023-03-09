@@ -1,5 +1,4 @@
 import os    
-import sys
 import subprocess
 import argparse
 
@@ -33,4 +32,4 @@ def main():
 
     # Call configuration procedure od hm-db binary
     cmd = ' '.join([hm_db_path + '/hm-db', 'configure', config_filename, '--home', args.home])
-    return_code = subprocess.call(cmd, shell=True)
+    subprocess.call(cmd, shell=True)

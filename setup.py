@@ -1,5 +1,4 @@
-from setuptools import setup
-from os import path, makedirs, chdir, pardir
+from os import path, pardir
 
 from setuptools import setup, Extension
 from setuptools.command.build_ext import build_ext as build_ext_orig
@@ -9,43 +8,46 @@ cwd = path.abspath(path.dirname(__file__))
 with open(path.join(cwd, 'docs', 'python_package.md'), encoding='utf-8') as f:
     long_description = f.read()
 
-
-class CMakeExtension(Extension):
-    def __init__(self, name):
-        super().__init__(name, sources=[])
+HM_DB_VERSION = "0.1.7"
 
 
 class build_ext(build_ext_orig):
+    def write_version_file(self):
+        with open('src/version.hpp.in', 'r') as f:
+            fdata = f.read()
 
-    def run(self):
-        for ext in self.extensions:
-            self.build_cmake(ext)
-        super().run()
+        fdata = fdata.replace('@hm_VERSION@', HM_DB_VERSION)
 
-    def build_cmake(self, ext):
-        makedirs(self.build_temp, exist_ok=True)
-        ext_dir = self.get_ext_fullpath(ext.name)
-        par_ext_dir = path.abspath(path.join(ext_dir, pardir))
-        makedirs(ext_dir, exist_ok=True)
-        
-        cmake_args = [
-            '-DCMAKE_RUNTIME_OUTPUT_DIRECTORY=' + par_ext_dir,
-        ]
+        with open('src/version.hpp', 'w') as f:
+            f.write(fdata)
 
-        build_args = [
-            '--', '-j4'
-        ]
+    def build_extension(self, ext):
+        sources = ext.sources
+        # sort to make the resulting .so file build reproducible
+        sources = sorted(sources)
 
-        chdir(self.build_temp)
-        self.spawn(['cmake', cwd] + cmake_args)
-        if not self.dry_run:
-            self.spawn(['cmake', '--build', '.'] + build_args)
-            
-        chdir(cwd)
+        ext_path = self.get_ext_fullpath(ext.name)
+        par_ext_dir = path.abspath(path.join(ext_path, pardir))
+
+        self.write_version_file()
+
+        extra_args = ["-std=c++11", "-fPIC", "-fpic", "-O3",
+                      "-DSQLITE_OMIT_LOAD_EXTENSION", "-DSQLITE_MAX_WORKER_THREADS=0", "-DSQLITE_ENABLE_FTS5"]
+
+        objects = self.compiler.compile(sources,
+                                        output_dir=self.build_temp,
+                                        include_dirs=ext.include_dirs,
+                                        extra_postargs=extra_args,
+                                        depends=ext.depends)
+
+        self.compiler.link_executable(
+            objects, path.join(par_ext_dir, ext.name),
+            extra_postargs=extra_args,
+            target_lang="c++")
 
 
 setup(name='history-manager',
-      version='0.1.6',
+      version=HM_DB_VERSION,
       description='Command line history manager for bash',
       long_description=long_description,
       long_description_content_type='text/markdown',
@@ -54,12 +56,24 @@ setup(name='history-manager',
       author_email='dimannadivane@gmail.com',
       license='Apache 2.0',
       packages=['hm_initializer'],
-      ext_modules=[CMakeExtension('hm-db')],
-      cmdclass={
-        'build_ext': build_ext,
-      },
-      entry_points = {
-        'console_scripts': ['history-manager-init=hm_initializer:main'],
+      ext_modules=[
+          Extension(
+              name='hm-db',
+              sources=[
+                  "src/main.cpp",
+                  "thirdparty/sqlite3/sqlite3.c"
+              ],
+              include_dirs=[
+                  "src",
+                  "thirdparty/sqlite3",
+                  "thirdparty/apathy",
+                  "thirdparty/clipp"
+              ]
+          )
+      ],
+      cmdclass={'build_ext': build_ext},
+      entry_points={
+          'console_scripts': ['hm-init=hm_initializer:main'],
       },
       zip_safe=False)
 
