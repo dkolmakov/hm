@@ -57,12 +57,12 @@ More details are [here](docs/configuration.md).
 Recovering command history related to the specific directory is performed with:
 
 ```Shell
-hm -d /path/of/interest
+hm /path/of/interest
 ```
 or for the current working directory:
 
 ```Shell
-hm -d
+hm .
 ```
 
 ### Terminal session command history recovery
