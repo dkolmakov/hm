@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.2)
-project(hm VERSION 1.0.0 LANGUAGES CXX)
+project(hm VERSION 1.1.0 LANGUAGES CXX)
 
 include(GNUInstallDirs)
 
