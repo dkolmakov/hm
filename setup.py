@@ -31,7 +31,7 @@ class build_ext(build_ext_orig):
 
         self.write_version_file()
 
-        extra_args = ["-std=c++11", "-fPIC", "-fpic", "-O3",
+        extra_args = ["-fPIC", "-fpic", "-O3",
                       "-DSQLITE_OMIT_LOAD_EXTENSION", "-DSQLITE_MAX_WORKER_THREADS=0", "-DSQLITE_ENABLE_FTS5"]
 
         objects = self.compiler.compile(sources,
