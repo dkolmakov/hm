@@ -14,7 +14,7 @@ jobs:
   build:
     name: ubuntu-build-and-test
     
-    runs-on: [ubuntu-latest, macos-latest]
+    runs-on: ubuntu-latest
 
     steps:
     - uses: actions/checkout@v3
