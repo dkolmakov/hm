@@ -8,7 +8,7 @@ cwd = path.abspath(path.dirname(__file__))
 with open(path.join(cwd, 'docs', 'python_package.md'), encoding='utf-8') as f:
     long_description = f.read()
 
-HM_DB_VERSION = "1.1.0"
+HM_DB_VERSION = "1.1.1"
 
 
 class build_ext(build_ext_orig):
